@@ -1,14 +1,14 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="The Good Shelf is a curated everyday store in Medellín with premium pantry staples, thoughtful essentials, and a refined shopping experience." />
-  <meta name="theme-color" content="#f6f1e8" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The Good Shelf is a curated everyday store in Medellín with premium pantry staples, thoughtful essentials, and a refined shopping experience.">
+  <meta name="theme-color" content="#f6f1e8">
   <title>The Good Shelf | Curated Essentials for Everyday Living</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
   <style>
     :root{
       --bg:#f7f3ec;
@@ -17,7 +17,6 @@
       --muted:#66625a;
       --line:#e7e0d5;
       --accent:#8a6f4d;
-      --accent2:#c4b39a;
       --shadow:0 18px 50px rgba(0,0,0,.08);
       --radius:24px;
     }
@@ -55,17 +54,6 @@
       letter-spacing:.02em;
       font-weight:700;
     }
-    .navlinks{
-      display:flex;
-      gap:18px;
-      flex-wrap:wrap;
-    }
-    .navlinks a{
-      color:var(--muted);
-      font-weight:600;
-      font-size:.95rem;
-    }
-    .navlinks a:hover{color:var(--text)}
 
     .hero{
       min-height:calc(100svh - 68px);
@@ -105,39 +93,6 @@
       line-height:1.8;
       color:var(--muted);
     }
-    .ctaRow{
-      display:flex;
-      justify-content:center;
-      gap:14px;
-      flex-wrap:wrap;
-      margin-top:28px;
-    }
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-height:48px;
-      padding:0 22px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      font-weight:700;
-      transition:.2s ease;
-      cursor:pointer;
-    }
-    .btnPrimary{
-      background:var(--text);
-      color:#fff;
-      border-color:var(--text);
-    }
-    .btnPrimary:hover{
-      transform:translateY(-1px);
-      box-shadow:var(--shadow);
-    }
-    .btnGhost{
-      background:rgba(255,255,255,.72);
-      color:var(--text);
-    }
-    .btnGhost:hover{border-color:#d9cdbb}
 
     .panel{
       background:rgba(255,253,248,.88);
@@ -166,21 +121,6 @@
       max-width:680px;
       color:var(--muted);
       line-height:1.75;
-    }
-    .filters{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin:18px 0 24px;
-    }
-    .chip{
-      padding:10px 14px;
-      border:1px solid var(--line);
-      border-radius:999px;
-      background:rgba(255,255,255,.68);
-      color:var(--muted);
-      font-weight:600;
-      font-size:.92rem;
     }
     .grid{
       display:grid;
@@ -305,12 +245,9 @@
     @media (max-width:640px){
       .wrap{width:min(100% - 22px,1120px)}
       .navin{padding:12px 0}
-      .navlinks{gap:12px;font-size:.9rem}
       .heroCard{padding:24px 8px}
       .grid{grid-template-columns:1fr}
       .sectionHead{align-items:flex-start}
-      .ctaRow{flex-direction:column}
-      .btn,.smallBtn{width:100%}
       .pc{padding:14px}
       .textBlock{padding:20px}
     }
@@ -320,12 +257,6 @@
   <header class="nav">
     <div class="wrap navin">
       <div class="brand">TGS</div>
-      <nav class="navlinks" aria-label="Primary">
-        <a href="#home">Home</a>
-        <a href="#shop">Shop</a>
-        <a href="#about">About</a>
-        <a href="contact.html">Contact</a>
-      </nav>
     </div>
   </header>
 
@@ -335,10 +266,6 @@
         <span class="eyebrow">Medellín • Curated everyday living</span>
         <h1>The Good Shelf</h1>
         <p class="sub">Where convenience meets good taste.<br>Everyday essentials, beautifully curated.</p>
-        <div class="ctaRow">
-          <button class="btn btnPrimary" id="enterBtn">Enter</button>
-          <a class="btn btnGhost" href="contact.html">Contact</a>
-        </div>
       </div>
     </section>
 
@@ -350,16 +277,9 @@
         </div>
       </div>
 
-      <div class="filters" aria-label="Categories">
-        <span class="chip">Pantry</span>
-        <span class="chip">Breakfast</span>
-        <span class="chip">Cooking</span>
-        <span class="chip">Wellness</span>
-      </div>
-
       <div class="grid">
         <article class="card panel">
-          <div class="pimg"><img alt="Organic creamy unsalted almond butter" src="https://images.unsplash.com/photo-1615484477775-7c8a52f7f36d?auto=format&fit=crop&w=900&q=80"></div>
+          <div class="pimg"><img alt="Organic creamy unsalted almond butter" src="https://images.unsplash.com/photo-1615484477775-7c8a52f7f36d?auto=format&amp;fit=crop&amp;w=900&amp;q=80"></div>
           <div class="pc">
             <div class="meta"><span class="tag">Pantry</span><span class="price">$18</span></div>
             <h3>Organic Creamy Unsalted Almond Butter</h3>
@@ -369,7 +289,7 @@
         </article>
 
         <article class="card panel">
-          <div class="pimg"><img alt="Organic extra virgin olive oil" src="https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=900&q=80"></div>
+          <div class="pimg"><img alt="Organic extra virgin olive oil" src="https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&amp;fit=crop&amp;w=900&amp;q=80"></div>
           <div class="pc">
             <div class="meta"><span class="tag">Cooking</span><span class="price">$22</span></div>
             <h3>Organic Extra Virgin Olive Oil</h3>
@@ -379,7 +299,7 @@
         </article>
 
         <article class="card panel">
-          <div class="pimg"><img alt="Organic whole grain pasta" src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=900&q=80"></div>
+          <div class="pimg"><img alt="Organic whole grain pasta" src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&amp;fit=crop&amp;w=900&amp;q=80"></div>
           <div class="pc">
             <div class="meta"><span class="tag">Dinner</span><span class="price">$12</span></div>
             <h3>Organic Whole Grain Pasta</h3>
@@ -389,11 +309,51 @@
         </article>
 
         <article class="card panel">
-          <div class="pimg"><img alt="Organic rolled oats" src="https://images.unsplash.com/photo-1515023115689-589c33041d3c?auto=format&fit=crop&w=900&q=80"></div>
+          <div class="pimg"><img alt="Organic rolled oats" src="https://images.unsplash.com/photo-1515023115689-589c33041d3c?auto=format&amp;fit=crop&amp;w=900&amp;q=80"></div>
           <div class="pc">
             <div class="meta"><span class="tag">Breakfast</span><span class="price">$10</span></div>
             <h3>Organic Rolled Oats</h3>
             <p>A clean everyday staple for breakfast bowls and baking.</p>
+            <div class="actions"><button class="smallBtn">Details</button><button class="smallBtn">Add</button></div>
+          </div>
+        </article>
+
+        <article class="card panel">
+          <div class="pimg"><img alt="Dark roast coffee beans" src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&amp;w=900&amp;q=80"></div>
+          <div class="pc">
+            <div class="meta"><span class="tag">Coffee</span><span class="price">$16</span></div>
+            <h3>Dark Roast Coffee Beans</h3>
+            <p>Rich, balanced coffee with a smooth and steady finish.</p>
+            <div class="actions"><button class="smallBtn">Details</button><button class="smallBtn">Add</button></div>
+          </div>
+        </article>
+
+        <article class="card panel">
+          <div class="pimg"><img alt="Artisan sea salt" src="https://images.unsplash.com/photo-1515023115689-589c33041d3c?auto=format&fit=crop&amp;w=900&amp;q=80"></div>
+          <div class="pc">
+            <div class="meta"><span class="tag">Seasoning</span><span class="price">$8</span></div>
+            <h3>Artisan Sea Salt</h3>
+            <p>A clean finishing salt for everyday cooking and plating.</p>
+            <div class="actions"><button class="smallBtn">Details</button><button class="smallBtn">Add</button></div>
+          </div>
+        </article>
+
+        <article class="card panel">
+          <div class="pimg"><img alt="Premium granola clusters" src="https://images.unsplash.com/photo-1517093157656-b9eccef91cb1?auto=format&fit=crop&amp;w=900&amp;q=80"></div>
+          <div class="pc">
+            <div class="meta"><span class="tag">Breakfast</span><span class="price">$14</span></div>
+            <h3>Premium Granola Clusters</h3>
+            <p>Crunchy, lightly sweet, and easy to enjoy any morning.</p>
+            <div class="actions"><button class="smallBtn">Details</button><button class="smallBtn">Add</button></div>
+          </div>
+        </article>
+
+        <article class="card panel">
+          <div class="pimg"><img alt="Herbal tea assortment" src="https://images.unsplash.com/photo-1515823662972-da6a2e4d3002?auto=format&amp;fit=crop&amp;w=900&amp;q=80"></div>
+          <div class="pc">
+            <div class="meta"><span class="tag">Wellness</span><span class="price">$11</span></div>
+            <h3>Herbal Tea Assortment</h3>
+            <p>A calm, fragrant set of teas for slow mornings and evenings.</p>
             <div class="actions"><button class="smallBtn">Details</button><button class="smallBtn">Add</button></div>
           </div>
         </article>
@@ -405,22 +365,18 @@
         <div class="textBlock panel">
           <h2>About the shelf</h2>
           <p>The Good Shelf is designed as a modern everyday store with a refined point of view. It is meant to feel familiar, curated, and worth browsing.</p>
-          <p>Built for Medellín, made to feel good for expats and locals alike, and flexible enough to grow with your real product mix later.</p>
+          <p>Built for Medellín, made to feel good for expats and locals alike.</p>
           <div class="facts">
-            <div class="fact"><strong>Fast</strong><span>Optimized for phones and easy loading.</span></div>
-            <div class="fact"><strong>Simple</strong><span>GitHub Pages friendly, static, and easy to update.</span></div>
-            <div class="fact"><strong>SEO-ready</strong><span>Built with titles, metadata, and crawlable links.</span></div>
+            <div class="fact"><strong>Fast</strong><span>We provide a fast and reliable service.</span></div>
+            <div class="fact"><strong>Simple</strong><span>Our mission is to keep things simple.</span></div>
+            <div class="fact"><strong>Exclusivity</strong><span>Every product in the store is selectively sourced.</span></div>
           </div>
         </div>
 
         <div class="textBlock panel">
-          <h2>How it works</h2>
-          <p>Click <strong>Enter</strong> to jump straight into the shop section. On mobile, the layout stacks into clean single-column views for easier browsing.</p>
-          <p>Use the contact page for owner details, WhatsApp, and business info. It shares the same brand style so the whole site feels connected.</p>
-          <div class="ctaRow" style="justify-content:flex-start">
-            <a class="btn btnPrimary" href="contact.html">Go to Contact</a>
-            <a class="btn btnGhost" href="#home">Back to Top</a>
-          </div>
+          <h2>Payment Methods</h2>
+          <p>CashApp | Zelle | Nequi | Solana | BTC</p>
+          <p><a class="btn btnGhost" href="#home">Back to Top</a></p>
         </div>
       </div>
     </section>
@@ -432,11 +388,5 @@
       <div>Where convenience meets good taste.</div>
     </div>
   </footer>
-
-  <script>
-    document.getElementById('enterBtn').addEventListener('click', () => {
-      document.getElementById('shop').scrollIntoView({behavior:'smooth', block:'start'});
-    });
-  </script>
 </body>
 </html>
