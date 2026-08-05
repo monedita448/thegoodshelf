@@ -65,6 +65,8 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
 .rowActions{display:flex;gap:8px}
 .smallBtn{padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:.82rem;font-weight:700}
 .smallBtn.danger{color:var(--danger);border-color:#e9c9c9}
+.smallBtn .caret{display:inline-block;margin-left:6px;font-size:.7em;font-weight:400;opacity:.55;transition:transform .15s ease}
+.smallBtn .caret.open{transform:rotate(180deg)}
 .statusChip{padding:4px 10px;border-radius:999px;font-size:.76rem;font-weight:700;display:inline-block}
 .st-PENDING,.st-NOT_SHIPPED{background:#f0e9d8;color:#8a6f4d}
 .st-APPROVED,.st-DELIVERED{background:#e1efe4;color:var(--success)}
@@ -750,7 +752,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
           '<td><span class="statusChip st-'+o.status+'">'+o.status+'</span></td>'+
           '<td><span class="statusChip st-'+o.shippingStatus+'">'+o.shippingStatus.replace("_"," ")+'</span></td>'+
           '<td style="font-size:.82rem;color:var(--muted)">'+new Date(o.createdAt).toLocaleDateString()+'</td>'+
-          '<td><button class="smallBtn" data-manage="'+o.reference+'">Manage</button></td>'+
+          '<td><button class="smallBtn" data-manage="'+o.reference+'">Manage <span class="caret'+(expandedRef===o.reference?' open':'')+'">▾</span></button></td>'+
         '</tr>';
       if(expandedRef === o.reference){
         rows += '<tr><td colspan="7" style="padding:0"><div class="detailPanel">'+detailHTML(o)+'</div></td></tr>';
