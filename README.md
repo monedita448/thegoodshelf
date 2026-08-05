@@ -4,8 +4,8 @@ A standalone, turnkey template for Colombian online stores — no Shopify, no th
 
 ## What's included
 
-- **Storefront** — product grid with search/filter/sort, cart, sold-out/low-stock badges, and Wompi checkout that collects a shipping address.
-- **Admin panel** (`/admin`) — password login, a dashboard (sales, orders today, low stock), full product management (multiple photos per product with drag-to-reorder and a click-to-expand viewer, inventory/stock tracking, add/edit/delete), order management (shipping status, tracking, carrier, and a one-click "Message on WhatsApp" button per order), and a Trash tab so deletes are recoverable. No coding required to run day to day.
+- **Storefront** — product grid with search/filter/sort, cart, sold-out/low-stock badges, Wompi checkout that collects a shipping address, and an English/Spanish toggle (flag icons) in the top nav.
+- **Admin panel** (`/admin`) — password login, a dashboard (sales, orders today, low stock), full product management (multiple photos per product with drag-to-reorder and a click-to-expand viewer, inventory/stock tracking, add/edit/delete), order management (shipping status, tracking, carrier, and a one-click "Message on WhatsApp" button per order), a Recently Deleted tab so deletes are recoverable, and an English/Spanish toggle (flag icons, top right). No coding required to run day to day.
 - **Security** — session-based login (not a token in a URL), rate-limited login attempts, CSRF protection, security headers, an audit log of every admin action, and sensitive files (`.env`, `orders.json`, `server.js`, etc.) are never servable over HTTP. See "Security" below for the full list.
 
 ## How it works
@@ -15,7 +15,7 @@ A standalone, turnkey template for Colombian online stores — no Shopify, no th
 - Wompi calls `/api/webhook/wompi` when a payment finishes. That webhook is signature-verified, so it's the authoritative record of whether an order was actually paid.
 - Once an order is paid, you (or your client) update its shipping status through `/admin` — `NOT_SHIPPED` → `PROCESSING` → `SHIPPED` → `DELIVERED`, plus a tracking number and carrier name. There's no courier API integration — you look up tracking on the carrier's own site and relay status manually.
 - Every product has a `stock` count. Checkout blocks anyone from buying more than what's on hand, reserves stock the moment an order is placed, and automatically puts it back if the payment later gets declined or voided.
-- Deleting a product or removing one of its photos doesn't destroy it right away — it moves to the admin **Trash** tab, recoverable until the trash clears automatically every day at 11:59am in `STORE_TIMEZONE` (or empty it manually).
+- Deleting a product or removing one of its photos doesn't destroy it right away — it moves to the admin **Recently Deleted** tab, recoverable until it clears automatically every day at 11:59am in `STORE_TIMEZONE` (or empty it manually).
 - Each order has a **Message on WhatsApp** button. It opens a chat in the admin's own WhatsApp (app or Web) with the customer's number and a short greeting already filled in — no API keys, no setup, nothing that can break. The admin sends photos, tracking info, whatever, from inside their normal WhatsApp exactly like they would with any other contact.
 - `orders.json`, `admin_audit.json`, and `trash.json` are flat files. All are git-ignored so real customer data and admin activity logs never end up in your repo.
 

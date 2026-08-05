@@ -60,6 +60,9 @@ button{cursor:pointer}
   display:none;align-items:center;justify-content:center;
 }
 .badge.show{display:flex}
+.langToggle{display:flex;gap:2px;border:1px solid var(--line);border-radius:999px;padding:3px;background:#fff}
+.langBtn{border:none;background:none;padding:5px 8px;border-radius:999px;font-size:1rem;line-height:1;opacity:.4;filter:grayscale(70%);transition:opacity .15s ease,filter .15s ease}
+.langBtn.active{opacity:1;filter:none;background:var(--bg)}
 
 /* Hero */
 .hero{padding:48px 0 40px;text-align:center}
@@ -229,26 +232,32 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
   <div class="wrap navin">
     <a class="brand" href="#home">The Good Shelf</a>
     <nav class="navlinks">
-      <a href="#shop">Shop</a>
-      <a href="#about">About</a>
-      <a href="#about">Payment</a>
+      <a href="#shop" data-i18n="nav.shop">Shop</a>
+      <a href="#about" data-i18n="nav.about">About</a>
+      <a href="#about" data-i18n="nav.payment">Payment</a>
     </nav>
-    <button class="iconBtn" id="cartToggle" aria-label="Open cart">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-      <span class="badge" id="cartBadge">0</span>
-    </button>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="langToggle" id="langToggle">
+        <button type="button" class="langBtn" data-lang="en" title="English">🇺🇸</button>
+        <button type="button" class="langBtn" data-lang="es" title="Español">🇨🇴</button>
+      </div>
+      <button class="iconBtn" id="cartToggle" aria-label="Open cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+        <span class="badge" id="cartBadge">0</span>
+      </button>
+    </div>
   </div>
 </header>
 
 <main id="home">
   <section class="hero wrap">
     <div class="heroCard">
-      <span class="eyebrow">Medellín • Curated everyday living</span>
+      <span class="eyebrow" data-i18n="hero.eyebrow">Medellín • Curated everyday living</span>
       <h1>The Good Shelf</h1>
-      <p class="sub">Where convenience meets good taste.<br>Everyday essentials, beautifully curated.</p>
+      <p class="sub" data-i18n-html="hero.sub">Where convenience meets good taste.<br>Everyday essentials, beautifully curated.</p>
       <div class="heroActions">
-        <a class="btn btnPrimary" href="#shop">Shop the shelf</a>
-        <a class="btn btnGhost" href="#about">Learn more</a>
+        <a class="btn btnPrimary" href="#shop" data-i18n="hero.shopBtn">Shop the shelf</a>
+        <a class="btn btnGhost" href="#about" data-i18n="hero.learnMore">Learn more</a>
       </div>
     </div>
   </section>
@@ -256,8 +265,8 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
   <section id="shop" class="shop wrap">
     <div class="sectionHead">
       <div>
-        <h2>Curated essentials for everyday living.</h2>
-        <p>Thoughtful pantry staples, refined basics, and products that feel simple, useful, and elevated.</p>
+        <h2 data-i18n="shop.heading">Curated essentials for everyday living.</h2>
+        <p data-i18n="shop.sub">Thoughtful pantry staples, refined basics, and products that feel simple, useful, and elevated.</p>
       </div>
       <span class="countPill" id="countPill">8 products</span>
     </div>
@@ -265,14 +274,14 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
     <div class="controls">
       <div class="searchWrap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
-        <input class="searchInput" id="searchInput" type="text" placeholder="Search products...">
+        <input class="searchInput" id="searchInput" type="text" placeholder="Search products..." data-i18n-placeholder="shop.searchPlaceholder">
         <button class="clearBtn" id="clearSearch" aria-label="Clear search">✕</button>
       </div>
       <select class="sortSelect" id="sortSelect">
-        <option value="featured">Featured</option>
-        <option value="price-asc">Price: Low to High</option>
-        <option value="price-desc">Price: High to Low</option>
-        <option value="name-asc">Name: A–Z</option>
+        <option value="featured" data-i18n="shop.sortFeatured">Featured</option>
+        <option value="price-asc" data-i18n="shop.sortPriceAsc">Price: Low to High</option>
+        <option value="price-desc" data-i18n="shop.sortPriceDesc">Price: High to Low</option>
+        <option value="name-asc" data-i18n="shop.sortNameAsc">Name: A–Z</option>
       </select>
     </div>
 
@@ -280,33 +289,33 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
 
     <div class="grid" id="productGrid"></div>
     <div class="emptyState panel" id="emptyState">
-      <p>No products match your search. Try a different term or category.</p>
+      <p data-i18n="shop.empty">No products match your search. Try a different term or category.</p>
     </div>
   </section>
 
   <section id="about" class="about wrap">
     <div class="split">
       <div class="textBlock panel">
-        <h2>About the shelf</h2>
-        <p>The Good Shelf is designed as a modern everyday store with a refined point of view. It is meant to feel familiar, curated, and worth browsing.</p>
-        <p>Built for Medellín, made to feel good for expats and locals alike.</p>
+        <h2 data-i18n="about.heading">About the shelf</h2>
+        <p data-i18n="about.p1">The Good Shelf is designed as a modern everyday store with a refined point of view. It is meant to feel familiar, curated, and worth browsing.</p>
+        <p data-i18n="about.p2">Built for Medellín, made to feel good for expats and locals alike.</p>
         <div class="facts">
-          <div class="fact"><strong>Fast</strong><span>We provide a fast and reliable service.</span></div>
-          <div class="fact"><strong>Simple</strong><span>Our mission is to keep things simple.</span></div>
-          <div class="fact"><strong>Exclusivity</strong><span>Every product in the store is selectively sourced.</span></div>
+          <div class="fact"><strong data-i18n="about.fastTitle">Fast</strong><span data-i18n="about.fastDesc">We provide a fast and reliable service.</span></div>
+          <div class="fact"><strong data-i18n="about.simpleTitle">Simple</strong><span data-i18n="about.simpleDesc">Our mission is to keep things simple.</span></div>
+          <div class="fact"><strong data-i18n="about.exclusivityTitle">Exclusivity</strong><span data-i18n="about.exclusivityDesc">Every product in the store is selectively sourced.</span></div>
         </div>
       </div>
 
       <div class="textBlock panel">
-        <h2>Payment &amp; Shipping</h2>
-        <p>Checkout is processed securely through Wompi:</p>
+        <h2 data-i18n="about.paymentHeading">Payment &amp; Shipping</h2>
+        <p data-i18n="about.checkoutIntro">Checkout is processed securely through Wompi:</p>
         <div class="payMethods">
-          <span class="payChip"><span class="swatch" style="background:#e6007a"></span>PSE bank transfer</span>
+          <span class="payChip"><span class="swatch" style="background:#e6007a"></span><span data-i18n="about.pse">PSE bank transfer</span></span>
           <span class="payChip"><span class="swatch" style="background:#00c244"></span>Nequi</span>
-          <span class="payChip"><span class="swatch" style="background:#171717"></span>Card</span>
+          <span class="payChip"><span class="swatch" style="background:#171717"></span><span data-i18n="about.card">Card</span></span>
         </div>
-        <p>Orders ship across Colombia. You'll get your tracking number once your order is on its way.</p>
-        <p><a class="btn btnGhost" href="#home">Back to Top</a></p>
+        <p data-i18n="about.shipping">Orders ship across Colombia. You'll get your tracking number once your order is on its way.</p>
+        <p><a class="btn btnGhost" href="#home" data-i18n="about.backToTop">Back to Top</a></p>
       </div>
     </div>
   </section>
@@ -315,8 +324,8 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
 <footer class="footer">
   <div class="wrap footerin">
     <div>© 2026 The Good Shelf</div>
-    <div>Where convenience meets good taste.</div>
-    <div><a href="/admin" style="text-decoration:underline">Admin login</a></div>
+    <div data-i18n="footer.tagline">Where convenience meets good taste.</div>
+    <div><a href="/admin" style="text-decoration:underline" data-i18n="footer.adminLogin">Admin login</a></div>
   </div>
 </footer>
 
@@ -324,13 +333,13 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
 <div class="overlay" id="overlay"></div>
 <aside class="drawer" id="cartDrawer" aria-label="Shopping cart">
   <div class="drawerHead">
-    <h3>Your Cart</h3>
+    <h3 data-i18n="cart.title">Your Cart</h3>
     <button class="closeBtn" id="closeCart" aria-label="Close cart">✕</button>
   </div>
   <div class="drawerBody" id="cartBody"></div>
   <div class="drawerFoot">
-    <div class="subtotalRow"><span>Subtotal</span><span id="cartSubtotal">$0</span></div>
-    <button class="checkoutBtn" id="checkoutBtn" disabled>Checkout</button>
+    <div class="subtotalRow"><span data-i18n="cart.subtotal">Subtotal</span><span id="cartSubtotal">$0</span></div>
+    <button class="checkoutBtn" id="checkoutBtn" disabled data-i18n="cart.checkout">Checkout</button>
   </div>
 </aside>
 
@@ -392,7 +401,8 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
   function renderPills(){
     pillRow.innerHTML = CATEGORIES.map(function(cat){
       var active = cat === state.filter ? " active" : "";
-      return '<button class="pill'+active+'" data-cat="'+cat+'">'+cat+'</button>';
+      var label = cat === "All" ? L("All","Todos") : cat;
+      return '<button class="pill'+active+'" data-cat="'+cat+'">'+esc(label)+'</button>';
     }).join("");
   }
   pillRow.addEventListener("click", function(e){
@@ -414,21 +424,96 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
     });
   }
 
+  /* ---------- Language (English / Spanish) ---------- */
+  var I18N = {
+    "nav.shop": ["Shop","Tienda"],
+    "nav.about": ["About","Nosotros"],
+    "nav.payment": ["Payment","Pago"],
+    "hero.eyebrow": ["Medellín • Curated everyday living","Medellín • Vida cotidiana curada"],
+    "hero.sub": ["Where convenience meets good taste.<br>Everyday essentials, beautifully curated.","Donde la comodidad se encuentra con el buen gusto.<br>Esenciales del día a día, cuidadosamente elegidos."],
+    "hero.shopBtn": ["Shop the shelf","Ver la tienda"],
+    "hero.learnMore": ["Learn more","Conoce más"],
+    "shop.heading": ["Curated essentials for everyday living.","Esenciales curados para el día a día."],
+    "shop.sub": ["Thoughtful pantry staples, refined basics, and products that feel simple, useful, and elevated.","Productos de despensa bien pensados, básicos refinados, artículos simples, útiles y de calidad."],
+    "shop.searchPlaceholder": ["Search products...","Buscar productos..."],
+    "shop.sortFeatured": ["Featured","Destacados"],
+    "shop.sortPriceAsc": ["Price: Low to High","Precio: menor a mayor"],
+    "shop.sortPriceDesc": ["Price: High to Low","Precio: mayor a menor"],
+    "shop.sortNameAsc": ["Name: A–Z","Nombre: A–Z"],
+    "shop.empty": ["No products match your search. Try a different term or category.","Ningún producto coincide con tu búsqueda. Prueba con otro término o categoría."],
+    "shop.all": ["All","Todos"],
+    "about.heading": ["About the shelf","Sobre la tienda"],
+    "about.p1": ["The Good Shelf is designed as a modern everyday store with a refined point of view. It is meant to feel familiar, curated, and worth browsing.","The Good Shelf está diseñada como una tienda moderna del día a día con un enfoque refinado. Busca sentirse familiar, curada y agradable de explorar."],
+    "about.p2": ["Built for Medellín, made to feel good for expats and locals alike.","Pensada para Medellín, hecha para sentirse bien tanto para extranjeros como para locales."],
+    "about.fastTitle": ["Fast","Rápido"],
+    "about.fastDesc": ["We provide a fast and reliable service.","Ofrecemos un servicio rápido y confiable."],
+    "about.simpleTitle": ["Simple","Simple"],
+    "about.simpleDesc": ["Our mission is to keep things simple.","Nuestra misión es mantener las cosas simples."],
+    "about.exclusivityTitle": ["Exclusivity","Exclusividad"],
+    "about.exclusivityDesc": ["Every product in the store is selectively sourced.","Cada producto de la tienda es seleccionado cuidadosamente."],
+    "about.paymentHeading": ["Payment &amp; Shipping","Pago y envío"],
+    "about.checkoutIntro": ["Checkout is processed securely through Wompi:","El pago se procesa de forma segura a través de Wompi:"],
+    "about.pse": ["PSE bank transfer","Transferencia PSE"],
+    "about.card": ["Card","Tarjeta"],
+    "about.shipping": ["Orders ship across Colombia. You'll get your tracking number once your order is on its way.","Los pedidos se envían a toda Colombia. Recibirás tu número de guía cuando tu pedido esté en camino."],
+    "about.backToTop": ["Back to Top","Volver arriba"],
+    "footer.tagline": ["Where convenience meets good taste.","Donde la comodidad se encuentra con el buen gusto."],
+    "footer.adminLogin": ["Admin login","Acceso administrador"],
+    "cart.title": ["Your Cart","Tu carrito"],
+    "cart.subtotal": ["Subtotal","Subtotal"],
+    "cart.checkout": ["Checkout","Pagar"]
+  };
+  var lang = localStorage.getItem("tgsStoreLang") === "es" ? "es" : "en";
+  function t(key){
+    var pair = I18N[key];
+    if(!pair) return key;
+    return lang === "es" ? pair[1] : pair[0];
+  }
+  function L(en, es){ return lang === "es" ? es : en; }
+  function applyI18n(){
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-i18n]").forEach(function(el){
+      el.textContent = t(el.getAttribute("data-i18n"));
+    });
+    document.querySelectorAll("[data-i18n-html]").forEach(function(el){
+      el.innerHTML = t(el.getAttribute("data-i18n-html"));
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(function(el){
+      el.placeholder = t(el.getAttribute("data-i18n-placeholder"));
+    });
+    document.querySelectorAll(".langBtn").forEach(function(btn){
+      btn.classList.toggle("active", btn.getAttribute("data-lang") === lang);
+    });
+  }
+  applyI18n();
+  document.querySelectorAll(".langBtn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var newLang = btn.getAttribute("data-lang");
+      if(newLang === lang) return;
+      lang = newLang;
+      localStorage.setItem("tgsStoreLang", lang);
+      applyI18n();
+      renderPills();
+      renderGrid();
+      renderCart();
+    });
+  });
+
   function cardHTML(p){
     var stock = Number.isInteger(p.stock) ? p.stock : 99;
     var soldOut = stock <= 0;
     return (
       '<article class="card panel" data-id="'+p.id+'">'+
         '<div class="pimg">'+
-          (soldOut ? '<span class="soldBadge">Sold out</span>' : '')+
+          (soldOut ? '<span class="soldBadge">'+L("Sold out","Agotado")+'</span>' : '')+
           '<img alt="'+esc(p.name)+'" src="'+((p.images && p.images[0]) || '')+'"></div>'+
         '<div class="pc">'+
           '<div class="meta"><span class="tag">'+esc(p.tag)+'</span><span class="price">'+money(p.price)+'</span></div>'+
           '<h3>'+esc(p.name)+'</h3>'+
           '<p>'+esc(p.desc)+'</p>'+
-          (!soldOut && stock <= 3 ? '<p class="lowStockNote">Only '+stock+' left</p>' : '')+
+          (!soldOut && stock <= 3 ? '<p class="lowStockNote">'+L("Only "+stock+" left","Solo quedan "+stock)+'</p>' : '')+
           '<div class="actions">'+
-            '<button class="addBtn" data-add="'+p.id+'"'+(soldOut ? ' disabled' : '')+'>'+(soldOut ? 'Sold out' : 'Add to Cart')+'</button>'+
+            '<button class="addBtn" data-add="'+p.id+'"'+(soldOut ? ' disabled' : '')+'>'+(soldOut ? L("Sold out","Agotado") : L("Add to Cart","Agregar al carrito"))+'</button>'+
           '</div>'+
         '</div>'+
       '</article>'
@@ -437,7 +522,7 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
 
   function renderGrid(){
     var list = getVisibleProducts();
-    countPill.textContent = list.length + (list.length === 1 ? " product" : " products");
+    countPill.textContent = L(list.length + (list.length === 1 ? " product" : " products"), list.length + (list.length === 1 ? " producto" : " productos"));
     if(list.length === 0){
       grid.innerHTML = "";
       emptyState.classList.add("show");
@@ -457,7 +542,7 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
 
   function flashAdded(btn){
     var original = btn.textContent;
-    btn.textContent = "Added ✓";
+    btn.textContent = L("Added ✓","Agregado ✓");
     btn.classList.add("added");
     setTimeout(function(){
       btn.textContent = original;
@@ -507,14 +592,15 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
     var stock = p && Number.isInteger(p.stock) ? p.stock : 99;
     var next = (state.cart[id] || 0) + qty;
     if(next > stock){
-      showToast(stock > 0 ? ("Only "+stock+" of "+(p?p.name:"this item")+" available") : ((p?p.name:"This item")+" is sold out"));
+      var itemName = p ? p.name : L("this item","este artículo");
+      showToast(stock > 0 ? L("Only "+stock+" of "+itemName+" available","Solo quedan "+stock+" de "+itemName+" disponibles") : L(itemName+" is sold out",itemName+" está agotado"));
       if(stock <= 0) return;
       next = stock;
     }
     state.cart[id] = next;
     saveCart();
     renderCart();
-    showToast((p ? p.name : "Item") + " added to cart");
+    showToast(L((p ? p.name : "Item") + " added to cart",(p ? p.name : "El artículo") + " agregado al carrito"));
   }
   function setQty(id, qty){
     var p = PRODUCTS.find(function(x){return x.id===id});
@@ -548,7 +634,7 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
     checkoutBtn.disabled = count === 0;
 
     if(ids.length === 0){
-      cartBody.innerHTML = '<div class="cartEmpty">Your cart is empty.<br>Start adding a few good things.</div>';
+      cartBody.innerHTML = '<div class="cartEmpty">'+L("Your cart is empty.<br>Start adding a few good things.","Tu carrito está vacío.<br>Empieza a agregar algunas cosas buenas.")+'</div>';
     }else{
       cartBody.innerHTML = ids.map(function(id){
         var p = PRODUCTS.find(function(x){return x.id===Number(id)});
@@ -559,14 +645,14 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
             '<img src="'+((p.images && p.images[0]) || '')+'" alt="'+esc(p.name)+'">'+
             '<div class="ci-info">'+
               '<h4>'+esc(p.name)+'</h4>'+
-              '<div class="ci-price">'+money(p.price)+' each</div>'+
+              '<div class="ci-price">'+money(p.price)+L(" each"," c/u")+'</div>'+
               '<div class="ci-line">'+
                 '<div class="qtyStepper">'+
                   '<button data-dec="'+p.id+'">−</button>'+
                   '<span>'+qty+'</span>'+
                   '<button data-inc="'+p.id+'">+</button>'+
                 '</div>'+
-                '<button class="removeBtn" data-remove="'+p.id+'">Remove</button>'+
+                '<button class="removeBtn" data-remove="'+p.id+'">'+L("Remove","Quitar")+'</button>'+
               '</div>'+
             '</div>'+
           '</div>'
@@ -633,26 +719,26 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
     checkoutModalBody.innerHTML = (
       '<button class="closeBtn modalClose" id="coClose">✕</button>'+
       '<div style="padding:28px 26px">'+
-        '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.6rem;margin:0 0 14px">Checkout</h3>'+
+        '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.6rem;margin:0 0 14px">'+L("Checkout","Pagar")+'</h3>'+
         '<div id="orderRows">'+rows+'</div>'+
-        '<div class="orderRow" style="border-bottom:none;font-size:1.02rem;padding-top:12px"><span>Total</span><strong>'+money(cartTotal())+'</strong></div>'+
-        '<p style="color:var(--muted);font-size:.88rem;margin:16px 0 8px">Your details:</p>'+
+        '<div class="orderRow" style="border-bottom:none;font-size:1.02rem;padding-top:12px"><span>'+L("Total","Total")+'</span><strong>'+money(cartTotal())+'</strong></div>'+
+        '<p style="color:var(--muted);font-size:.88rem;margin:16px 0 8px">'+L("Your details:","Tus datos:")+'</p>'+
         '<div style="display:flex;flex-direction:column;gap:9px">'+
-          '<input class="searchInput" style="padding-left:14px" id="ckName" type="text" placeholder="Full name" autocomplete="name">'+
-          '<input class="searchInput" style="padding-left:14px" id="ckEmail" type="email" placeholder="Email" autocomplete="email">'+
-          '<input class="searchInput" style="padding-left:14px" id="ckPhone" type="tel" placeholder="Phone (optional)" autocomplete="tel">'+
+          '<input class="searchInput" style="padding-left:14px" id="ckName" type="text" placeholder="'+L("Full name","Nombre completo")+'" autocomplete="name">'+
+          '<input class="searchInput" style="padding-left:14px" id="ckEmail" type="email" placeholder="'+L("Email","Correo electrónico")+'" autocomplete="email">'+
+          '<input class="searchInput" style="padding-left:14px" id="ckPhone" type="tel" placeholder="'+L("Phone (optional)","Teléfono (opcional)")+'" autocomplete="tel">'+
         '</div>'+
-        '<p style="color:var(--muted);font-size:.88rem;margin:16px 0 8px">Shipping address:</p>'+
+        '<p style="color:var(--muted);font-size:.88rem;margin:16px 0 8px">'+L("Shipping address:","Dirección de envío:")+'</p>'+
         '<div style="display:flex;flex-direction:column;gap:9px">'+
-          '<input class="searchInput" style="padding-left:14px" id="ckAddress" type="text" placeholder="Address" autocomplete="street-address">'+
+          '<input class="searchInput" style="padding-left:14px" id="ckAddress" type="text" placeholder="'+L("Address","Dirección")+'" autocomplete="street-address">'+
           '<div style="display:flex;gap:9px">'+
-            '<input class="searchInput" style="padding-left:14px" id="ckCity" type="text" placeholder="City" autocomplete="address-level2">'+
-            '<input class="searchInput" style="padding-left:14px" id="ckRegion" type="text" placeholder="Department (optional)" autocomplete="address-level1">'+
+            '<input class="searchInput" style="padding-left:14px" id="ckCity" type="text" placeholder="'+L("City","Ciudad")+'" autocomplete="address-level2">'+
+            '<input class="searchInput" style="padding-left:14px" id="ckRegion" type="text" placeholder="'+L("Department (optional)","Departamento (opcional)")+'" autocomplete="address-level1">'+
           '</div>'+
         '</div>'+
         (errorMsg ? '<p style="color:#b23b3b;font-size:.86rem;margin:10px 0 0">'+esc(errorMsg)+'</p>' : '')+
-        '<p style="color:var(--muted);font-size:.85rem;line-height:1.6;margin-top:14px">You\'ll be taken to Wompi\'s secure checkout to pay with <strong>PSE</strong>, <strong>Nequi</strong>, or a debit/credit card.</p>'+
-        '<button class="btn btnPrimary" id="placeOrderBtn" style="width:100%;justify-content:center;margin-top:8px">Continue to secure payment</button>'+
+        '<p style="color:var(--muted);font-size:.85rem;line-height:1.6;margin-top:14px">'+L("You'll be taken to Wompi's secure checkout to pay with <strong>PSE</strong>, <strong>Nequi</strong>, or a debit/credit card.","Serás dirigido al pago seguro de Wompi para pagar con <strong>PSE</strong>, <strong>Nequi</strong>, o tarjeta débito/crédito.")+'</p>'+
+        '<button class="btn btnPrimary" id="placeOrderBtn" style="width:100%;justify-content:center;margin-top:8px">'+L("Continue to secure payment","Continuar al pago seguro")+'</button>'+
       '</div>'
     );
 
@@ -670,16 +756,16 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
     var region = document.getElementById("ckRegion").value.trim();
 
     if(!fullName || !email){
-      renderCheckoutForm("Please enter your full name and email.");
+      renderCheckoutForm(L("Please enter your full name and email.","Ingresa tu nombre completo y correo electrónico."));
       return;
     }
     if(!address || !city){
-      renderCheckoutForm("Please enter your shipping address and city.");
+      renderCheckoutForm(L("Please enter your shipping address and city.","Ingresa tu dirección de envío y ciudad."));
       return;
     }
 
     btn.disabled = true;
-    btn.textContent = "Redirecting to secure payment…";
+    btn.textContent = L("Redirecting to secure payment…","Redirigiendo al pago seguro…");
 
     fetch("/api/checkout", {
       method:"POST",
@@ -693,13 +779,13 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
     .then(function(r){ return r.json().then(function(data){ return {ok:r.ok, data:data}; }); })
     .then(function(res){
       if(!res.ok){
-        renderCheckoutForm(res.data.error || "Something went wrong. Please try again.");
+        renderCheckoutForm(res.data.error || L("Something went wrong. Please try again.","Algo salió mal. Inténtalo de nuevo."));
         return;
       }
       goToWompi(res.data, {fullName:fullName, email:email, phone:phone});
     })
     .catch(function(){
-      renderCheckoutForm("Could not reach the server. Please try again.");
+      renderCheckoutForm(L("Could not reach the server. Please try again.","No se pudo conectar con el servidor. Inténtalo de nuevo."));
     });
   }
 
@@ -761,11 +847,11 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
 
   function showOrderResult(status, reference, amountInCents){
     var labels = {
-      APPROVED: {title:"Payment approved", icon:"✓", tone:"var(--success)", msg:"Thank you — your order "+reference+" is confirmed."},
-      DECLINED: {title:"Payment declined", icon:"✕", tone:"#b23b3b", msg:"Your payment for order "+reference+" was declined. No charge was made."},
-      PENDING: {title:"Payment pending", icon:"…", tone:"var(--accent)", msg:"Order "+reference+" is still processing. We'll update you once it's confirmed."},
-      VOIDED: {title:"Payment voided", icon:"✕", tone:"#b23b3b", msg:"Order "+reference+" was voided."},
-      ERROR: {title:"Something went wrong", icon:"✕", tone:"#b23b3b", msg:"We couldn't confirm order "+reference+". Contact us if you were charged."}
+      APPROVED: {title:L("Payment approved","Pago aprobado"), icon:"✓", tone:"var(--success)", msg:L("Thank you — your order "+reference+" is confirmed.","Gracias — tu pedido "+reference+" está confirmado.")},
+      DECLINED: {title:L("Payment declined","Pago rechazado"), icon:"✕", tone:"#b23b3b", msg:L("Your payment for order "+reference+" was declined. No charge was made.","Tu pago del pedido "+reference+" fue rechazado. No se realizó ningún cargo.")},
+      PENDING: {title:L("Payment pending","Pago pendiente"), icon:"…", tone:"var(--accent)", msg:L("Order "+reference+" is still processing. We'll update you once it's confirmed.","El pedido "+reference+" aún se está procesando. Te avisaremos cuando esté confirmado.")},
+      VOIDED: {title:L("Payment voided","Pago anulado"), icon:"✕", tone:"#b23b3b", msg:L("Order "+reference+" was voided.","El pedido "+reference+" fue anulado.")},
+      ERROR: {title:L("Something went wrong","Algo salió mal"), icon:"✕", tone:"#b23b3b", msg:L("We couldn't confirm order "+reference+". Contact us if you were charged.","No pudimos confirmar el pedido "+reference+". Contáctanos si se te realizó un cargo.")}
     };
     var info = labels[status] || labels.ERROR;
     checkoutModalBody.innerHTML = (
@@ -774,7 +860,7 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
         '<div class="checkmark" style="background:'+info.tone+'">'+info.icon+'</div>'+
         '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.7rem;margin:0 0 8px">'+info.title+'</h3>'+
         '<p style="color:var(--muted);line-height:1.7">'+esc(info.msg)+(amountInCents ? ' ('+money(amountInCents/100)+')' : '')+'</p>'+
-        '<button class="btn btnPrimary" id="orDone" style="margin-top:10px">Done</button>'+
+        '<button class="btn btnPrimary" id="orDone" style="margin-top:10px">'+L("Done","Listo")+'</button>'+
       '</div>'
     );
     checkoutWrap.classList.add("show");
@@ -823,7 +909,7 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
       checkReturnedOrder();
     })
     .catch(function(){
-      grid.innerHTML = '<p style="color:var(--muted)">Could not load products. Please refresh.</p>';
+      grid.innerHTML = '<p style="color:var(--muted)">'+L("Could not load products. Please refresh.","No se pudieron cargar los productos. Actualiza la página.")+'</p>';
     });
 })();
 </script>
