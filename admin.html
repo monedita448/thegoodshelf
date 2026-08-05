@@ -21,7 +21,8 @@
   --radius:14px;
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text)}
+html,body{overflow-x:hidden}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-text-size-adjust:100%}
 a{color:inherit}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
@@ -46,8 +47,10 @@ h1,h2,h3{font-family:'Cormorant Garamond',serif;margin:0}
 .topbar{position:sticky;top:0;background:rgba(247,243,236,.96);border-bottom:1px solid var(--line);z-index:5}
 .topbarin{display:flex;align-items:center;justify-content:space-between;padding:14px 0;gap:16px;flex-wrap:wrap}
 .brand{font-size:1.3rem;font-weight:700}
-.tabs{display:flex;gap:8px}
-.tabBtn{padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:#fff;font-weight:700;font-size:.88rem;color:var(--muted)}
+.tabs{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;max-width:100%}
+.tabs::-webkit-scrollbar{height:4px}
+.tabs::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px}
+.tabBtn{padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:#fff;font-weight:700;font-size:.88rem;color:var(--muted);white-space:nowrap;flex-shrink:0}
 .tabBtn.active{background:var(--text);color:#fff;border-color:var(--text)}
 .langToggle{display:flex;gap:2px;border:1px solid var(--line);border-radius:999px;padding:3px;background:#fff}
 .langBtn{border:none;background:none;padding:5px 8px;border-radius:999px;font-size:1rem;line-height:1;opacity:.4;filter:grayscale(70%);transition:opacity .15s ease,filter .15s ease}
@@ -58,14 +61,16 @@ main{padding:24px 0 60px}
 .panel.active{display:block}
 
 .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.tableScroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse;font-size:.9rem}
+.tableScroll table{min-width:580px}
 th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
 th{color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
 tr:last-child td{border-bottom:none}
 td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
 .thumbBtn{border:none;padding:0;background:none;cursor:zoom-in;display:block;border-radius:8px}
 .thumbBtn:hover img{outline:2px solid var(--accent);outline-offset:1px}
-.rowActions{display:flex;gap:8px}
+.rowActions{display:flex;gap:8px;flex-wrap:wrap}
 .smallBtn{padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:.82rem;font-weight:700;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
 .smallBtn.danger{color:var(--danger);border-color:#e9c9c9}
 .smallBtn .caret{display:inline-block;font-size:.7em;font-weight:400;opacity:.55;transition:transform .15s ease;line-height:1}
@@ -133,6 +138,20 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
   .formGrid, .detailGrid{grid-template-columns:1fr}
   table{font-size:.82rem}
   th,td{padding:9px 8px}
+  .shipForm{flex-direction:column;align-items:stretch}
+  .shipForm > div{width:100%}
+  .shipForm button{width:100%}
+}
+@media (max-width:640px){
+  .hideNarrow{display:none}
+}
+@media (max-width:480px){
+  .statGrid{grid-template-columns:1fr 1fr;gap:10px}
+  .statCard{padding:14px}
+  .statCard .statValue{font-size:1.5rem}
+  .brand{font-size:1.08rem}
+  .loginCard{padding:24px}
+  .langBtn{padding:4px 6px;font-size:.9rem}
 }
 </style>
 </head>
@@ -207,10 +226,12 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       </div>
       <div id="productFormWrap"></div>
       <div class="card">
+        <div class="tableScroll">
         <table>
           <thead><tr><th></th><th data-i18n="products.thName">Name</th><th data-i18n="products.thCategory">Category</th><th data-i18n="products.thPrice">Price</th><th data-i18n="products.thStock">Stock</th><th></th></tr></thead>
           <tbody id="productsBody"></tbody>
         </table>
+        </div>
         <div class="emptyMsg" id="productsEmpty" style="display:none" data-i18n="products.empty">No products yet — add your first one above.</div>
       </div>
     </section>
@@ -224,8 +245,8 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
         </div>
       </div>
       <div class="card">
-        <table>
-          <thead><tr><th data-i18n="orders.thRef">Reference</th><th data-i18n="orders.thCustomer">Customer</th><th data-i18n="orders.thTotal">Total</th><th data-i18n="orders.thPayment">Payment</th><th data-i18n="orders.thShipping">Shipping</th><th data-i18n="orders.thDate">Date</th><th></th></tr></thead>
+        <table class="ordersTable">
+          <thead><tr><th data-i18n="orders.thRef">Reference</th><th data-i18n="orders.thCustomer">Customer</th><th data-i18n="orders.thTotal">Total</th><th class="hideNarrow" data-i18n="orders.thPayment">Payment</th><th data-i18n="orders.thShipping">Shipping</th><th class="hideNarrow" data-i18n="orders.thDate">Date</th><th></th></tr></thead>
           <tbody id="ordersBody"></tbody>
         </table>
         <div class="emptyMsg" id="ordersEmpty" style="display:none" data-i18n="orders.empty">No orders yet.</div>
@@ -239,10 +260,12 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       </div>
       <p style="color:var(--muted);font-size:.86rem;margin:-8px 0 16px" data-i18n="trash.description">Deleted products and photos land here and can be restored. This list clears automatically every day at 11:59am (store time) — anything not restored by then is gone for good.</p>
       <div class="card">
+        <div class="tableScroll">
         <table>
           <thead><tr><th></th><th data-i18n="trash.thWhat">What</th><th data-i18n="trash.thDeleted">Deleted</th><th></th></tr></thead>
           <tbody id="trashBody"></tbody>
         </table>
+        </div>
         <div class="emptyMsg" id="trashEmpty" style="display:none" data-i18n="trash.empty">Nothing here.</div>
       </div>
     </section>
@@ -857,9 +880,9 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
           '<td>'+esc(o.reference)+(o.isDemo ? ' <span class="statusChip st-PENDING" style="margin-left:4px">DEMO</span>' : '')+'</td>'+
           '<td>'+esc(o.customer.fullName)+'<br><span style="color:var(--muted);font-size:.82rem">'+esc(o.customer.email)+'</span></td>'+
           '<td>'+money(o.amountInCents/100)+'</td>'+
-          '<td><span class="statusChip st-'+o.status+'">'+orderStatusLabel(o.status)+'</span></td>'+
+          '<td class="hideNarrow"><span class="statusChip st-'+o.status+'">'+orderStatusLabel(o.status)+'</span></td>'+
           '<td><span class="statusChip st-'+o.shippingStatus+'">'+shippingStatusLabel(o.shippingStatus)+'</span></td>'+
-          '<td style="font-size:.82rem;color:var(--muted)">'+new Date(o.createdAt).toLocaleDateString()+'</td>'+
+          '<td class="hideNarrow" style="font-size:.82rem;color:var(--muted)">'+new Date(o.createdAt).toLocaleDateString()+'</td>'+
           '<td><button class="smallBtn" data-manage="'+o.reference+'">'+L("Manage","Gestionar")+' <span class="caret'+(expandedRef===o.reference?' open':'')+'">▾</span></button></td>'+
         '</tr>';
       if(expandedRef === o.reference){
