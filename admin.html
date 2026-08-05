@@ -67,6 +67,8 @@ table{width:100%;border-collapse:collapse;font-size:.9rem}
 th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
 th{color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
 tr:last-child td{border-bottom:none}
+.orderRowClickable{cursor:pointer}
+.orderRowClickable:hover{background:#faf6ef}
 td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
 .thumbBtn{border:none;padding:0;background:none;cursor:zoom-in;display:block;border-radius:8px}
 .thumbBtn:hover img{outline:2px solid var(--accent);outline-offset:1px}
@@ -878,7 +880,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
   function renderOrders(orders){
     ordersEmpty.style.display = orders.length ? "none" : "block";
     ordersBody.innerHTML = orders.map(function(o){
-      var rows = '<tr>'+
+      var rows = '<tr class="orderRowClickable" data-ref="'+esc(o.reference)+'">'+
           '<td>'+esc(o.reference)+(o.isDemo ? ' <span class="statusChip st-PENDING" style="margin-left:4px">DEMO</span>' : '')+'</td>'+
           '<td>'+esc(o.customer.fullName)+'<br><span style="color:var(--muted);font-size:.82rem">'+esc(o.customer.email)+'</span></td>'+
           '<td>'+money(o.amountInCents/100)+'</td>'+
@@ -893,9 +895,9 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       return rows;
     }).join("");
 
-    ordersBody.querySelectorAll("[data-manage]").forEach(function(btn){
-      btn.addEventListener("click", function(){
-        var ref = btn.getAttribute("data-manage");
+    ordersBody.querySelectorAll(".orderRowClickable").forEach(function(row){
+      row.addEventListener("click", function(){
+        var ref = row.getAttribute("data-ref");
         expandedRef = (expandedRef === ref) ? null : ref;
         renderOrders(orders);
         if(expandedRef) wireDetail(orders.find(function(o){ return o.reference === expandedRef; }));
