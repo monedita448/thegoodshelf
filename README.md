@@ -5,7 +5,7 @@ A standalone, turnkey template for Colombian online stores — no Shopify, no th
 ## What's included
 
 - **Storefront** — product grid with search/filter/sort, cart, sold-out/low-stock badges, and Wompi checkout that collects a shipping address.
-- **Admin panel** (`/admin`) — password login, a dashboard (sales, orders today, low stock), full product management (multiple photos per product with drag-to-reorder and a click-to-expand viewer, inventory/stock tracking, add/edit/delete), order management (shipping status, tracking, carrier, and a per-order WhatsApp message thread), and a Trash tab so deletes are recoverable. No coding required to run day to day.
+- **Admin panel** (`/admin`) — password login, a dashboard (sales, orders today, low stock), full product management (multiple photos per product with drag-to-reorder and a click-to-expand viewer, inventory/stock tracking, add/edit/delete), order management (shipping status, tracking, carrier, and a one-click "Message on WhatsApp" button per order), and a Trash tab so deletes are recoverable. No coding required to run day to day.
 - **Security** — session-based login (not a token in a URL), rate-limited login attempts, CSRF protection, security headers, an audit log of every admin action, and sensitive files (`.env`, `orders.json`, `server.js`, etc.) are never servable over HTTP. See "Security" below for the full list.
 
 ## How it works
@@ -16,7 +16,8 @@ A standalone, turnkey template for Colombian online stores — no Shopify, no th
 - Once an order is paid, you (or your client) update its shipping status through `/admin` — `NOT_SHIPPED` → `PROCESSING` → `SHIPPED` → `DELIVERED`, plus a tracking number and carrier name. There's no courier API integration — you look up tracking on the carrier's own site and relay status manually.
 - Every product has a `stock` count. Checkout blocks anyone from buying more than what's on hand, reserves stock the moment an order is placed, and automatically puts it back if the payment later gets declined or voided.
 - Deleting a product or removing one of its photos doesn't destroy it right away — it moves to the admin **Trash** tab, recoverable until the trash clears automatically every day at 11:59am in `STORE_TIMEZONE` (or empty it manually).
-- `orders.json`, `admin_audit.json`, `trash.json`, and `order_messages.json` are flat files. All are git-ignored so real customer data and admin activity logs never end up in your repo.
+- Each order has a **Message on WhatsApp** button. It opens a chat in the admin's own WhatsApp (app or Web) with the customer's number and a short greeting already filled in — no API keys, no setup, nothing that can break. The admin sends photos, tracking info, whatever, from inside their normal WhatsApp exactly like they would with any other contact.
+- `orders.json`, `admin_audit.json`, and `trash.json` are flat files. All are git-ignored so real customer data and admin activity logs never end up in your repo.
 
 ## 1. Get Wompi sandbox keys (free, ~5 minutes)
 
@@ -45,7 +46,7 @@ Local webhooks need a public URL — use [ngrok](https://ngrok.com) (`ngrok http
 
 Any Node host works (Render, Railway, Fly.io, a VPS).
 
-**Important — persistent disk required.** `products.json`, `orders.json`, `admin_audit.json`, `trash.json`, `order_messages.json`, and the `images/`, `order-images/`, `inbound-media/`, `trash/` folders are all plain files/folders the server writes to directly. Some hosting free tiers (notably Render's free web service tier) wipe the filesystem on every restart/redeploy, which would silently erase products, orders, and uploaded photos. Before picking a host, confirm it gives you a persistent disk:
+**Important — persistent disk required.** `products.json`, `orders.json`, `admin_audit.json`, `trash.json`, and the `images/`/`trash/` folders are all plain files/folders the server writes to directly. Some hosting free tiers (notably Render's free web service tier) wipe the filesystem on every restart/redeploy, which would silently erase products, orders, and uploaded photos. Before picking a host, confirm it gives you a persistent disk:
 - **Railway** — persists by default on a standard service. Simplest option.
 - **Render** — needs their paid "Persistent Disk" add-on attached to the service; the free tier alone is not safe for this.
 - **A basic VPS** (Droplet, Lightsail, etc.) — persists naturally, more setup work.
@@ -65,22 +66,9 @@ Quick path with Railway or Render (paid disk):
 - Set real prices through `/admin` before announcing the store.
 - Wompi takes a percentage fee per transaction (check current pricing on the dashboard) and pays out on their normal schedule.
 
-## 5. WhatsApp order messaging (optional)
+## 5. Messaging customers on WhatsApp
 
-Lets the admin send shipping photos/updates to a customer's WhatsApp from the Orders tab, and see their replies right there — no separate app. This uses Meta's official **WhatsApp Business Cloud API**; there's no way to reliably send WhatsApp messages without it (unofficial libraries risk the number getting banned), and it does require a Meta Business account. Leave the `WHATSAPP_*` vars blank and the feature simply shows a "not connected" notice — nothing else breaks.
-
-**Setup:**
-
-1. Create a [Meta for Developers](https://developers.facebook.com) app, add the **WhatsApp** product. Meta gives you a free test phone number to start — good enough for development; add your own business number later in the same dashboard.
-2. Note the **Phone Number ID** shown on the WhatsApp → API Setup page → `WHATSAPP_PHONE_NUMBER_ID`.
-3. Generate a **permanent** access token (System Users → create a token with `whatsapp_business_messaging` permission — the temporary token on the API Setup page expires in 24 hours) → `WHATSAPP_ACCESS_TOKEN`.
-4. Make up any string for `WHATSAPP_VERIFY_TOKEN` — you'll enter the same value in the next step.
-5. In WhatsApp → Configuration, set the webhook URL to `https://<your-deployed-url>/api/webhook/whatsapp`, paste your verify token, and subscribe to the `messages` field.
-6. Copy the App Secret from the app's Settings → Basic page → `WHATSAPP_APP_SECRET` (used to verify inbound webhook requests are really from Meta).
-
-**The 24-hour rule (important):** Meta only allows free-form messages within 24 hours of the customer's *last* message to your number. Outside that window, a plain "your order shipped" text will fail — Meta requires a pre-approved message template instead, which isn't something this template auto-builds (it's a manual approval process in Meta's dashboard). In practice: if you send an update and it shows "Not delivered" in the thread, that's almost always why — ask the customer to send any WhatsApp message first to reopen the window, or approve a template in Meta's dashboard for cases outside it.
-
-**Cost:** Meta charges per conversation for business-initiated messages outside the free tier volume — check current pricing in the Meta dashboard before relying on this at scale.
+No setup needed. Each order in `/admin` has a **Message on WhatsApp** button — it opens a chat in the admin's own WhatsApp (app or Web, whichever the browser/device defaults to) with the customer's number and a short greeting pre-filled. From there the admin sends photos, tracking updates, whatever they'd normally send a contact — it's just their regular WhatsApp, nothing routes through this server. If a customer's phone number was entered as a plain 10-digit Colombian mobile number (no country code), the button assumes `+57` automatically.
 
 ## Security
 
@@ -109,13 +97,10 @@ What this setup deliberately doesn't include: multi-user accounts/roles (one sha
 ## Files
 
 - `index.html` — the storefront
-- `admin.html` — the admin panel (dashboard, products, orders + shipping + messages, trash)
+- `admin.html` — the admin panel (dashboard, products, orders + shipping + WhatsApp, trash)
 - `products.json` — product catalog: photos, prices in COP, stock
-- `server.js` — backend: checkout, Wompi signing + webhook verification, admin auth, product/order APIs, WhatsApp messaging, trash
+- `server.js` — backend: checkout, Wompi signing + webhook verification, admin auth, product/order APIs, trash
 - `orders.json` — order log (auto-created, git-ignored)
 - `admin_audit.json` — admin action log (auto-created, git-ignored)
 - `trash.json` / `trash/` — recoverable deletes (auto-created, git-ignored)
-- `order_messages.json` — WhatsApp message log per order (auto-created, git-ignored)
-- `order-images/` — shipping-update photos sent to customers (auto-created, git-ignored)
-- `inbound-media/` — photos customers send back (auto-created, git-ignored)
 - `.env` — your secrets (git-ignored, never commit this)

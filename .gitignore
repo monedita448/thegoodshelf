@@ -4,7 +4,4 @@ orders.json
 admin_audit.json
 trash.json
 trash/
-order_messages.json
-order-images/
-inbound-media/
 .DS_Store

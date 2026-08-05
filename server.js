@@ -27,33 +27,6 @@ const TRASH_PATH = path.join(ROOT, 'trash.json');
 const TRASH_IMAGES_DIR = path.join(ROOT, 'trash', 'images');
 fs.mkdirSync(TRASH_IMAGES_DIR, { recursive: true });
 
-const ORDER_MESSAGES_PATH = path.join(ROOT, 'order_messages.json');
-const ORDER_IMAGES_DIR = path.join(ROOT, 'order-images'); // shipping photos admin sends to customers — publicly linkable, WhatsApp needs to fetch them
-const INBOUND_MEDIA_DIR = path.join(ROOT, 'inbound-media'); // photos customers send back — private, admin-only
-fs.mkdirSync(ORDER_IMAGES_DIR, { recursive: true });
-fs.mkdirSync(INBOUND_MEDIA_DIR, { recursive: true });
-
-// WhatsApp Business Cloud API (Meta). Optional — the order messaging feature
-// simply reports a clear error until these are set. See README for setup.
-const WHATSAPP_API_VERSION = process.env.WHATSAPP_API_VERSION || 'v20.0';
-const WHATSAPP_PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
-const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN || '';
-const WHATSAPP_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || '';
-const WHATSAPP_APP_SECRET = process.env.WHATSAPP_APP_SECRET || '';
-const WHATSAPP_CONFIGURED = Boolean(WHATSAPP_PHONE_NUMBER_ID && WHATSAPP_ACCESS_TOKEN);
-if (!WHATSAPP_CONFIGURED) {
-  console.warn(
-    '[warn] WhatsApp order messaging is not configured (WHATSAPP_PHONE_NUMBER_ID / WHATSAPP_ACCESS_TOKEN missing). ' +
-    'The Orders > Messages panel will show a setup notice until these are set — see .env.example.'
-  );
-}
-if (WHATSAPP_CONFIGURED && !WHATSAPP_APP_SECRET) {
-  console.warn(
-    '[warn] WHATSAPP_APP_SECRET is not set — inbound WhatsApp webhook signatures will not be verified. ' +
-    'Set it before exposing the webhook publicly.'
-  );
-}
-
 // Deleted products/photos are held here — recoverable — until the daily
 // trash clear. "Local time" for a store means the timezone it operates in;
 // set STORE_TIMEZONE in .env (defaults to Colombia) so the 11:59am clear
@@ -110,13 +83,7 @@ app.use(helmet({
   },
 }));
 
-// The verify hook stashes the raw request bytes so webhook handlers (Wompi,
-// WhatsApp) can check payload signatures — signature checks must run against
-// the exact bytes that were sent, not a re-serialized copy.
-app.use(express.json({
-  limit: '200kb',
-  verify: (req, res, buf) => { req.rawBody = buf; },
-}));
+app.use(express.json({ limit: '200kb' }));
 app.use(cookieParser(SESSION_SECRET));
 
 // Light global limiter on the API surface, defense-in-depth against abuse.
@@ -125,10 +92,6 @@ app.use('/api', rateLimit({ windowMs: 5 * 60 * 1000, max: 300, standardHeaders: 
 // ---------- static, explicit routes only (nothing sensitive is ever statically served) ----------
 
 app.use('/images', express.static(IMAGES_DIR, { maxAge: '1d' }));
-// Shipping-update photos the admin sends to customers. These have to be
-// publicly fetchable — WhatsApp's servers download the image from this URL
-// when we send an "image" message by link.
-app.use('/order-images', express.static(ORDER_IMAGES_DIR, { maxAge: '1d' }));
 app.get('/', (req, res) => res.sendFile(path.join(ROOT, 'index.html')));
 app.get('/index.html', (req, res) => res.sendFile(path.join(ROOT, 'index.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(ROOT, 'admin.html')));
@@ -246,85 +209,6 @@ setInterval(() => {
     purgeAllTrash().catch((err) => console.error('Daily trash purge failed:', err));
   }
 }, 60 * 1000).unref();
-
-// ---------- order messages (WhatsApp) ----------
-
-function loadOrderMessages() {
-  try {
-    return JSON.parse(fs.readFileSync(ORDER_MESSAGES_PATH, 'utf8'));
-  } catch (e) {
-    return [];
-  }
-}
-
-let orderMessagesWriteQueue = Promise.resolve();
-function saveOrderMessages(messages) {
-  orderMessagesWriteQueue = orderMessagesWriteQueue.then(() =>
-    fsp.writeFile(ORDER_MESSAGES_PATH, JSON.stringify(messages, null, 2))
-  );
-  return orderMessagesWriteQueue;
-}
-
-// Digits only, no leading zero/plus — matches the format WhatsApp sends in
-// the `from` field of inbound webhook events (E.164 without the `+`).
-function normalizePhone(phone) {
-  if (!phone) return '';
-  return String(phone).replace(/[^0-9]/g, '').replace(/^0+/, '');
-}
-
-// Sends a text or image (by public link) message via the WhatsApp Business
-// Cloud API. Returns {ok, messageId, error}. Callers see a real Meta error
-// message on failure (e.g. the 24-hour customer-service-window rule) instead
-// of a generic failure, so the admin knows what actually went wrong.
-async function sendWhatsAppMessage({ to, text, imageUrl }) {
-  if (!WHATSAPP_CONFIGURED) {
-    return { ok: false, error: 'WhatsApp isn’t connected yet. Set WHATSAPP_PHONE_NUMBER_ID and WHATSAPP_ACCESS_TOKEN in .env — see the README.' };
-  }
-  const payload = imageUrl
-    ? { messaging_product: 'whatsapp', to, type: 'image', image: { link: imageUrl, caption: text || undefined } }
-    : { messaging_product: 'whatsapp', to, type: 'text', text: { body: text || '' } };
-
-  try {
-    const res = await fetch(`https://graph.facebook.com/${WHATSAPP_API_VERSION}/${WHATSAPP_PHONE_NUMBER_ID}/messages`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${WHATSAPP_ACCESS_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    const body = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      const msg = (body.error && body.error.message) || `WhatsApp API error (HTTP ${res.status}).`;
-      return { ok: false, error: msg };
-    }
-    const messageId = body.messages && body.messages[0] && body.messages[0].id;
-    return { ok: true, messageId };
-  } catch (err) {
-    return { ok: false, error: 'Could not reach WhatsApp: ' + err.message };
-  }
-}
-
-// Inbound photos only come as a short-lived media id — fetch its temporary
-// URL, then download the bytes, saving locally so the admin panel can show
-// it (this download requires the same access token, it isn't public).
-async function downloadWhatsAppMedia(mediaId) {
-  const metaRes = await fetch(`https://graph.facebook.com/${WHATSAPP_API_VERSION}/${mediaId}`, {
-    headers: { Authorization: `Bearer ${WHATSAPP_ACCESS_TOKEN}` },
-  });
-  if (!metaRes.ok) throw new Error(`Could not resolve media ${mediaId} (HTTP ${metaRes.status})`);
-  const meta = await metaRes.json();
-  const fileRes = await fetch(meta.url, { headers: { Authorization: `Bearer ${WHATSAPP_ACCESS_TOKEN}` } });
-  if (!fileRes.ok) throw new Error(`Could not download media ${mediaId} (HTTP ${fileRes.status})`);
-  const ext = (meta.mime_type || '').includes('png') ? '.png'
-    : (meta.mime_type || '').includes('webp') ? '.webp'
-    : (meta.mime_type || '').includes('gif') ? '.gif'
-    : '.jpg';
-  const filename = crypto.randomBytes(10).toString('hex') + ext;
-  const buf = Buffer.from(await fileRes.arrayBuffer());
-  await fsp.writeFile(path.join(INBOUND_MEDIA_DIR, filename), buf);
-  return filename;
-}
 
 function genReference() {
   return 'TGS-' + Date.now() + '-' + crypto.randomBytes(4).toString('hex');
@@ -646,96 +530,6 @@ app.post('/api/webhook/wompi', async (req, res) => {
   }
 });
 
-// Meta's one-time handshake when you register the webhook URL in the
-// WhatsApp app dashboard.
-app.get('/api/webhook/whatsapp', (req, res) => {
-  const mode = req.query['hub.mode'];
-  const token = req.query['hub.verify_token'];
-  const challenge = req.query['hub.challenge'];
-  if (mode === 'subscribe' && WHATSAPP_VERIFY_TOKEN && token === WHATSAPP_VERIFY_TOKEN) {
-    return res.status(200).send(challenge);
-  }
-  res.sendStatus(403);
-});
-
-// Inbound WhatsApp messages from customers replying to a shipping update.
-app.post('/api/webhook/whatsapp', async (req, res) => {
-  // Meta expects a fast 200 to avoid retry storms — always ack, log problems.
-  try {
-    if (WHATSAPP_APP_SECRET) {
-      const sigHeader = req.headers['x-hub-signature-256'];
-      const expected = 'sha256=' + crypto.createHmac('sha256', WHATSAPP_APP_SECRET).update(req.rawBody || Buffer.alloc(0)).digest('hex');
-      if (!sigHeader || sigHeader !== expected) {
-        console.warn('WhatsApp webhook signature mismatch — ignoring event.');
-        return res.sendStatus(200);
-      }
-    }
-
-    const entries = (req.body && req.body.entry) || [];
-    for (const entry of entries) {
-      for (const change of entry.changes || []) {
-        const value = change.value || {};
-        for (const msg of value.messages || []) {
-          await handleInboundWhatsAppMessage(msg);
-        }
-      }
-    }
-  } catch (err) {
-    console.error('POST /api/webhook/whatsapp failed:', err);
-  }
-  res.sendStatus(200);
-});
-
-async function handleInboundWhatsAppMessage(msg) {
-  const from = normalizePhone(msg.from);
-  const orders = loadOrders()
-    .filter((o) => normalizePhone(o.customer && o.customer.phone) === from)
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  if (!orders.length) {
-    console.warn(`Inbound WhatsApp message from unrecognized number: ${msg.from}`);
-    return;
-  }
-  const reference = orders[0].reference;
-
-  const message = {
-    id: genTrashId(),
-    reference,
-    direction: 'in',
-    kind: 'text',
-    text: '',
-    imageUrl: null,
-    imageFile: null,
-    at: new Date().toISOString(),
-    status: 'received',
-    error: null,
-    whatsappMessageId: msg.id || null,
-  };
-
-  if (msg.type === 'text') {
-    message.kind = 'text';
-    message.text = (msg.text && msg.text.body) || '';
-  } else if (msg.type === 'image') {
-    message.kind = 'image';
-    message.text = (msg.image && msg.image.caption) || '';
-    try {
-      const filename = await downloadWhatsAppMedia(msg.image.id);
-      message.imageFile = filename;
-      message.imageUrl = '/api/admin/order-media/' + filename;
-    } catch (err) {
-      console.error('Could not download inbound WhatsApp image:', err);
-      message.text = message.text || '[Photo could not be downloaded]';
-    }
-  } else {
-    message.kind = 'text';
-    message.text = `[Unsupported message type: ${msg.type}]`;
-  }
-
-  const messages = loadOrderMessages();
-  messages.push(message);
-  await saveOrderMessages(messages);
-  await auditLog({ action: 'order_message_received', reference });
-}
-
 // ---------- admin: dashboard ----------
 
 app.get('/api/admin/dashboard', requireAdmin, (req, res) => {
@@ -867,60 +661,6 @@ app.patch('/api/admin/orders/:reference/shipping', requireAdmin, async (req, res
   res.json(orders[idx]);
 });
 
-// ---------- admin: order messages (WhatsApp) ----------
-
-app.get('/api/admin/orders/:reference/messages', requireAdmin, (req, res) => {
-  const messages = loadOrderMessages()
-    .filter((m) => m.reference === req.params.reference)
-    .sort((a, b) => new Date(a.at) - new Date(b.at));
-  res.json({ whatsappConfigured: WHATSAPP_CONFIGURED, messages });
-});
-
-app.post('/api/admin/orders/:reference/messages', requireAdmin, async (req, res) => {
-  const { text, imageUrl } = req.body || {};
-  const reference = req.params.reference;
-  if ((!text || !String(text).trim()) && !imageUrl) {
-    return res.status(400).json({ error: 'Write a message or attach a photo.' });
-  }
-
-  const orders = loadOrders();
-  const order = orders.find((o) => o.reference === reference);
-  if (!order) return res.status(404).json({ error: 'Order not found.' });
-  const phone = normalizePhone(order.customer && order.customer.phone);
-  if (!phone) return res.status(400).json({ error: 'This order has no phone number on file, so there’s no WhatsApp to message.' });
-
-  const absoluteImageUrl = imageUrl ? `${process.env.SITE_URL || ''}${imageUrl}` : undefined;
-  const result = await sendWhatsAppMessage({ to: phone, text: text ? String(text).slice(0, 1000) : '', imageUrl: absoluteImageUrl });
-
-  const message = {
-    id: genTrashId(),
-    reference,
-    direction: 'out',
-    kind: imageUrl ? 'image' : 'text',
-    text: text ? String(text).slice(0, 1000) : '',
-    imageUrl: imageUrl || null,
-    at: new Date().toISOString(),
-    status: result.ok ? 'sent' : 'failed',
-    error: result.ok ? null : result.error,
-    whatsappMessageId: result.messageId || null,
-  };
-  const messages = loadOrderMessages();
-  messages.push(message);
-  await saveOrderMessages(messages);
-  await auditLog({ action: 'order_message_sent', reference, ok: result.ok, ip: req.ip });
-
-  res.status(result.ok ? 201 : 502).json({ ok: result.ok, message, error: result.ok ? undefined : result.error });
-});
-
-// Private preview for photos a customer sent back over WhatsApp.
-app.get('/api/admin/order-media/:filename', requireAdmin, (req, res) => {
-  const filename = path.basename(req.params.filename);
-  const messages = loadOrderMessages();
-  const known = messages.some((m) => m.direction === 'in' && m.imageFile === filename);
-  if (!known) return res.status(404).end();
-  res.sendFile(path.join(INBOUND_MEDIA_DIR, filename));
-});
-
 // ---------- admin: products ----------
 
 function validateProductInput(body, opts) {
@@ -976,38 +716,6 @@ app.post('/api/admin/upload', requireAdmin, (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
     await auditLog({ action: 'image_upload', filename: req.file.filename, ip: req.ip });
     res.status(201).json({ url: '/images/' + req.file.filename });
-  });
-});
-
-const orderImageUpload = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => cb(null, ORDER_IMAGES_DIR),
-    filename: (req, file, cb) => {
-      const ext = ALLOWED_IMAGE_TYPES[file.mimetype] || path.extname(file.originalname).toLowerCase();
-      cb(null, crypto.randomBytes(10).toString('hex') + ext);
-    },
-  }),
-  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
-  fileFilter: (req, file, cb) => {
-    if (!ALLOWED_IMAGE_TYPES[file.mimetype]) {
-      return cb(new Error('Only PNG, JPEG, WEBP, or GIF images are allowed.'));
-    }
-    cb(null, true);
-  },
-});
-
-// Uploads a shipping-update photo (proof of packaging, tracking screenshot,
-// etc). Saved publicly under /order-images so it can be attached as a
-// WhatsApp image message — WhatsApp fetches images by URL.
-app.post('/api/admin/orders/:reference/upload-image', requireAdmin, (req, res) => {
-  orderImageUpload.single('image')(req, res, async (err) => {
-    if (err) {
-      const msg = err.code === 'LIMIT_FILE_SIZE' ? 'Image must be under 5MB.' : (err.message || 'Upload failed.');
-      return res.status(400).json({ error: msg });
-    }
-    if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
-    await auditLog({ action: 'order_image_upload', reference: req.params.reference, filename: req.file.filename, ip: req.ip });
-    res.status(201).json({ url: '/order-images/' + req.file.filename });
   });
 });
 

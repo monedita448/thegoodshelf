@@ -121,21 +121,9 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
 .lightboxDots span.active{background:#fff}
 
 .msgSection{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
-.whatsappNotice{background:#fdf3e2;border:1px solid #eadab0;color:#8a6f4d;padding:10px 12px;border-radius:10px;font-size:.84rem;margin-bottom:10px}
-.msgThread{max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px 2px;margin-bottom:12px}
-.msgEmpty{color:var(--muted);font-size:.86rem;padding:4px 2px}
-.msgBubble{max-width:78%;padding:10px 13px;border-radius:14px;font-size:.88rem;line-height:1.45}
-.msgBubble.out{align-self:flex-end;background:var(--text);color:#fff;border-bottom-right-radius:4px}
-.msgBubble.in{align-self:flex-start;background:#efe8db;color:var(--text);border-bottom-left-radius:4px}
-.msgBubble img{max-width:100%;border-radius:8px;margin-bottom:6px;display:block;cursor:zoom-in}
-.msgMeta{font-size:.72rem;opacity:.65;margin-top:4px}
-.msgBubble.out .msgMeta{color:rgba(255,255,255,.8)}
-.msgFailed{color:#e39a9a;font-weight:700;font-size:.8rem;margin-top:4px}
-.composeRow{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
-.composeRow textarea{flex:1;min-width:200px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);resize:vertical;min-height:44px;font:inherit;outline:none}
-.composeRow textarea:focus{border-color:var(--accent)}
-.composePreview{display:none;align-items:center;gap:8px;font-size:.82rem;color:var(--muted);margin-top:8px}
-.composePreview img{width:40px;height:40px;object-fit:cover;border-radius:6px}
+.waBtn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;font-weight:700;font-size:.92rem;border:1px solid transparent;background:#25D366;color:#fff;text-decoration:none}
+.waBtn:hover{background:#1fb955}
+.waBtn svg{flex-shrink:0}
 @media (max-width:720px){
   .formGrid, .detailGrid{grid-template-columns:1fr}
   table{font-size:.82rem}
@@ -812,21 +800,24 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
         '</div>'+
       '</div>'+
       '<div class="msgSection">'+
-        '<h4>Updates &amp; messages</h4>'+
-        '<div class="msgThread" id="msgThread"><div class="msgEmpty">Loading…</div></div>'+
+        '<h4>Message the customer</h4>'+
         (o.customer.phone
-          ? (
-              '<div class="composeRow">'+
-                '<textarea id="msgText" placeholder="Type an update for the customer…" rows="2"></textarea>'+
-                '<label class="btn btnGhost" style="cursor:pointer">Photo<input type="file" id="msgFile" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none"></label>'+
-                '<button class="btn btnPrimary" id="msgSend">Send</button>'+
-              '</div>'+
-              '<div class="composePreview" id="msgPreview"></div>'+
-              '<div class="errMsg" id="msgError"></div>'
-            )
-          : '<div class="msgEmpty">Add a phone number to this order to message the customer on WhatsApp.</div>')+
+          ? '<a class="waBtn" id="waLink" href="#" target="_blank" rel="noopener">'+
+              '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.2h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2Zm5.8 14.03c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.12.11-1.8-.11a15.5 15.5 0 0 1-1.65-.6c-2.9-1.25-4.79-4.17-4.94-4.36-.15-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.01-2.41.27-.28.58-.35.78-.35h.55c.18 0 .42-.07.65.5.24.58.81 2 .88 2.15.07.15.12.32.02.52-.1.2-.15.32-.3.5-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.3.76 1.25 1.63 2.02 1.12 1 2.06 1.31 2.36 1.46.3.15.47.13.65-.08.17-.2.73-.85.93-1.14.2-.28.4-.24.66-.14.28.1 1.77.83 2.07.99.3.15.5.22.57.35.08.13.08.75-.16 1.42Z"/></svg>'+
+              'Message on WhatsApp'+
+            '</a>'+
+            '<p style="color:var(--muted);font-size:.82rem;margin:8px 0 0">Opens a chat in your own WhatsApp, pre-filled and ready to send.</p>'
+          : '<p style="color:var(--muted);font-size:.86rem">Add a phone number to this order to message the customer on WhatsApp.</p>')+
       '</div>'
     );
+  }
+
+  // Colombian mobile numbers are commonly entered without the country code
+  // (10 digits). Assume +57 in that case since this store is Colombia-based.
+  function toWhatsAppNumber(phone){
+    var digits = String(phone || "").replace(/[^0-9]/g, "").replace(/^0+/, "");
+    if(digits.length === 10) digits = "57" + digits;
+    return digits;
   }
 
   function wireDetail(order){
@@ -850,112 +841,11 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       });
     }
 
-    function loadMessages(){
-      api("/api/admin/orders/"+order.reference+"/messages").then(function(res){
-        if(handle401(res)) return;
-        if(!res.ok) return;
-        renderMsgThread(res.data.messages || [], res.data.whatsappConfigured);
-      });
-    }
-
-    function renderMsgThread(messages, configured){
-      var thread = document.getElementById("msgThread");
-      if(!thread) return;
-      var notice = configured ? "" : '<div class="whatsappNotice">WhatsApp isn’t connected on this store yet. Messages are saved here, but won’t reach the customer until WhatsApp is set up.</div>';
-      if(!messages.length){
-        thread.innerHTML = notice + '<div class="msgEmpty">No messages yet.</div>';
-        return;
-      }
-      thread.innerHTML = notice + messages.map(function(m){
-        var img = m.imageUrl ? '<img src="'+esc(m.imageUrl)+'" class="msgImgClick" data-src="'+esc(m.imageUrl)+'">' : '';
-        var text = m.text ? '<div>'+esc(m.text).replace(/\n/g, "<br>")+'</div>' : '';
-        var failed = (m.direction === "out" && m.status === "failed") ? '<div class="msgFailed">Not delivered — '+esc(m.error || "send failed")+'</div>' : '';
-        return (
-          '<div class="msgBubble '+(m.direction === "out" ? "out" : "in")+'">'+
-            img + text + failed +
-            '<div class="msgMeta">'+new Date(m.at).toLocaleString()+'</div>'+
-          '</div>'
-        );
-      }).join("");
-      thread.scrollTop = thread.scrollHeight;
-      thread.querySelectorAll(".msgImgClick").forEach(function(img){
-        img.addEventListener("click", function(){ openLightbox([img.getAttribute("data-src")], 0); });
-      });
-    }
-    loadMessages();
-
-    var msgSendBtn = document.getElementById("msgSend");
-    if(msgSendBtn){
-      var msgFile = document.getElementById("msgFile");
-      var msgPreview = document.getElementById("msgPreview");
-      var msgText = document.getElementById("msgText");
-      var msgError = document.getElementById("msgError");
-      var pendingImageUrl = null;
-
-      function clearAttachment(){
-        pendingImageUrl = null;
-        msgPreview.style.display = "none";
-        msgPreview.innerHTML = "";
-        msgFile.value = "";
-      }
-
-      msgFile.addEventListener("change", function(e){
-        var file = e.target.files[0];
-        if(!file) return;
-        var fd = new FormData();
-        fd.append("image", file);
-        msgPreview.style.display = "flex";
-        msgPreview.innerHTML = "Uploading…";
-        fetch("/api/admin/orders/"+order.reference+"/upload-image", {
-          method: "POST", credentials: "same-origin",
-          headers: {"X-Requested-With":"tgs-admin"}, body: fd
-        }).then(function(r){
-          return r.json().then(function(data){ return {ok:r.ok, data:data}; });
-        }).then(function(res){
-          if(!res.ok){
-            msgPreview.innerHTML = '<span style="color:var(--danger)">'+(res.data.error || "Upload failed.")+'</span>';
-            pendingImageUrl = null;
-            return;
-          }
-          pendingImageUrl = res.data.url;
-          msgPreview.innerHTML = '<img src="'+esc(pendingImageUrl)+'"><span>Photo attached</span>';
-          var removeBtn = document.createElement("button");
-          removeBtn.type = "button";
-          removeBtn.className = "smallBtn";
-          removeBtn.textContent = "Remove";
-          removeBtn.addEventListener("click", clearAttachment);
-          msgPreview.appendChild(removeBtn);
-        }).catch(function(){
-          msgPreview.innerHTML = '<span style="color:var(--danger)">Could not reach the server.</span>';
-        });
-      });
-
-      msgSendBtn.addEventListener("click", function(){
-        var text = msgText.value.trim();
-        if(!text && !pendingImageUrl){
-          msgError.textContent = "Write a message or attach a photo.";
-          return;
-        }
-        msgError.textContent = "";
-        msgSendBtn.disabled = true;
-        api("/api/admin/orders/"+order.reference+"/messages", {method:"POST", body: JSON.stringify({text: text, imageUrl: pendingImageUrl})})
-          .then(function(res){
-            msgSendBtn.disabled = false;
-            if(handle401(res)) return;
-            showToast(res.ok ? "Sent." : "Saved, but not delivered — see the thread for details.");
-            msgText.value = "";
-            clearAttachment();
-            loadMessages();
-          })
-          .catch(function(){
-            msgSendBtn.disabled = false;
-            msgError.textContent = "Could not reach the server.";
-          });
-      });
-
-      msgText.addEventListener("keydown", function(e){
-        if((e.metaKey || e.ctrlKey) && e.key === "Enter") msgSendBtn.click();
-      });
+    var waLink = document.getElementById("waLink");
+    if(waLink && order.customer.phone){
+      var number = toWhatsAppNumber(order.customer.phone);
+      var greeting = "Hola " + order.customer.fullName.split(" ")[0] + ", te escribimos sobre tu pedido " + order.reference + ".";
+      waLink.href = "https://wa.me/" + number + "?text=" + encodeURIComponent(greeting);
     }
   }
 
