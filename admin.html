@@ -89,7 +89,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
 .formActions{display:flex;gap:10px;grid-column:1 / -1}
 .emptyMsg{padding:40px;text-align:center;color:var(--muted)}
 
-.detailPanel{padding:16px;background:#faf6ef;border-top:1px solid var(--line)}
+.detailPanel{padding:16px 16px 22px;background:#faf6ef;border-top:1px solid var(--line);border-bottom:3px solid var(--line)}
 .detailGrid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .detailGrid h4{margin:0 0 8px;font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
 .detailGrid p{margin:0 0 4px;font-size:.9rem}
@@ -133,6 +133,8 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
 .lightboxDots span.active{background:#fff}
 
 .msgSection{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+.dangerZone{margin-top:24px;padding:14px 16px;background:#fdf2f2;border:1px solid #f0c9c9;border-radius:12px}
+.dangerZone h4{color:#a13a3a}
 .waBtn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;font-weight:700;font-size:.92rem;border:1px solid transparent;background:#25D366;color:#fff;text-decoration:none}
 .waBtn:hover{background:#1fb955}
 .waBtn svg{flex-shrink:0}
@@ -969,10 +971,10 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
         '</div>'+
         '<p style="color:var(--muted);font-size:.82rem;margin:8px 0 0">'+L("Sends to "+esc(o.customer.email)+".","Se envía a "+esc(o.customer.email)+".")+'</p>'+
       '</div>'+
-      '<div class="msgSection">'+
+      '<div class="msgSection dangerZone">'+
         '<h4>'+L("Danger zone","Zona de peligro")+'</h4>'+
         '<button class="btn btnDanger" id="deleteOrderBtn">'+L("Delete order","Eliminar pedido")+'</button>'+
-        '<p style="color:var(--muted);font-size:.82rem;margin:8px 0 0">'+L("This permanently removes the order record. This cannot be undone.","Esto elimina el registro del pedido de forma permanente. Esta acción no se puede deshacer.")+'</p>'+
+        '<p style="color:#8a3a3a;font-size:.82rem;margin:8px 0 0">'+L("This permanently removes the order record. This cannot be undone.","Esto elimina el registro del pedido de forma permanente. Esta acción no se puede deshacer.")+'</p>'+
       '</div>'
     );
   }
