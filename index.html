@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="The Good Shelf is a curated everyday store in Medellín with premium pantry staples, thoughtful essentials, and a refined shopping experience.">
+<meta name="theme-color" content="#f6f1e8">
+<title>The Good Shelf | Curated Essentials for Everyday Living</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f3ec;
+  --panel:#fffdf8;
+  --text:#171717;
+  --muted:#66625a;
+  --line:#e7e0d5;
+  --accent:#8a6f4d;
+  --accent-dark:#6f5a3c;
+  --success:#3f7a52;
+  --shadow:0 12px 32px rgba(0,0,0,.06);
+  --shadow-lg:0 20px 50px rgba(0,0,0,.14);
+  --radius:20px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Inter,system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+a{text-decoration:none;color:inherit}
+img{max-width:100%;display:block}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.wrap{width:min(1120px,calc(100% - 32px));margin:0 auto}
+
+/* Nav */
+.nav{
+  position:sticky;top:0;z-index:40;
+  background:rgba(247,243,236,.94);
+  border-bottom:1px solid var(--line);
+}
+.navin{display:flex;align-items:center;justify-content:space-between;padding:14px 0;gap:16px}
+.brand{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700}
+.navlinks{display:flex;gap:26px;align-items:center;font-weight:600;font-size:.94rem;color:var(--muted)}
+.navlinks a:hover{color:var(--text)}
+.iconBtn{
+  position:relative;
+  width:42px;height:42px;border-radius:50%;
+  border:1px solid var(--line);background:#fff;
+  display:grid;place-items:center;
+}
+.iconBtn svg{width:19px;height:19px}
+.badge{
+  position:absolute;top:-4px;right:-4px;
+  min-width:19px;height:19px;padding:0 4px;border-radius:999px;
+  background:var(--accent);color:#fff;font-size:.68rem;font-weight:800;
+  display:none;align-items:center;justify-content:center;
+}
+.badge.show{display:flex}
+
+/* Hero */
+.hero{padding:48px 0 40px;text-align:center}
+.heroCard{width:min(820px,100%);margin:0 auto}
+.eyebrow{
+  display:inline-flex;gap:8px;align-items:center;padding:7px 14px;
+  border:1px solid var(--line);border-radius:999px;background:#fff;
+  color:var(--muted);font-size:.86rem;font-weight:600;
+}
+h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6rem,6vw,4.6rem);line-height:1;letter-spacing:-.02em}
+.sub{margin:0 auto;max-width:600px;font-size:1.05rem;line-height:1.7;color:var(--muted)}
+.heroActions{display:flex;gap:12px;justify-content:center;margin-top:22px;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border-radius:999px;
+  font-weight:700;font-size:.94rem;border:1px solid transparent;
+}
+.btnPrimary{background:var(--text);color:#fff}
+.btnGhost{border-color:var(--line);background:#fff}
+
+.panel{background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:var(--radius)}
+
+/* Shop controls */
+.shop{padding:10px 0 72px}
+.sectionHead{display:flex;justify-content:space-between;gap:18px;align-items:end;flex-wrap:wrap;margin-bottom:20px}
+.sectionHead h2{margin:0;font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,3.4vw,2.5rem);line-height:1}
+.sectionHead p{margin:0;max-width:640px;color:var(--muted);line-height:1.7}
+.countPill{font-size:.82rem;font-weight:700;color:var(--muted);background:#fff;border:1px solid var(--line);padding:6px 12px;border-radius:999px;white-space:nowrap}
+
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.searchWrap{position:relative;flex:1;min-width:220px}
+.searchWrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted)}
+.searchInput{
+  width:100%;padding:12px 14px 12px 38px;border-radius:999px;border:1px solid var(--line);
+  background:#fff;outline:none;
+}
+.searchInput:focus{border-color:var(--accent)}
+.clearBtn{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  width:24px;height:24px;border-radius:50%;border:none;background:var(--line);color:var(--text);
+  display:none;align-items:center;justify-content:center;font-size:.8rem;line-height:1;
+}
+.clearBtn.show{display:flex}
+.sortSelect{padding:12px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--text)}
+
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.pill{
+  padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:#fff;
+  font-size:.86rem;font-weight:700;color:var(--muted);
+}
+.pill.active{background:var(--text);color:#fff;border-color:var(--text)}
+
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{overflow:hidden;display:flex;flex-direction:column}
+.pimg{aspect-ratio:1.03;border-bottom:1px solid var(--line);background:#efe5d7;flex-shrink:0;position:relative}
+.pimg img{width:100%;height:100%;object-fit:cover}
+.soldBadge{position:absolute;top:10px;left:10px;background:var(--text);color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:5px 10px;border-radius:999px}
+.lowStockNote{font-size:.78rem;color:var(--accent);font-weight:700;margin:6px 0 0}
+.addBtn:disabled{opacity:.45;cursor:not-allowed}
+.pc{padding:16px 16px 18px;display:flex;flex-direction:column;flex:1}
+.meta{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px}
+.tag{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.price{font-weight:800}
+.pc h3{margin:0 0 8px;font-size:1.02rem}
+.pc p{margin:0;color:var(--muted);line-height:1.6;font-size:.94rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .actions{margin-top:auto;padding-top:14px}
+.addBtn{
+  width:100%;min-height:42px;border-radius:999px;border:1px solid var(--text);
+  background:var(--text);color:#fff;font-weight:700;
+}
+.addBtn.added{background:var(--success);border-color:var(--success)}
+.emptyState{padding:50px 20px;text-align:center;color:var(--muted);display:none}
+.emptyState.show{display:block}
+
+/* About */
+.about{padding:0 0 72px}
+.split{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:stretch}
+.textBlock{padding:26px}
+.textBlock h2{margin:0 0 10px;font-family:'Cormorant Garamond',serif;font-size:clamp(1.7rem,3.4vw,2.3rem)}
+.textBlock p{color:var(--muted);line-height:1.75;margin:0 0 12px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+.fact{padding:14px;border:1px solid var(--line);border-radius:16px;background:#fff}
+.fact strong{display:block;font-size:1.02rem;margin-bottom:4px}
+.fact span{color:var(--muted);font-size:.9rem;line-height:1.5}
+.payMethods{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+.payChip{
+  padding:9px 15px;border-radius:999px;border:1px solid var(--line);background:#fff;
+  font-weight:700;font-size:.86rem;display:flex;align-items:center;gap:7px;
+}
+.payChip .swatch{width:9px;height:9px;border-radius:50%}
+
+.footer{padding:24px 0 40px;color:var(--muted);font-size:.9rem}
+.footerin{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:16px}
+
+/* Overlay + drawer + modal shared */
+.overlay{
+  position:fixed;inset:0;background:rgba(23,23,23,.4);
+  z-index:60;opacity:0;pointer-events:none;transition:opacity .2s ease;
+}
+.overlay.show{opacity:1;pointer-events:auto}
+
+.drawer{
+  position:fixed;top:0;right:0;height:100%;width:min(420px,100%);
+  background:var(--bg);z-index:70;box-shadow:-16px 0 40px rgba(0,0,0,.16);
+  transform:translateX(100%);transition:transform .3s ease;
+  display:flex;flex-direction:column;
+}
+.drawer.show{transform:translateX(0)}
+.drawerHead{display:flex;align-items:center;justify-content:space-between;padding:20px 22px;border-bottom:1px solid var(--line)}
+.drawerHead h3{margin:0;font-family:'Cormorant Garamond',serif;font-size:1.5rem}
+.closeBtn{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#fff;display:grid;place-items:center;font-size:1rem}
+.drawerBody{flex:1;overflow-y:auto;padding:16px 22px}
+.cartEmpty{text-align:center;padding:50px 10px;color:var(--muted)}
+.cartItem{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.cartItem img{width:60px;height:60px;border-radius:10px;object-fit:cover;flex-shrink:0}
+.cartItem .ci-info{flex:1;min-width:0}
+.cartItem h4{margin:0 0 4px;font-size:.92rem}
+.cartItem .ci-price{color:var(--muted);font-size:.85rem}
+.qtyStepper{display:flex;align-items:center;gap:8px;margin-top:8px}
+.qtyStepper button{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:#fff;font-weight:700;line-height:1}
+.qtyStepper span{min-width:18px;text-align:center;font-weight:700;font-size:.9rem}
+.removeBtn{margin-left:auto;font-size:.8rem;color:var(--muted);font-weight:700;text-decoration:underline}
+.ci-line{display:flex;align-items:center}
+.drawerFoot{padding:18px 22px 22px;border-top:1px solid var(--line)}
+.subtotalRow{display:flex;justify-content:space-between;font-weight:700;font-size:1.02rem;margin-bottom:14px}
+.checkoutBtn{width:100%;padding:14px;border-radius:999px;border:none;background:var(--text);color:#fff;font-weight:800;font-size:.98rem}
+.checkoutBtn:disabled{opacity:.4;cursor:not-allowed}
+
+.modalWrap{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s ease}
+.modalWrap.show{opacity:1;pointer-events:auto}
+.modal{width:min(520px,100%);max-height:88vh;overflow-y:auto;background:var(--panel);border-radius:22px;box-shadow:var(--shadow-lg)}
+.modalClose{position:absolute;top:16px;right:16px}
+.orderRow{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:.92rem}
+.orderRow strong{font-weight:700}
+.confirmBox{text-align:center;padding:20px 10px}
+.confirmBox .checkmark{
+  width:60px;height:60px;border-radius:50%;background:var(--success);color:#fff;font-size:1.6rem;
+  display:grid;place-items:center;margin:0 auto 14px;
+}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--text);color:#fff;padding:13px 20px;border-radius:999px;font-weight:700;font-size:.88rem;
+  z-index:80;opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.toast.show{opacity:1}
+
+@media (max-width:960px){
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .split{grid-template-columns:1fr}
+  .facts{grid-template-columns:1fr}
+  .navlinks{display:none}
+}
+@media (max-width:640px){
+  .wrap{width:min(100% - 22px,1120px)}
+  .grid{grid-template-columns:1fr}
+  .sectionHead{align-items:flex-start}
+  .pc{padding:14px}
+  .textBlock{padding:20px}
+  .drawer{width:100%}
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap navin">
+    <a class="brand" href="#home">The Good Shelf</a>
+    <nav class="navlinks">
+      <a href="#shop">Shop</a>
+      <a href="#about">About</a>
+      <a href="#about">Payment</a>
+    </nav>
+    <button class="iconBtn" id="cartToggle" aria-label="Open cart">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+      <span class="badge" id="cartBadge">0</span>
+    </button>
+  </div>
+</header>
+
+<main id="home">
+  <section class="hero wrap">
+    <div class="heroCard">
+      <span class="eyebrow">Medellín • Curated everyday living</span>
+      <h1>The Good Shelf</h1>
+      <p class="sub">Where convenience meets good taste.<br>Everyday essentials, beautifully curated.</p>
+      <div class="heroActions">
+        <a class="btn btnPrimary" href="#shop">Shop the shelf</a>
+        <a class="btn btnGhost" href="#about">Learn more</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="shop" class="shop wrap">
+    <div class="sectionHead">
+      <div>
+        <h2>Curated essentials for everyday living.</h2>
+        <p>Thoughtful pantry staples, refined basics, and products that feel simple, useful, and elevated.</p>
+      </div>
+      <span class="countPill" id="countPill">8 products</span>
+    </div>
+
+    <div class="controls">
+      <div class="searchWrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <input class="searchInput" id="searchInput" type="text" placeholder="Search products...">
+        <button class="clearBtn" id="clearSearch" aria-label="Clear search">✕</button>
+      </div>
+      <select class="sortSelect" id="sortSelect">
+        <option value="featured">Featured</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+        <option value="name-asc">Name: A–Z</option>
+      </select>
+    </div>
+
+    <div class="pills" id="pillRow"></div>
+
+    <div class="grid" id="productGrid"></div>
+    <div class="emptyState panel" id="emptyState">
+      <p>No products match your search. Try a different term or category.</p>
+    </div>
+  </section>
+
+  <section id="about" class="about wrap">
+    <div class="split">
+      <div class="textBlock panel">
+        <h2>About the shelf</h2>
+        <p>The Good Shelf is designed as a modern everyday store with a refined point of view. It is meant to feel familiar, curated, and worth browsing.</p>
+        <p>Built for Medellín, made to feel good for expats and locals alike.</p>
+        <div class="facts">
+          <div class="fact"><strong>Fast</strong><span>We provide a fast and reliable service.</span></div>
+          <div class="fact"><strong>Simple</strong><span>Our mission is to keep things simple.</span></div>
+          <div class="fact"><strong>Exclusivity</strong><span>Every product in the store is selectively sourced.</span></div>
+        </div>
+      </div>
+
+      <div class="textBlock panel">
+        <h2>Payment &amp; Shipping</h2>
+        <p>Checkout is processed securely through Wompi:</p>
+        <div class="payMethods">
+          <span class="payChip"><span class="swatch" style="background:#e6007a"></span>PSE bank transfer</span>
+          <span class="payChip"><span class="swatch" style="background:#00c244"></span>Nequi</span>
+          <span class="payChip"><span class="swatch" style="background:#171717"></span>Card</span>
+        </div>
+        <p>Orders ship across Colombia. You'll get your tracking number once your order is on its way.</p>
+        <p><a class="btn btnGhost" href="#home">Back to Top</a></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap footerin">
+    <div>© 2026 The Good Shelf</div>
+    <div>Where convenience meets good taste.</div>
+    <div><a href="/admin" style="text-decoration:underline">Admin login</a></div>
+  </div>
+</footer>
+
+<!-- Cart drawer -->
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="cartDrawer" aria-label="Shopping cart">
+  <div class="drawerHead">
+    <h3>Your Cart</h3>
+    <button class="closeBtn" id="closeCart" aria-label="Close cart">✕</button>
+  </div>
+  <div class="drawerBody" id="cartBody"></div>
+  <div class="drawerFoot">
+    <div class="subtotalRow"><span>Subtotal</span><span id="cartSubtotal">$0</span></div>
+    <button class="checkoutBtn" id="checkoutBtn" disabled>Checkout</button>
+  </div>
+</aside>
+
+<!-- Checkout modal -->
+<div class="modalWrap" id="checkoutWrap">
+  <div class="modal panel" id="checkoutModalBody" style="position:relative"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var PRODUCTS = [];
+  var CATEGORIES = ["All"];
+
+  var state = {
+    filter: "All",
+    search: "",
+    sort: "featured",
+    cart: loadCart()
+  };
+
+  function loadCart(){
+    try{
+      var raw = localStorage.getItem("tgs_cart");
+      return raw ? JSON.parse(raw) : {};
+    }catch(e){ return {}; }
+  }
+  function saveCart(){
+    try{ localStorage.setItem("tgs_cart", JSON.stringify(state.cart)); }catch(e){}
+  }
+
+  var moneyFmt = new Intl.NumberFormat("es-CO", {style:"currency", currency:"COP", maximumFractionDigits:0});
+  function money(n){ return moneyFmt.format(n); }
+
+  function getVisibleProducts(){
+    var list = PRODUCTS.slice();
+    if(state.filter !== "All"){
+      list = list.filter(function(p){ return p.tag === state.filter; });
+    }
+    if(state.search.trim()){
+      var q = state.search.trim().toLowerCase();
+      list = list.filter(function(p){
+        return p.name.toLowerCase().indexOf(q) > -1 ||
+               p.desc.toLowerCase().indexOf(q) > -1 ||
+               p.tag.toLowerCase().indexOf(q) > -1;
+      });
+    }
+    if(state.sort === "price-asc") list.sort(function(a,b){return a.price-b.price});
+    else if(state.sort === "price-desc") list.sort(function(a,b){return b.price-a.price});
+    else if(state.sort === "name-asc") list.sort(function(a,b){return a.name.localeCompare(b.name)});
+    return list;
+  }
+
+  /* ---------- Render: pills ---------- */
+  var pillRow = document.getElementById("pillRow");
+  function renderPills(){
+    pillRow.innerHTML = CATEGORIES.map(function(cat){
+      var active = cat === state.filter ? " active" : "";
+      return '<button class="pill'+active+'" data-cat="'+cat+'">'+cat+'</button>';
+    }).join("");
+  }
+  pillRow.addEventListener("click", function(e){
+    var btn = e.target.closest(".pill");
+    if(!btn) return;
+    state.filter = btn.getAttribute("data-cat");
+    renderPills();
+    renderGrid();
+  });
+
+  /* ---------- Render: grid ---------- */
+  var grid = document.getElementById("productGrid");
+  var emptyState = document.getElementById("emptyState");
+  var countPill = document.getElementById("countPill");
+
+  function esc(s){
+    return s.replace(/[&<>"]/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];
+    });
+  }
+
+  function cardHTML(p){
+    var stock = Number.isInteger(p.stock) ? p.stock : 99;
+    var soldOut = stock <= 0;
+    return (
+      '<article class="card panel" data-id="'+p.id+'">'+
+        '<div class="pimg">'+
+          (soldOut ? '<span class="soldBadge">Sold out</span>' : '')+
+          '<img alt="'+esc(p.name)+'" src="'+((p.images && p.images[0]) || '')+'"></div>'+
+        '<div class="pc">'+
+          '<div class="meta"><span class="tag">'+esc(p.tag)+'</span><span class="price">'+money(p.price)+'</span></div>'+
+          '<h3>'+esc(p.name)+'</h3>'+
+          '<p>'+esc(p.desc)+'</p>'+
+          (!soldOut && stock <= 3 ? '<p class="lowStockNote">Only '+stock+' left</p>' : '')+
+          '<div class="actions">'+
+            '<button class="addBtn" data-add="'+p.id+'"'+(soldOut ? ' disabled' : '')+'>'+(soldOut ? 'Sold out' : 'Add to Cart')+'</button>'+
+          '</div>'+
+        '</div>'+
+      '</article>'
+    );
+  }
+
+  function renderGrid(){
+    var list = getVisibleProducts();
+    countPill.textContent = list.length + (list.length === 1 ? " product" : " products");
+    if(list.length === 0){
+      grid.innerHTML = "";
+      emptyState.classList.add("show");
+    }else{
+      emptyState.classList.remove("show");
+      grid.innerHTML = list.map(cardHTML).join("");
+    }
+  }
+
+  grid.addEventListener("click", function(e){
+    var addBtn = e.target.closest("[data-add]");
+    if(!addBtn) return;
+    var id = Number(addBtn.getAttribute("data-add"));
+    addToCart(id);
+    flashAdded(addBtn);
+  });
+
+  function flashAdded(btn){
+    var original = btn.textContent;
+    btn.textContent = "Added ✓";
+    btn.classList.add("added");
+    setTimeout(function(){
+      btn.textContent = original;
+      btn.classList.remove("added");
+    }, 900);
+  }
+
+  /* ---------- Search / sort ---------- */
+  var searchInput = document.getElementById("searchInput");
+  var clearSearch = document.getElementById("clearSearch");
+  var sortSelect = document.getElementById("sortSelect");
+
+  searchInput.addEventListener("input", function(){
+    state.search = searchInput.value;
+    clearSearch.classList.toggle("show", state.search.length > 0);
+    renderGrid();
+  });
+  clearSearch.addEventListener("click", function(){
+    state.search = "";
+    searchInput.value = "";
+    clearSearch.classList.remove("show");
+    renderGrid();
+    searchInput.focus();
+  });
+  sortSelect.addEventListener("change", function(){
+    state.sort = sortSelect.value;
+    renderGrid();
+  });
+
+  /* ---------- Cart ---------- */
+  var cartToggle = document.getElementById("cartToggle");
+  var cartDrawer = document.getElementById("cartDrawer");
+  var closeCartBtn = document.getElementById("closeCart");
+  var overlay = document.getElementById("overlay");
+  var cartBody = document.getElementById("cartBody");
+  var cartSubtotal = document.getElementById("cartSubtotal");
+  var cartBadge = document.getElementById("cartBadge");
+  var checkoutBtn = document.getElementById("checkoutBtn");
+
+  function cartItemsPayload(){
+    return Object.keys(state.cart).map(function(id){ return {id:Number(id), qty:state.cart[id]}; });
+  }
+
+  function addToCart(id, qty){
+    qty = qty || 1;
+    var p = PRODUCTS.find(function(x){return x.id===id});
+    var stock = p && Number.isInteger(p.stock) ? p.stock : 99;
+    var next = (state.cart[id] || 0) + qty;
+    if(next > stock){
+      showToast(stock > 0 ? ("Only "+stock+" of "+(p?p.name:"this item")+" available") : ((p?p.name:"This item")+" is sold out"));
+      if(stock <= 0) return;
+      next = stock;
+    }
+    state.cart[id] = next;
+    saveCart();
+    renderCart();
+    showToast((p ? p.name : "Item") + " added to cart");
+  }
+  function setQty(id, qty){
+    var p = PRODUCTS.find(function(x){return x.id===id});
+    var stock = p && Number.isInteger(p.stock) ? p.stock : 99;
+    if(qty > stock) qty = stock;
+    if(qty <= 0){ delete state.cart[id]; }
+    else{ state.cart[id] = qty; }
+    saveCart();
+    renderCart();
+  }
+  function removeFromCart(id){
+    delete state.cart[id];
+    saveCart();
+    renderCart();
+  }
+  function cartCount(){
+    return Object.values(state.cart).reduce(function(a,b){return a+b},0);
+  }
+  function cartTotal(){
+    return Object.keys(state.cart).reduce(function(sum,id){
+      var p = PRODUCTS.find(function(x){return x.id===Number(id)});
+      return sum + (p ? p.price * state.cart[id] : 0);
+    },0);
+  }
+
+  function renderCart(){
+    var ids = Object.keys(state.cart);
+    var count = cartCount();
+    cartBadge.textContent = count;
+    cartBadge.classList.toggle("show", count > 0);
+    checkoutBtn.disabled = count === 0;
+
+    if(ids.length === 0){
+      cartBody.innerHTML = '<div class="cartEmpty">Your cart is empty.<br>Start adding a few good things.</div>';
+    }else{
+      cartBody.innerHTML = ids.map(function(id){
+        var p = PRODUCTS.find(function(x){return x.id===Number(id)});
+        if(!p) return "";
+        var qty = state.cart[id];
+        return (
+          '<div class="cartItem">'+
+            '<img src="'+((p.images && p.images[0]) || '')+'" alt="'+esc(p.name)+'">'+
+            '<div class="ci-info">'+
+              '<h4>'+esc(p.name)+'</h4>'+
+              '<div class="ci-price">'+money(p.price)+' each</div>'+
+              '<div class="ci-line">'+
+                '<div class="qtyStepper">'+
+                  '<button data-dec="'+p.id+'">−</button>'+
+                  '<span>'+qty+'</span>'+
+                  '<button data-inc="'+p.id+'">+</button>'+
+                '</div>'+
+                '<button class="removeBtn" data-remove="'+p.id+'">Remove</button>'+
+              '</div>'+
+            '</div>'+
+          '</div>'
+        );
+      }).join("");
+    }
+    cartSubtotal.textContent = money(cartTotal());
+  }
+
+  cartBody.addEventListener("click", function(e){
+    var inc = e.target.closest("[data-inc]");
+    var dec = e.target.closest("[data-dec]");
+    var rem = e.target.closest("[data-remove]");
+    if(inc){
+      var id1 = Number(inc.getAttribute("data-inc"));
+      setQty(id1, (state.cart[id1]||0)+1);
+    }else if(dec){
+      var id2 = Number(dec.getAttribute("data-dec"));
+      setQty(id2, (state.cart[id2]||0)-1);
+    }else if(rem){
+      removeFromCart(Number(rem.getAttribute("data-remove")));
+    }
+  });
+
+  function openCart(){
+    cartDrawer.classList.add("show");
+    overlay.classList.add("show");
+  }
+  function closeCart(){
+    cartDrawer.classList.remove("show");
+    if(!checkoutWrap.classList.contains("show")){
+      overlay.classList.remove("show");
+    }
+  }
+  cartToggle.addEventListener("click", openCart);
+  closeCartBtn.addEventListener("click", closeCart);
+
+  /* ---------- Checkout modal (Wompi) ---------- */
+  var checkoutWrap = document.getElementById("checkoutWrap");
+  var checkoutModalBody = document.getElementById("checkoutModalBody");
+
+  function openCheckout(){
+    if(cartCount() === 0) return;
+    renderCheckoutForm();
+    checkoutWrap.classList.add("show");
+    overlay.classList.add("show");
+  }
+  function closeCheckout(){
+    checkoutWrap.classList.remove("show");
+    if(!cartDrawer.classList.contains("show")){
+      overlay.classList.remove("show");
+    }
+  }
+
+  function renderCheckoutForm(errorMsg){
+    var ids = Object.keys(state.cart);
+    var rows = ids.map(function(id){
+      var p = PRODUCTS.find(function(x){return x.id===Number(id)});
+      if(!p) return "";
+      var qty = state.cart[id];
+      return '<div class="orderRow"><span>'+esc(p.name)+' × '+qty+'</span><strong>'+money(p.price*qty)+'</strong></div>';
+    }).join("");
+
+    checkoutModalBody.innerHTML = (
+      '<button class="closeBtn modalClose" id="coClose">✕</button>'+
+      '<div style="padding:28px 26px">'+
+        '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.6rem;margin:0 0 14px">Checkout</h3>'+
+        '<div id="orderRows">'+rows+'</div>'+
+        '<div class="orderRow" style="border-bottom:none;font-size:1.02rem;padding-top:12px"><span>Total</span><strong>'+money(cartTotal())+'</strong></div>'+
+        '<p style="color:var(--muted);font-size:.88rem;margin:16px 0 8px">Your details:</p>'+
+        '<div style="display:flex;flex-direction:column;gap:9px">'+
+          '<input class="searchInput" style="padding-left:14px" id="ckName" type="text" placeholder="Full name" autocomplete="name">'+
+          '<input class="searchInput" style="padding-left:14px" id="ckEmail" type="email" placeholder="Email" autocomplete="email">'+
+          '<input class="searchInput" style="padding-left:14px" id="ckPhone" type="tel" placeholder="Phone (optional)" autocomplete="tel">'+
+        '</div>'+
+        '<p style="color:var(--muted);font-size:.88rem;margin:16px 0 8px">Shipping address:</p>'+
+        '<div style="display:flex;flex-direction:column;gap:9px">'+
+          '<input class="searchInput" style="padding-left:14px" id="ckAddress" type="text" placeholder="Address" autocomplete="street-address">'+
+          '<div style="display:flex;gap:9px">'+
+            '<input class="searchInput" style="padding-left:14px" id="ckCity" type="text" placeholder="City" autocomplete="address-level2">'+
+            '<input class="searchInput" style="padding-left:14px" id="ckRegion" type="text" placeholder="Department (optional)" autocomplete="address-level1">'+
+          '</div>'+
+        '</div>'+
+        (errorMsg ? '<p style="color:#b23b3b;font-size:.86rem;margin:10px 0 0">'+esc(errorMsg)+'</p>' : '')+
+        '<p style="color:var(--muted);font-size:.85rem;line-height:1.6;margin-top:14px">You\'ll be taken to Wompi\'s secure checkout to pay with <strong>PSE</strong>, <strong>Nequi</strong>, or a debit/credit card.</p>'+
+        '<button class="btn btnPrimary" id="placeOrderBtn" style="width:100%;justify-content:center;margin-top:8px">Continue to secure payment</button>'+
+      '</div>'
+    );
+
+    document.getElementById("coClose").addEventListener("click", closeCheckout);
+    document.getElementById("placeOrderBtn").addEventListener("click", submitOrder);
+  }
+
+  function submitOrder(){
+    var btn = document.getElementById("placeOrderBtn");
+    var fullName = document.getElementById("ckName").value.trim();
+    var email = document.getElementById("ckEmail").value.trim();
+    var phone = document.getElementById("ckPhone").value.trim();
+    var address = document.getElementById("ckAddress").value.trim();
+    var city = document.getElementById("ckCity").value.trim();
+    var region = document.getElementById("ckRegion").value.trim();
+
+    if(!fullName || !email){
+      renderCheckoutForm("Please enter your full name and email.");
+      return;
+    }
+    if(!address || !city){
+      renderCheckoutForm("Please enter your shipping address and city.");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Redirecting to secure payment…";
+
+    fetch("/api/checkout", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        items: cartItemsPayload(),
+        customer: { fullName:fullName, email:email, phone: phone || undefined },
+        shippingAddress: { addressLine:address, city:city, region: region || undefined }
+      })
+    })
+    .then(function(r){ return r.json().then(function(data){ return {ok:r.ok, data:data}; }); })
+    .then(function(res){
+      if(!res.ok){
+        renderCheckoutForm(res.data.error || "Something went wrong. Please try again.");
+        return;
+      }
+      goToWompi(res.data, {fullName:fullName, email:email, phone:phone});
+    })
+    .catch(function(){
+      renderCheckoutForm("Could not reach the server. Please try again.");
+    });
+  }
+
+  // Builds Wompi's required hidden form and submits it — this navigates
+  // the browser away to Wompi's hosted, PCI-compliant checkout page.
+  function goToWompi(order, customer){
+    var form = document.createElement("form");
+    form.method = "GET";
+    form.action = order.checkoutAction;
+
+    function field(name, value){
+      if(value === undefined || value === null || value === "") return;
+      var input = document.createElement("input");
+      input.type = "hidden";
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    }
+
+    field("public-key", order.publicKey);
+    field("currency", order.currency);
+    field("amount-in-cents", order.amountInCents);
+    field("reference", order.reference);
+    field("signature:integrity", order.signature);
+    field("redirect-url", order.redirectUrl);
+    field("customer-data:email", customer.email);
+    field("customer-data:full-name", customer.fullName);
+    if(customer.phone){
+      field("customer-data:phone-number", customer.phone);
+      field("customer-data:phone-number-prefix", "+57");
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  // ---------- Post-payment status check (Wompi redirects back here) ----------
+  function checkReturnedOrder(){
+    var params = new URLSearchParams(window.location.search);
+    var ref = params.get("ref");
+    var id = params.get("id");
+    if(!ref) return;
+
+    var qs = "ref=" + encodeURIComponent(ref) + (id ? "&id=" + encodeURIComponent(id) : "");
+    fetch("/api/checkout/status?" + qs)
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        showOrderResult(data.status, data.reference, data.amountInCents);
+        if(data.status === "APPROVED"){
+          state.cart = {};
+          saveCart();
+          renderCart();
+        }
+        var cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      })
+      .catch(function(){});
+  }
+
+  function showOrderResult(status, reference, amountInCents){
+    var labels = {
+      APPROVED: {title:"Payment approved", icon:"✓", tone:"var(--success)", msg:"Thank you — your order "+reference+" is confirmed."},
+      DECLINED: {title:"Payment declined", icon:"✕", tone:"#b23b3b", msg:"Your payment for order "+reference+" was declined. No charge was made."},
+      PENDING: {title:"Payment pending", icon:"…", tone:"var(--accent)", msg:"Order "+reference+" is still processing. We'll update you once it's confirmed."},
+      VOIDED: {title:"Payment voided", icon:"✕", tone:"#b23b3b", msg:"Order "+reference+" was voided."},
+      ERROR: {title:"Something went wrong", icon:"✕", tone:"#b23b3b", msg:"We couldn't confirm order "+reference+". Contact us if you were charged."}
+    };
+    var info = labels[status] || labels.ERROR;
+    checkoutModalBody.innerHTML = (
+      '<button class="closeBtn modalClose" id="orClose">✕</button>'+
+      '<div class="confirmBox">'+
+        '<div class="checkmark" style="background:'+info.tone+'">'+info.icon+'</div>'+
+        '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.7rem;margin:0 0 8px">'+info.title+'</h3>'+
+        '<p style="color:var(--muted);line-height:1.7">'+esc(info.msg)+(amountInCents ? ' ('+money(amountInCents/100)+')' : '')+'</p>'+
+        '<button class="btn btnPrimary" id="orDone" style="margin-top:10px">Done</button>'+
+      '</div>'
+    );
+    checkoutWrap.classList.add("show");
+    overlay.classList.add("show");
+    function close(){ closeCheckout(); }
+    document.getElementById("orClose").addEventListener("click", close);
+    document.getElementById("orDone").addEventListener("click", close);
+  }
+
+  checkoutBtn.addEventListener("click", function(){
+    closeCart();
+    openCheckout();
+  });
+
+  /* ---------- Overlay click closes topmost ---------- */
+  overlay.addEventListener("click", function(){
+    if(checkoutWrap.classList.contains("show")) closeCheckout();
+    else if(cartDrawer.classList.contains("show")) closeCart();
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape"){
+      if(checkoutWrap.classList.contains("show")) closeCheckout();
+      else if(cartDrawer.classList.contains("show")) closeCart();
+    }
+  });
+
+  /* ---------- Toast ---------- */
+  var toast = document.getElementById("toast");
+  var toastTimer;
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toast.classList.remove("show"); }, 2200);
+  }
+
+  /* ---------- Init ---------- */
+  fetch("/products.json")
+    .then(function(r){ return r.json(); })
+    .then(function(products){
+      PRODUCTS = products;
+      CATEGORIES = ["All"].concat(Array.from(new Set(PRODUCTS.map(function(p){return p.tag}))));
+      renderPills();
+      renderGrid();
+      renderCart();
+      checkReturnedOrder();
+    })
+    .catch(function(){
+      grid.innerHTML = '<p style="color:var(--muted)">Could not load products. Please refresh.</p>';
+    });
+})();
+</script>
+</body>
+</html>

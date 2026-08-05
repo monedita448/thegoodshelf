@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — The Good Shelf</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f3ec;
+  --panel:#fffdf8;
+  --text:#171717;
+  --muted:#66625a;
+  --line:#e7e0d5;
+  --accent:#8a6f4d;
+  --danger:#b23b3b;
+  --success:#3f7a52;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text)}
+a{color:inherit}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.wrap{width:min(1100px,calc(100% - 32px));margin:0 auto}
+h1,h2,h3{font-family:'Cormorant Garamond',serif;margin:0}
+
+/* Login screen */
+#loginScreen{min-height:100vh;display:grid;place-items:center;padding:20px}
+.loginCard{width:min(360px,100%);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:32px;box-shadow:0 12px 30px rgba(0,0,0,.08)}
+.loginCard h1{font-size:1.7rem;margin-bottom:6px}
+.loginCard p{color:var(--muted);font-size:.9rem;margin:0 0 20px}
+.field{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:#fff;margin-bottom:12px;outline:none}
+.field:focus{border-color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:10px;font-weight:700;font-size:.92rem;border:1px solid transparent}
+.btnPrimary{background:var(--text);color:#fff;width:100%}
+.btnGhost{border-color:var(--line);background:#fff}
+.btnDanger{background:var(--danger);color:#fff}
+.errMsg{color:var(--danger);font-size:.86rem;margin-top:10px;min-height:1.2em}
+
+/* Dashboard */
+#dashboard{display:none}
+.topbar{position:sticky;top:0;background:rgba(247,243,236,.96);border-bottom:1px solid var(--line);z-index:5}
+.topbarin{display:flex;align-items:center;justify-content:space-between;padding:14px 0;gap:16px;flex-wrap:wrap}
+.brand{font-size:1.3rem;font-weight:700}
+.tabs{display:flex;gap:8px}
+.tabBtn{padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:#fff;font-weight:700;font-size:.88rem;color:var(--muted)}
+.tabBtn.active{background:var(--text);color:#fff;border-color:var(--text)}
+main{padding:24px 0 60px}
+.panelHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+.panel{display:none}
+.panel.active{display:block}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+tr:last-child td{border-bottom:none}
+td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
+.thumbBtn{border:none;padding:0;background:none;cursor:zoom-in;display:block;border-radius:8px}
+.thumbBtn:hover img{outline:2px solid var(--accent);outline-offset:1px}
+.rowActions{display:flex;gap:8px}
+.smallBtn{padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:.82rem;font-weight:700}
+.smallBtn.danger{color:var(--danger);border-color:#e9c9c9}
+.statusChip{padding:4px 10px;border-radius:999px;font-size:.76rem;font-weight:700;display:inline-block}
+.st-PENDING,.st-NOT_SHIPPED{background:#f0e9d8;color:#8a6f4d}
+.st-APPROVED,.st-DELIVERED{background:#e1efe4;color:var(--success)}
+.st-DECLINED,.st-VOIDED,.st-ERROR{background:#f6e2e2;color:var(--danger)}
+.st-PROCESSING,.st-SHIPPED{background:#e3ebf5;color:#3a5a8a}
+
+.formGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:18px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:16px}
+.formGrid .full{grid-column:1 / -1}
+.formGrid label{display:block;font-size:.8rem;color:var(--muted);font-weight:700;margin-bottom:5px}
+.formActions{display:flex;gap:10px;grid-column:1 / -1}
+.emptyMsg{padding:40px;text-align:center;color:var(--muted)}
+
+.detailPanel{padding:16px;background:#faf6ef;border-top:1px solid var(--line)}
+.detailGrid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.detailGrid h4{margin:0 0 8px;font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.detailGrid p{margin:0 0 4px;font-size:.9rem}
+.shipForm{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-top:10px}
+.shipForm > div{display:flex;flex-direction:column;gap:5px}
+.shipForm label{font-size:.78rem;color:var(--muted);font-weight:700}
+.toast{
+  position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
+  background:var(--text);color:#fff;padding:12px 20px;border-radius:999px;font-weight:700;font-size:.86rem;
+  z-index:80;opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.toast.show{opacity:1}
+
+.statGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.statCard{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+.statCard .statLabel{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+.statCard .statValue{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;margin-top:6px}
+.statCard.warn .statValue{color:var(--danger)}
+.lowStockRow{display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);font-size:.9rem}
+.lowStockRow:last-child{border-bottom:none}
+@media (max-width:720px){
+  .statGrid{grid-template-columns:1fr 1fr}
+}
+
+.pfThumbWrap{position:relative;width:86px;height:84px;border-radius:8px;overflow:hidden;cursor:grab}
+.pfThumbWrap.dragOver{outline:2px dashed var(--accent);outline-offset:2px}
+.pfThumbImg{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
+.pfThumbRemove{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;border:none;background:rgba(0,0,0,.65);color:#fff;font-size:11px;line-height:18px;padding:0;cursor:pointer}
+.pfThumbCover{position:absolute;bottom:2px;left:2px;font-size:9px;padding:2px 5px;border-radius:4px;border:none;background:rgba(0,0,0,.65);color:#fff;cursor:pointer}
+.pfThumbBadge{position:absolute;bottom:2px;left:2px;font-size:9px;padding:2px 5px;border-radius:4px;background:var(--accent);color:#fff}
+
+.lightbox{position:fixed;inset:0;background:rgba(10,8,6,.9);z-index:200;display:none;align-items:center;justify-content:center}
+.lightbox.show{display:flex}
+.lightbox img{max-width:88vw;max-height:78vh;object-fit:contain;border-radius:10px;background:#000}
+.lightboxClose{position:absolute;top:20px;right:24px;width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:20px;line-height:1;cursor:pointer}
+.lightboxNav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:24px;cursor:pointer}
+.lightboxPrev{left:18px}
+.lightboxNext{right:18px}
+.lightboxDots{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);display:flex;gap:8px}
+.lightboxDots span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.35);cursor:pointer;display:inline-block}
+.lightboxDots span.active{background:#fff}
+
+.msgSection{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+.whatsappNotice{background:#fdf3e2;border:1px solid #eadab0;color:#8a6f4d;padding:10px 12px;border-radius:10px;font-size:.84rem;margin-bottom:10px}
+.msgThread{max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px 2px;margin-bottom:12px}
+.msgEmpty{color:var(--muted);font-size:.86rem;padding:4px 2px}
+.msgBubble{max-width:78%;padding:10px 13px;border-radius:14px;font-size:.88rem;line-height:1.45}
+.msgBubble.out{align-self:flex-end;background:var(--text);color:#fff;border-bottom-right-radius:4px}
+.msgBubble.in{align-self:flex-start;background:#efe8db;color:var(--text);border-bottom-left-radius:4px}
+.msgBubble img{max-width:100%;border-radius:8px;margin-bottom:6px;display:block;cursor:zoom-in}
+.msgMeta{font-size:.72rem;opacity:.65;margin-top:4px}
+.msgBubble.out .msgMeta{color:rgba(255,255,255,.8)}
+.msgFailed{color:#e39a9a;font-weight:700;font-size:.8rem;margin-top:4px}
+.composeRow{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.composeRow textarea{flex:1;min-width:200px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);resize:vertical;min-height:44px;font:inherit;outline:none}
+.composeRow textarea:focus{border-color:var(--accent)}
+.composePreview{display:none;align-items:center;gap:8px;font-size:.82rem;color:var(--muted);margin-top:8px}
+.composePreview img{width:40px;height:40px;object-fit:cover;border-radius:6px}
+@media (max-width:720px){
+  .formGrid, .detailGrid{grid-template-columns:1fr}
+  table{font-size:.82rem}
+  th,td{padding:9px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="loginCard">
+    <h1>Admin</h1>
+    <p>The Good Shelf — store management</p>
+    <input class="field" id="loginPassword" type="password" placeholder="Admin password" autocomplete="current-password">
+    <button class="btn btnPrimary" id="loginBtn">Log in</button>
+    <div class="errMsg" id="loginError"></div>
+  </div>
+</div>
+
+<div id="dashboard">
+  <header class="topbar">
+    <div class="wrap topbarin">
+      <div class="brand">The Good Shelf — Admin</div>
+      <div class="tabs">
+        <button class="tabBtn active" id="tabHome">Dashboard</button>
+        <button class="tabBtn" id="tabProducts">Products</button>
+        <button class="tabBtn" id="tabOrders">Orders</button>
+        <button class="tabBtn" id="tabTrash">Trash</button>
+      </div>
+      <button class="btn btnGhost" id="logoutBtn">Log out</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="panel active" id="homePanel">
+      <div class="panelHead">
+        <h2>Dashboard</h2>
+      </div>
+      <div class="statGrid">
+        <div class="statCard">
+          <div class="statLabel">Total sales</div>
+          <div class="statValue" id="statSales">—</div>
+        </div>
+        <div class="statCard">
+          <div class="statLabel">Orders today</div>
+          <div class="statValue" id="statOrdersToday">—</div>
+        </div>
+        <div class="statCard" id="statAwaitingCard">
+          <div class="statLabel">Awaiting shipment</div>
+          <div class="statValue" id="statAwaiting">—</div>
+        </div>
+        <div class="statCard" id="statLowStockCard">
+          <div class="statLabel">Low stock items</div>
+          <div class="statValue" id="statLowStockCount">—</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="panelHead" style="padding:16px 16px 0">
+          <h3 style="font-family:Inter,sans-serif;font-size:.95rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em">Low stock</h3>
+        </div>
+        <div id="lowStockList"></div>
+        <div class="emptyMsg" id="lowStockEmpty" style="display:none">Nothing running low right now.</div>
+      </div>
+    </section>
+
+    <section class="panel" id="productsPanel">
+      <div class="panelHead">
+        <h2>Products</h2>
+        <button class="btn btnPrimary" id="newProductBtn">+ Add product</button>
+      </div>
+      <div id="productFormWrap"></div>
+      <div class="card">
+        <table>
+          <thead><tr><th></th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th></th></tr></thead>
+          <tbody id="productsBody"></tbody>
+        </table>
+        <div class="emptyMsg" id="productsEmpty" style="display:none">No products yet — add your first one above.</div>
+      </div>
+    </section>
+
+    <section class="panel" id="ordersPanel">
+      <div class="panelHead">
+        <h2>Orders</h2>
+        <div style="display:flex;gap:8px">
+          <button class="btn btnGhost" id="loadDemoOrdersBtn">Load demo orders</button>
+          <button class="btn btnGhost" id="clearDemoOrdersBtn">Clear demo orders</button>
+        </div>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Reference</th><th>Customer</th><th>Total</th><th>Payment</th><th>Shipping</th><th>Date</th><th></th></tr></thead>
+          <tbody id="ordersBody"></tbody>
+        </table>
+        <div class="emptyMsg" id="ordersEmpty" style="display:none">No orders yet.</div>
+      </div>
+    </section>
+
+    <section class="panel" id="trashPanel">
+      <div class="panelHead">
+        <h2>Trash</h2>
+        <button class="btn btnGhost" id="emptyTrashBtn">Empty trash now</button>
+      </div>
+      <p style="color:var(--muted);font-size:.86rem;margin:-8px 0 16px">Deleted products and photos land here and can be restored. Trash clears automatically every day at 11:59am (store time) — anything not restored by then is gone for good.</p>
+      <div class="card">
+        <table>
+          <thead><tr><th></th><th>What</th><th>Deleted</th><th></th></tr></thead>
+          <tbody id="trashBody"></tbody>
+        </table>
+        <div class="emptyMsg" id="trashEmpty" style="display:none">Trash is empty.</div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="lightbox" id="lightbox">
+  <button type="button" class="lightboxClose" id="lightboxClose">&times;</button>
+  <button type="button" class="lightboxNav lightboxPrev" id="lightboxPrev">&lsaquo;</button>
+  <img id="lightboxImg" src="" alt="">
+  <button type="button" class="lightboxNav lightboxNext" id="lightboxNext">&rsaquo;</button>
+  <div class="lightboxDots" id="lightboxDots"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var moneyFmt = new Intl.NumberFormat("es-CO", {style:"currency", currency:"COP", maximumFractionDigits:0});
+  function money(n){ return moneyFmt.format(n); }
+  function esc(s){
+    return String(s).replace(/[&<>"]/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];
+    });
+  }
+
+  /* ---------- Lightbox (click any product photo to view full-size) ---------- */
+  var lightbox = document.getElementById("lightbox");
+  var lightboxImg = document.getElementById("lightboxImg");
+  var lightboxDots = document.getElementById("lightboxDots");
+  var lightboxPrev = document.getElementById("lightboxPrev");
+  var lightboxNext = document.getElementById("lightboxNext");
+  var lbImages = [];
+  var lbIndex = 0;
+
+  function renderLightbox(){
+    lightboxImg.src = lbImages[lbIndex];
+    lightboxDots.innerHTML = lbImages.map(function(_, i){
+      return '<span class="'+(i === lbIndex ? "active" : "")+'" data-idx="'+i+'"></span>';
+    }).join("");
+    lightboxDots.querySelectorAll("span").forEach(function(dot){
+      dot.addEventListener("click", function(){ lbIndex = Number(dot.getAttribute("data-idx")); renderLightbox(); });
+    });
+    var multi = lbImages.length > 1;
+    lightboxPrev.style.display = multi ? "flex" : "none";
+    lightboxNext.style.display = multi ? "flex" : "none";
+    lightboxDots.style.display = multi ? "flex" : "none";
+  }
+  function openLightbox(images, startIndex){
+    images = (images || []).filter(Boolean);
+    if(!images.length) return;
+    lbImages = images;
+    lbIndex = startIndex || 0;
+    renderLightbox();
+    lightbox.classList.add("show");
+  }
+  function closeLightbox(){ lightbox.classList.remove("show"); }
+  document.getElementById("lightboxClose").addEventListener("click", closeLightbox);
+  lightbox.addEventListener("click", function(e){ if(e.target === lightbox) closeLightbox(); });
+  lightboxPrev.addEventListener("click", function(){ lbIndex = (lbIndex - 1 + lbImages.length) % lbImages.length; renderLightbox(); });
+  lightboxNext.addEventListener("click", function(){ lbIndex = (lbIndex + 1) % lbImages.length; renderLightbox(); });
+  document.addEventListener("keydown", function(e){
+    if(!lightbox.classList.contains("show")) return;
+    if(e.key === "Escape") closeLightbox();
+    if(e.key === "ArrowLeft") lightboxPrev.click();
+    if(e.key === "ArrowRight") lightboxNext.click();
+  });
+
+  function api(path, opts){
+    opts = opts || {};
+    var headers = Object.assign({"Content-Type":"application/json", "X-Requested-With":"tgs-admin"}, opts.headers || {});
+    return fetch(path, Object.assign({credentials:"same-origin"}, opts, {headers: headers}))
+      .then(function(r){
+        return r.json().catch(function(){ return {}; }).then(function(data){
+          return {ok:r.ok, status:r.status, data:data};
+        });
+      });
+  }
+
+  var toast = document.getElementById("toast");
+  var toastTimer;
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toast.classList.remove("show"); }, 2400);
+  }
+
+  function showLogin(){
+    document.getElementById("loginScreen").style.display = "grid";
+    document.getElementById("dashboard").style.display = "none";
+  }
+  function showDashboard(){
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+    loadHome();
+    loadProducts();
+    loadOrders();
+  }
+
+  function handle401(res){
+    if(res.status === 401){ showLogin(); return true; }
+    return false;
+  }
+
+  /* ---------- Login ---------- */
+  var loginBtn = document.getElementById("loginBtn");
+  var loginPassword = document.getElementById("loginPassword");
+  var loginError = document.getElementById("loginError");
+
+  function doLogin(){
+    loginError.textContent = "";
+    loginBtn.disabled = true;
+    api("/api/admin/login", {method:"POST", body: JSON.stringify({password: loginPassword.value})})
+      .then(function(res){
+        loginBtn.disabled = false;
+        if(!res.ok){
+          loginError.textContent = res.data.error || "Login failed.";
+          return;
+        }
+        loginPassword.value = "";
+        showDashboard();
+      })
+      .catch(function(){
+        loginBtn.disabled = false;
+        loginError.textContent = "Could not reach the server.";
+      });
+  }
+  loginBtn.addEventListener("click", doLogin);
+  loginPassword.addEventListener("keydown", function(e){ if(e.key === "Enter") doLogin(); });
+
+  document.getElementById("logoutBtn").addEventListener("click", function(){
+    api("/api/admin/logout", {method:"POST"}).then(function(){ showLogin(); });
+  });
+
+  /* ---------- Tabs ---------- */
+  var tabHome = document.getElementById("tabHome");
+  var tabProducts = document.getElementById("tabProducts");
+  var tabOrders = document.getElementById("tabOrders");
+  var tabTrash = document.getElementById("tabTrash");
+  var homePanel = document.getElementById("homePanel");
+  var productsPanel = document.getElementById("productsPanel");
+  var ordersPanel = document.getElementById("ordersPanel");
+  var trashPanel = document.getElementById("trashPanel");
+  var allTabs = [tabHome, tabProducts, tabOrders, tabTrash];
+  var allPanels = [homePanel, productsPanel, ordersPanel, trashPanel];
+  function activateTab(tab, panel){
+    allTabs.forEach(function(t){ t.classList.remove("active"); });
+    allPanels.forEach(function(p){ p.classList.remove("active"); });
+    tab.classList.add("active");
+    panel.classList.add("active");
+  }
+  tabHome.addEventListener("click", function(){
+    activateTab(tabHome, homePanel);
+    loadHome();
+  });
+  tabProducts.addEventListener("click", function(){
+    activateTab(tabProducts, productsPanel);
+  });
+  tabOrders.addEventListener("click", function(){
+    activateTab(tabOrders, ordersPanel);
+    loadOrders();
+  });
+  tabTrash.addEventListener("click", function(){
+    activateTab(tabTrash, trashPanel);
+    loadTrash();
+  });
+
+  /* ---------- Home / Dashboard ---------- */
+  function loadHome(){
+    api("/api/admin/dashboard").then(function(res){
+      if(handle401(res)) return;
+      if(!res.ok) return;
+      renderHome(res.data);
+    });
+  }
+
+  function renderHome(d){
+    document.getElementById("statSales").textContent = money(d.totalSalesCOP);
+    document.getElementById("statOrdersToday").textContent = d.ordersToday;
+    document.getElementById("statAwaiting").textContent = d.awaitingShipment;
+    document.getElementById("statLowStockCount").textContent = d.lowStock.length;
+
+    var awaitingCard = document.getElementById("statAwaitingCard");
+    awaitingCard.classList.toggle("warn", d.awaitingShipment > 0);
+    var lowStockCard = document.getElementById("statLowStockCard");
+    lowStockCard.classList.toggle("warn", d.lowStock.length > 0);
+
+    var list = document.getElementById("lowStockList");
+    var empty = document.getElementById("lowStockEmpty");
+    if(!d.lowStock.length){
+      list.innerHTML = "";
+      empty.style.display = "block";
+    }else{
+      empty.style.display = "none";
+      list.innerHTML = d.lowStock.map(function(p){
+        return '<div class="lowStockRow"><span>'+esc(p.name)+'</span><span style="font-weight:700;color:'+(p.stock<=0?"var(--danger)":"var(--accent)")+'">'+(p.stock<=0 ? "Sold out" : p.stock+" left")+'</span></div>';
+      }).join("");
+    }
+  }
+
+  /* ---------- Products ---------- */
+  var productsBody = document.getElementById("productsBody");
+  var productsEmpty = document.getElementById("productsEmpty");
+  var productFormWrap = document.getElementById("productFormWrap");
+
+  function loadProducts(){
+    api("/api/admin/products").then(function(res){
+      if(handle401(res)) return;
+      renderProducts(res.data || []);
+    });
+  }
+
+  var LOW_STOCK_THRESHOLD = 3;
+  function stockCellHTML(stock){
+    stock = Number.isInteger(stock) ? stock : 0;
+    if(stock <= 0) return '<span class="statusChip st-DECLINED">Sold out</span>';
+    if(stock <= LOW_STOCK_THRESHOLD) return '<span class="statusChip st-PENDING">'+stock+' left</span>';
+    return String(stock);
+  }
+
+  function renderProducts(products){
+    productsEmpty.style.display = products.length ? "none" : "block";
+    productsBody.innerHTML = products.map(function(p){
+      return (
+        '<tr>'+
+          '<td><button type="button" class="thumbBtn" data-view="'+p.id+'" title="Click to view all photos"><img src="'+((p.images && p.images[0]) || '')+'" alt=""></button></td>'+
+          '<td>'+esc(p.name)+'</td>'+
+          '<td>'+esc(p.tag)+'</td>'+
+          '<td>'+money(p.price)+'</td>'+
+          '<td>'+stockCellHTML(p.stock)+'</td>'+
+          '<td><div class="rowActions">'+
+            '<button class="smallBtn" data-edit="'+p.id+'">Edit</button>'+
+            '<button class="smallBtn danger" data-delete="'+p.id+'">Delete</button>'+
+          '</div></td>'+
+        '</tr>'
+      );
+    }).join("");
+
+    productsBody.querySelectorAll("[data-view]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var p = products.find(function(x){ return x.id === Number(btn.getAttribute("data-view")); });
+        if(p) openLightbox(p.images || [], 0);
+      });
+    });
+    productsBody.querySelectorAll("[data-edit]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var p = products.find(function(x){ return x.id === Number(btn.getAttribute("data-edit")); });
+        if(p) openProductForm(p);
+      });
+    });
+    productsBody.querySelectorAll("[data-delete]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var id = Number(btn.getAttribute("data-delete"));
+        if(!confirm("Move this product to Trash? You can restore it from the Trash tab until it's cleared.")) return;
+        api("/api/admin/products/"+id, {method:"DELETE"}).then(function(res){
+          if(handle401(res)) return;
+          if(!res.ok){ showToast(res.data.error || "Could not delete product."); return; }
+          showToast("Moved to Trash.");
+          loadProducts();
+        });
+      });
+    });
+  }
+
+  document.getElementById("newProductBtn").addEventListener("click", function(){ openProductForm(null); });
+
+  function uploadImage(file){
+    var fd = new FormData();
+    fd.append("image", file);
+    return fetch("/api/admin/upload", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {"X-Requested-With":"tgs-admin"},
+      body: fd
+    }).then(function(r){
+      return r.json().then(function(data){ return {ok:r.ok, status:r.status, data:data}; });
+    });
+  }
+
+  var MAX_PRODUCT_IMAGES = 8;
+
+  function openProductForm(product){
+    var isEdit = Boolean(product);
+    var pfImages = isEdit && Array.isArray(product.images) ? product.images.slice() : [];
+
+    productFormWrap.innerHTML = (
+      '<div class="formGrid">'+
+        '<div><label>Name</label><input class="field" id="pfName" value="'+(isEdit ? esc(product.name) : '')+'"></div>'+
+        '<div><label>Category</label><input class="field" id="pfTag" value="'+(isEdit ? esc(product.tag) : '')+'"></div>'+
+        '<div><label>Price (COP)</label><input class="field" id="pfPrice" type="number" min="1" step="1" value="'+(isEdit ? product.price : '')+'"></div>'+
+        '<div><label>Stock on hand</label><input class="field" id="pfStock" type="number" min="0" step="1" value="'+(isEdit ? product.stock : '0')+'"></div>'+
+        '<div class="full"><label>Description</label><input class="field" id="pfDesc" value="'+(isEdit ? esc(product.desc) : '')+'"></div>'+
+        '<div class="full">'+
+          '<label>Product images</label>'+
+          '<div id="pfGallery" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px"></div>'+
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'+
+            '<input class="field" id="pfImgUrl" placeholder="Paste an image URL" style="flex:1;min-width:200px;margin-bottom:0">'+
+            '<button type="button" class="btn btnGhost" id="pfAddUrl">Add URL</button>'+
+            '<label class="btn btnGhost" style="cursor:pointer">Upload photo<input type="file" id="pfImgFile" accept="image/png,image/jpeg,image/webp,image/gif" multiple style="display:none"></label>'+
+          '</div>'+
+          '<span style="font-size:.78rem;color:var(--muted);display:block;margin-top:6px" id="pfUploadStatus">Add up to '+MAX_PRODUCT_IMAGES+' photos (PNG/JPEG/WEBP/GIF, 5MB each). Drag photos to reorder, click one to view it full-size. The first is the cover shown on the storefront card.</span>'+
+        '</div>'+
+        '<div class="formActions">'+
+          '<button class="btn btnPrimary" id="pfSave">'+(isEdit ? "Save changes" : "Add product")+'</button>'+
+          '<button class="btn btnGhost" id="pfCancel">Cancel</button>'+
+        '</div>'+
+        '<div class="errMsg full" id="pfError"></div>'+
+      '</div>'
+    );
+
+    var pfGallery = document.getElementById("pfGallery");
+    var pfImgUrl = document.getElementById("pfImgUrl");
+    var pfUploadStatus = document.getElementById("pfUploadStatus");
+    var defaultStatusText = pfUploadStatus.textContent;
+
+    function setStatus(text, color){
+      pfUploadStatus.textContent = text;
+      pfUploadStatus.style.color = color || "var(--muted)";
+    }
+    function resetStatusSoon(){
+      setTimeout(function(){ setStatus(defaultStatusText); }, 2500);
+    }
+
+    var dragFromIdx = null;
+
+    function renderGallery(){
+      if(!pfImages.length){
+        pfGallery.innerHTML = '<div style="font-size:.82rem;color:var(--muted)">No images yet — add a URL or upload a photo below.</div>';
+        return;
+      }
+      pfGallery.innerHTML = pfImages.map(function(url, i){
+        return (
+          '<div class="pfThumbWrap" draggable="true" data-idx="'+i+'" style="border:'+(i===0 ? "2px solid var(--accent)" : "1px solid var(--line)")+'">'+
+            '<img class="pfThumbImg" data-idx="'+i+'" src="'+esc(url)+'" title="Click to view full-size">'+
+            '<button type="button" class="pfThumbRemove" data-idx="'+i+'" title="Remove">&times;</button>'+
+            (i===0
+              ? '<span class="pfThumbBadge">Cover</span>'
+              : '<button type="button" class="pfThumbCover" data-idx="'+i+'">Set cover</button>')+
+          '</div>'
+        );
+      }).join("");
+
+      var thumbEls = pfGallery.querySelectorAll(".pfThumbWrap");
+
+      pfGallery.querySelectorAll(".pfThumbImg").forEach(function(img){
+        img.addEventListener("click", function(){
+          openLightbox(pfImages, Number(img.getAttribute("data-idx")));
+        });
+      });
+      pfGallery.querySelectorAll(".pfThumbRemove").forEach(function(btn){
+        btn.addEventListener("click", function(e){
+          e.stopPropagation();
+          pfImages.splice(Number(btn.getAttribute("data-idx")), 1);
+          renderGallery();
+        });
+      });
+      pfGallery.querySelectorAll(".pfThumbCover").forEach(function(btn){
+        btn.addEventListener("click", function(e){
+          e.stopPropagation();
+          var idx = Number(btn.getAttribute("data-idx"));
+          var moved = pfImages.splice(idx, 1)[0];
+          pfImages.unshift(moved);
+          renderGallery();
+        });
+      });
+
+      thumbEls.forEach(function(el){
+        el.addEventListener("dragstart", function(e){
+          dragFromIdx = Number(el.getAttribute("data-idx"));
+          e.dataTransfer.effectAllowed = "move";
+          try { e.dataTransfer.setData("text/plain", String(dragFromIdx)); } catch(err){}
+        });
+        el.addEventListener("dragover", function(e){
+          e.preventDefault();
+          el.classList.add("dragOver");
+        });
+        el.addEventListener("dragleave", function(){
+          el.classList.remove("dragOver");
+        });
+        el.addEventListener("drop", function(e){
+          e.preventDefault();
+          el.classList.remove("dragOver");
+          var dropIdx = Number(el.getAttribute("data-idx"));
+          if(dragFromIdx === null || dragFromIdx === dropIdx) return;
+          var moved = pfImages.splice(dragFromIdx, 1)[0];
+          pfImages.splice(dropIdx, 0, moved);
+          dragFromIdx = null;
+          renderGallery();
+        });
+        el.addEventListener("dragend", function(){
+          dragFromIdx = null;
+          thumbEls.forEach(function(t){ t.classList.remove("dragOver"); });
+        });
+      });
+    }
+    renderGallery();
+
+    function addImage(url){
+      if(!url) return;
+      if(pfImages.length >= MAX_PRODUCT_IMAGES){
+        setStatus("You can add up to "+MAX_PRODUCT_IMAGES+" images per product.", "var(--danger)");
+        return;
+      }
+      pfImages.push(url);
+      renderGallery();
+    }
+
+    document.getElementById("pfAddUrl").addEventListener("click", function(){
+      var val = pfImgUrl.value.trim();
+      if(!val) return;
+      addImage(val);
+      pfImgUrl.value = "";
+    });
+
+    document.getElementById("pfImgFile").addEventListener("change", function(e){
+      var files = Array.prototype.slice.call(e.target.files || []);
+      if(!files.length) return;
+      var remaining = MAX_PRODUCT_IMAGES - pfImages.length;
+      if(remaining <= 0){
+        setStatus("You can add up to "+MAX_PRODUCT_IMAGES+" images per product.", "var(--danger)");
+        e.target.value = "";
+        return;
+      }
+      files = files.slice(0, remaining);
+      setStatus("Uploading "+files.length+" photo"+(files.length>1?"s":"")+"…");
+      Promise.all(files.map(function(file){ return uploadImage(file); })).then(function(results){
+        var failed = 0;
+        results.forEach(function(res){
+          if(res.ok){ addImage(res.data.url); }
+          else { failed++; }
+        });
+        if(failed){
+          setStatus(failed+" upload"+(failed>1?"s":"")+" failed. Check file type and size (max 5MB).", "var(--danger)");
+        }else{
+          setStatus("Uploaded ✓", "var(--success)");
+          resetStatusSoon();
+        }
+        e.target.value = "";
+      }).catch(function(){
+        setStatus("Could not reach the server.", "var(--danger)");
+        e.target.value = "";
+      });
+    });
+
+    document.getElementById("pfCancel").addEventListener("click", function(){ productFormWrap.innerHTML = ""; });
+    document.getElementById("pfSave").addEventListener("click", function(){
+      if(!pfImages.length){
+        document.getElementById("pfError").textContent = "Add at least one product image.";
+        return;
+      }
+      var body = {
+        name: document.getElementById("pfName").value.trim(),
+        tag: document.getElementById("pfTag").value.trim(),
+        price: Number(document.getElementById("pfPrice").value),
+        stock: Number(document.getElementById("pfStock").value),
+        images: pfImages,
+        desc: document.getElementById("pfDesc").value.trim()
+      };
+      var url = isEdit ? "/api/admin/products/"+product.id : "/api/admin/products";
+      var method = isEdit ? "PUT" : "POST";
+      api(url, {method:method, body: JSON.stringify(body)}).then(function(res){
+        if(handle401(res)) return;
+        if(!res.ok){
+          document.getElementById("pfError").textContent = res.data.error || "Could not save product.";
+          return;
+        }
+        productFormWrap.innerHTML = "";
+        showToast(isEdit ? "Product updated." : "Product added.");
+        loadProducts();
+      });
+    });
+  }
+
+  /* ---------- Orders ---------- */
+  var ordersBody = document.getElementById("ordersBody");
+  var ordersEmpty = document.getElementById("ordersEmpty");
+  var expandedRef = null;
+
+  function loadOrders(){
+    api("/api/admin/orders").then(function(res){
+      if(handle401(res)) return;
+      renderOrders(res.data || []);
+    });
+  }
+
+  document.getElementById("loadDemoOrdersBtn").addEventListener("click", function(){
+    api("/api/admin/orders/seed-demo", {method:"POST"}).then(function(res){
+      if(handle401(res)) return;
+      if(!res.ok){ showToast(res.data.error || "Could not load demo orders."); return; }
+      showToast("Loaded " + res.data.count + " demo orders.");
+      loadOrders();
+      loadHome();
+    });
+  });
+  document.getElementById("clearDemoOrdersBtn").addEventListener("click", function(){
+    if(!confirm("Remove all demo orders? Real orders are untouched.")) return;
+    api("/api/admin/orders/clear-demo", {method:"POST"}).then(function(res){
+      if(handle401(res)) return;
+      if(!res.ok){ showToast(res.data.error || "Could not clear demo orders."); return; }
+      showToast("Cleared " + res.data.count + " demo orders.");
+      loadOrders();
+      loadHome();
+    });
+  });
+
+  function renderOrders(orders){
+    ordersEmpty.style.display = orders.length ? "none" : "block";
+    ordersBody.innerHTML = orders.map(function(o){
+      var rows = '<tr>'+
+          '<td>'+esc(o.reference)+(o.isDemo ? ' <span class="statusChip st-PENDING" style="margin-left:4px">DEMO</span>' : '')+'</td>'+
+          '<td>'+esc(o.customer.fullName)+'<br><span style="color:var(--muted);font-size:.82rem">'+esc(o.customer.email)+'</span></td>'+
+          '<td>'+money(o.amountInCents/100)+'</td>'+
+          '<td><span class="statusChip st-'+o.status+'">'+o.status+'</span></td>'+
+          '<td><span class="statusChip st-'+o.shippingStatus+'">'+o.shippingStatus.replace("_"," ")+'</span></td>'+
+          '<td style="font-size:.82rem;color:var(--muted)">'+new Date(o.createdAt).toLocaleDateString()+'</td>'+
+          '<td><button class="smallBtn" data-manage="'+o.reference+'">Manage</button></td>'+
+        '</tr>';
+      if(expandedRef === o.reference){
+        rows += '<tr><td colspan="7" style="padding:0"><div class="detailPanel">'+detailHTML(o)+'</div></td></tr>';
+      }
+      return rows;
+    }).join("");
+
+    ordersBody.querySelectorAll("[data-manage]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var ref = btn.getAttribute("data-manage");
+        expandedRef = (expandedRef === ref) ? null : ref;
+        renderOrders(orders);
+        if(expandedRef) wireDetail(orders.find(function(o){ return o.reference === expandedRef; }));
+      });
+    });
+  }
+
+  function detailHTML(o){
+    var itemsHtml = o.items.map(function(it){
+      return '<p>'+esc(it.name)+' × '+it.qty+' — '+money(it.price*it.qty)+'</p>';
+    }).join("");
+    var addr = o.shippingAddress || {};
+    return (
+      '<div class="detailGrid">'+
+        '<div>'+
+          '<h4>Items</h4>'+itemsHtml+
+          '<h4 style="margin-top:14px">Shipping address</h4>'+
+          '<p>'+esc(addr.addressLine || "—")+'</p>'+
+          '<p>'+esc(addr.city || "")+(addr.region ? ", "+esc(addr.region) : '')+'</p>'+
+          (o.customer.phone ? '<p>Phone: '+esc(o.customer.phone)+'</p>' : '')+
+        '</div>'+
+        '<div>'+
+          '<h4>Update shipping</h4>'+
+          '<div class="shipForm">'+
+            '<div><label>Status</label>'+
+              '<select class="field" id="shStatus">'+
+                ["NOT_SHIPPED","PROCESSING","SHIPPED","DELIVERED"].map(function(s){
+                  return '<option value="'+s+'"'+(o.shippingStatus===s?' selected':'')+'>'+s.replace("_"," ")+'</option>';
+                }).join("")+
+              '</select>'+
+            '</div>'+
+            '<div><label>Carrier</label><input class="field" id="shCarrier" value="'+esc(o.carrier || "")+'" placeholder="Servientrega"></div>'+
+            '<div><label>Tracking #</label><input class="field" id="shTracking" value="'+esc(o.trackingNumber || "")+'" placeholder="123456789"></div>'+
+            '<button class="btn btnPrimary" id="shSave">Save</button>'+
+          '</div>'+
+          '<div class="errMsg" id="shError"></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="msgSection">'+
+        '<h4>Updates &amp; messages</h4>'+
+        '<div class="msgThread" id="msgThread"><div class="msgEmpty">Loading…</div></div>'+
+        (o.customer.phone
+          ? (
+              '<div class="composeRow">'+
+                '<textarea id="msgText" placeholder="Type an update for the customer…" rows="2"></textarea>'+
+                '<label class="btn btnGhost" style="cursor:pointer">Photo<input type="file" id="msgFile" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none"></label>'+
+                '<button class="btn btnPrimary" id="msgSend">Send</button>'+
+              '</div>'+
+              '<div class="composePreview" id="msgPreview"></div>'+
+              '<div class="errMsg" id="msgError"></div>'
+            )
+          : '<div class="msgEmpty">Add a phone number to this order to message the customer on WhatsApp.</div>')+
+      '</div>'
+    );
+  }
+
+  function wireDetail(order){
+    var saveBtn = document.getElementById("shSave");
+    if(saveBtn){
+      saveBtn.addEventListener("click", function(){
+        var body = {
+          shippingStatus: document.getElementById("shStatus").value,
+          carrier: document.getElementById("shCarrier").value.trim(),
+          trackingNumber: document.getElementById("shTracking").value.trim()
+        };
+        api("/api/admin/orders/"+order.reference+"/shipping", {method:"PATCH", body: JSON.stringify(body)}).then(function(res){
+          if(handle401(res)) return;
+          if(!res.ok){
+            document.getElementById("shError").textContent = res.data.error || "Could not update shipping.";
+            return;
+          }
+          showToast("Shipping updated.");
+          loadOrders();
+        });
+      });
+    }
+
+    function loadMessages(){
+      api("/api/admin/orders/"+order.reference+"/messages").then(function(res){
+        if(handle401(res)) return;
+        if(!res.ok) return;
+        renderMsgThread(res.data.messages || [], res.data.whatsappConfigured);
+      });
+    }
+
+    function renderMsgThread(messages, configured){
+      var thread = document.getElementById("msgThread");
+      if(!thread) return;
+      var notice = configured ? "" : '<div class="whatsappNotice">WhatsApp isn’t connected on this store yet. Messages are saved here, but won’t reach the customer until WhatsApp is set up.</div>';
+      if(!messages.length){
+        thread.innerHTML = notice + '<div class="msgEmpty">No messages yet.</div>';
+        return;
+      }
+      thread.innerHTML = notice + messages.map(function(m){
+        var img = m.imageUrl ? '<img src="'+esc(m.imageUrl)+'" class="msgImgClick" data-src="'+esc(m.imageUrl)+'">' : '';
+        var text = m.text ? '<div>'+esc(m.text).replace(/\n/g, "<br>")+'</div>' : '';
+        var failed = (m.direction === "out" && m.status === "failed") ? '<div class="msgFailed">Not delivered — '+esc(m.error || "send failed")+'</div>' : '';
+        return (
+          '<div class="msgBubble '+(m.direction === "out" ? "out" : "in")+'">'+
+            img + text + failed +
+            '<div class="msgMeta">'+new Date(m.at).toLocaleString()+'</div>'+
+          '</div>'
+        );
+      }).join("");
+      thread.scrollTop = thread.scrollHeight;
+      thread.querySelectorAll(".msgImgClick").forEach(function(img){
+        img.addEventListener("click", function(){ openLightbox([img.getAttribute("data-src")], 0); });
+      });
+    }
+    loadMessages();
+
+    var msgSendBtn = document.getElementById("msgSend");
+    if(msgSendBtn){
+      var msgFile = document.getElementById("msgFile");
+      var msgPreview = document.getElementById("msgPreview");
+      var msgText = document.getElementById("msgText");
+      var msgError = document.getElementById("msgError");
+      var pendingImageUrl = null;
+
+      function clearAttachment(){
+        pendingImageUrl = null;
+        msgPreview.style.display = "none";
+        msgPreview.innerHTML = "";
+        msgFile.value = "";
+      }
+
+      msgFile.addEventListener("change", function(e){
+        var file = e.target.files[0];
+        if(!file) return;
+        var fd = new FormData();
+        fd.append("image", file);
+        msgPreview.style.display = "flex";
+        msgPreview.innerHTML = "Uploading…";
+        fetch("/api/admin/orders/"+order.reference+"/upload-image", {
+          method: "POST", credentials: "same-origin",
+          headers: {"X-Requested-With":"tgs-admin"}, body: fd
+        }).then(function(r){
+          return r.json().then(function(data){ return {ok:r.ok, data:data}; });
+        }).then(function(res){
+          if(!res.ok){
+            msgPreview.innerHTML = '<span style="color:var(--danger)">'+(res.data.error || "Upload failed.")+'</span>';
+            pendingImageUrl = null;
+            return;
+          }
+          pendingImageUrl = res.data.url;
+          msgPreview.innerHTML = '<img src="'+esc(pendingImageUrl)+'"><span>Photo attached</span>';
+          var removeBtn = document.createElement("button");
+          removeBtn.type = "button";
+          removeBtn.className = "smallBtn";
+          removeBtn.textContent = "Remove";
+          removeBtn.addEventListener("click", clearAttachment);
+          msgPreview.appendChild(removeBtn);
+        }).catch(function(){
+          msgPreview.innerHTML = '<span style="color:var(--danger)">Could not reach the server.</span>';
+        });
+      });
+
+      msgSendBtn.addEventListener("click", function(){
+        var text = msgText.value.trim();
+        if(!text && !pendingImageUrl){
+          msgError.textContent = "Write a message or attach a photo.";
+          return;
+        }
+        msgError.textContent = "";
+        msgSendBtn.disabled = true;
+        api("/api/admin/orders/"+order.reference+"/messages", {method:"POST", body: JSON.stringify({text: text, imageUrl: pendingImageUrl})})
+          .then(function(res){
+            msgSendBtn.disabled = false;
+            if(handle401(res)) return;
+            showToast(res.ok ? "Sent." : "Saved, but not delivered — see the thread for details.");
+            msgText.value = "";
+            clearAttachment();
+            loadMessages();
+          })
+          .catch(function(){
+            msgSendBtn.disabled = false;
+            msgError.textContent = "Could not reach the server.";
+          });
+      });
+
+      msgText.addEventListener("keydown", function(e){
+        if((e.metaKey || e.ctrlKey) && e.key === "Enter") msgSendBtn.click();
+      });
+    }
+  }
+
+  /* ---------- Trash ---------- */
+  var trashBody = document.getElementById("trashBody");
+  var trashEmpty = document.getElementById("trashEmpty");
+
+  function loadTrash(){
+    api("/api/admin/trash").then(function(res){
+      if(handle401(res)) return;
+      renderTrash(res.data || []);
+    });
+  }
+
+  function trashFileSrc(entry, file){
+    if(file.trashed && file.filename) return "/api/admin/trash-image/"+entry.id+"/"+encodeURIComponent(file.filename);
+    return file.url;
+  }
+
+  function renderTrash(trash){
+    trashEmpty.style.display = trash.length ? "none" : "block";
+    trashBody.innerHTML = trash.map(function(t){
+      var thumbSrc = t.files && t.files[0] ? trashFileSrc(t, t.files[0]) : "";
+      var what = t.type === "product"
+        ? esc(t.productName || "Product") + ' <span style="color:var(--muted);font-size:.82rem">(whole product)</span>'
+        : esc(t.productName || "Photo") + ' <span style="color:var(--muted);font-size:.82rem">(1 photo)</span>';
+      return (
+        '<tr>'+
+          '<td>'+(thumbSrc ? '<button type="button" class="thumbBtn" data-view="'+t.id+'"><img src="'+thumbSrc+'" alt=""></button>' : '')+'</td>'+
+          '<td>'+what+'</td>'+
+          '<td style="font-size:.82rem;color:var(--muted)">'+new Date(t.deletedAt).toLocaleString()+'</td>'+
+          '<td><div class="rowActions">'+
+            '<button class="smallBtn" data-restore="'+t.id+'">Restore</button>'+
+            '<button class="smallBtn danger" data-purge="'+t.id+'">Delete forever</button>'+
+          '</div></td>'+
+        '</tr>'
+      );
+    }).join("");
+
+    trashBody.querySelectorAll("[data-view]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var t = trash.find(function(x){ return x.id === btn.getAttribute("data-view"); });
+        if(!t) return;
+        var srcs = (t.files || []).map(function(f){ return trashFileSrc(t, f); });
+        openLightbox(srcs, 0);
+      });
+    });
+    trashBody.querySelectorAll("[data-restore]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var id = btn.getAttribute("data-restore");
+        api("/api/admin/trash/"+id+"/restore", {method:"POST"}).then(function(res){
+          if(handle401(res)) return;
+          if(!res.ok){ showToast(res.data.error || "Could not restore."); return; }
+          showToast("Restored.");
+          loadTrash();
+          loadProducts();
+          loadHome();
+        });
+      });
+    });
+    trashBody.querySelectorAll("[data-purge]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var id = btn.getAttribute("data-purge");
+        if(!confirm("Permanently delete this? This cannot be undone.")) return;
+        api("/api/admin/trash/"+id, {method:"DELETE"}).then(function(res){
+          if(handle401(res)) return;
+          if(!res.ok){ showToast(res.data.error || "Could not delete."); return; }
+          showToast("Permanently deleted.");
+          loadTrash();
+        });
+      });
+    });
+  }
+
+  document.getElementById("emptyTrashBtn").addEventListener("click", function(){
+    if(!confirm("Permanently empty the trash? This cannot be undone.")) return;
+    api("/api/admin/trash/empty", {method:"POST"}).then(function(res){
+      if(handle401(res)) return;
+      if(!res.ok){ showToast(res.data.error || "Could not empty trash."); return; }
+      showToast("Trash emptied.");
+      loadTrash();
+    });
+  });
+
+  /* ---------- Init ---------- */
+  api("/api/admin/session").then(function(res){
+    if(res.data && res.data.loggedIn){ showDashboard(); }
+    else{ showLogin(); }
+  }).catch(function(){ showLogin(); });
+})();
+</script>
+</body>
+</html>

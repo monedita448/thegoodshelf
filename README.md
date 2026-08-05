@@ -1,0 +1,121 @@
+# The Good Shelf
+
+A standalone, turnkey template for Colombian online stores — no Shopify, no third-party store platform. A static front end (`index.html`), a password-protected admin panel (`admin.html`), and a small Node/Express backend (`server.js`) that you fully control. Real checkout via [Wompi](https://wompi.co): PSE (bank transfer), Nequi, and cards, all in COP. Built to be resold: the only thing that should need to change per client is cosmetics (branding, colors, copy, product catalog) — everything else, including the admin panel, works out of the box.
+
+## What's included
+
+- **Storefront** — product grid with search/filter/sort, cart, sold-out/low-stock badges, and Wompi checkout that collects a shipping address.
+- **Admin panel** (`/admin`) — password login, a dashboard (sales, orders today, low stock), full product management (multiple photos per product with drag-to-reorder and a click-to-expand viewer, inventory/stock tracking, add/edit/delete), order management (shipping status, tracking, carrier, and a per-order WhatsApp message thread), and a Trash tab so deletes are recoverable. No coding required to run day to day.
+- **Security** — session-based login (not a token in a URL), rate-limited login attempts, CSRF protection, security headers, an audit log of every admin action, and sensitive files (`.env`, `orders.json`, `server.js`, etc.) are never servable over HTTP. See "Security" below for the full list.
+
+## How it works
+
+- `products.json` is the catalog. The storefront fetches it to render the shop; the backend re-reads it on every order so a customer can never pay less than the real price. Edit it through `/admin` — you should never need to hand-edit the file.
+- Checkout collects contact info and a shipping address, creates a `PENDING` order, cryptographically signs it, and redirects the customer to Wompi's own hosted payment page — your server never touches card numbers or bank credentials.
+- Wompi calls `/api/webhook/wompi` when a payment finishes. That webhook is signature-verified, so it's the authoritative record of whether an order was actually paid.
+- Once an order is paid, you (or your client) update its shipping status through `/admin` — `NOT_SHIPPED` → `PROCESSING` → `SHIPPED` → `DELIVERED`, plus a tracking number and carrier name. There's no courier API integration — you look up tracking on the carrier's own site and relay status manually.
+- Every product has a `stock` count. Checkout blocks anyone from buying more than what's on hand, reserves stock the moment an order is placed, and automatically puts it back if the payment later gets declined or voided.
+- Deleting a product or removing one of its photos doesn't destroy it right away — it moves to the admin **Trash** tab, recoverable until the trash clears automatically every day at 11:59am in `STORE_TIMEZONE` (or empty it manually).
+- `orders.json`, `admin_audit.json`, `trash.json`, and `order_messages.json` are flat files. All are git-ignored so real customer data and admin activity logs never end up in your repo.
+
+## 1. Get Wompi sandbox keys (free, ~5 minutes)
+
+1. Go to [comercios.wompi.co](https://comercios.wompi.co) and create an account.
+2. In the dashboard, open **Developers → Secrets for technical integration**.
+3. Copy your **sandbox** public key (`pub_test_...`), integrity secret (`test_integrity_...`), and events secret (`test_events_...`).
+4. Set your **Events URL** for the sandbox environment to `https://<your-deployed-url>/api/webhook/wompi` once you've deployed (step 4).
+
+## 2. Run it locally
+
+```bash
+cp .env.example .env
+# paste your Wompi sandbox keys in, and set ADMIN_TOKEN + SESSION_SECRET to real random values
+npm install
+npm start
+```
+
+- Storefront: `http://localhost:3000`
+- Admin panel: `http://localhost:3000/admin` — log in with whatever you set `ADMIN_TOKEN` to.
+
+Try the whole loop: log into `/admin`, add a product, open the storefront and confirm it appears, add it to a cart, and checkout — you'll land on Wompi's real sandbox payment page. Use their [test data](https://docs.wompi.co/en/docs/colombia/datos-de-prueba-en-sandbox/) (e.g. financial institution "Banco que aprueba") to simulate an approved PSE payment. Then go back to `/admin`'s Orders tab and mark it shipped.
+
+Local webhooks need a public URL — use [ngrok](https://ngrok.com) (`ngrok http 3000`) and set that as your sandbox Events URL if you want to test the webhook end to end before deploying.
+
+## 3. Deploy
+
+Any Node host works (Render, Railway, Fly.io, a VPS).
+
+**Important — persistent disk required.** `products.json`, `orders.json`, `admin_audit.json`, `trash.json`, `order_messages.json`, and the `images/`, `order-images/`, `inbound-media/`, `trash/` folders are all plain files/folders the server writes to directly. Some hosting free tiers (notably Render's free web service tier) wipe the filesystem on every restart/redeploy, which would silently erase products, orders, and uploaded photos. Before picking a host, confirm it gives you a persistent disk:
+- **Railway** — persists by default on a standard service. Simplest option.
+- **Render** — needs their paid "Persistent Disk" add-on attached to the service; the free tier alone is not safe for this.
+- **A basic VPS** (Droplet, Lightsail, etc.) — persists naturally, more setup work.
+
+Quick path with Railway or Render (paid disk):
+
+1. Push this repo to GitHub.
+2. Connect the repo as a new Web Service.
+3. Build command: `npm install`. Start command: `npm start`.
+4. Add every variable from `.env.example` with real values. Set `SITE_URL` to the URL your host gives you.
+5. Once deployed, set the **production** Events URL in Wompi's dashboard to `https://<your-url>/api/webhook/wompi`.
+
+## 4. Going live (real money)
+
+- In the Wompi dashboard, complete their merchant verification (cédula/NIT + a Colombian bank account for payouts — only doable by the store owner, since it's tied to their identity).
+- Swap the sandbox Wompi keys for the `pub_prod_` / `prod_integrity_` / `prod_events_` keys, and set `APP_ENV=production`.
+- Set real prices through `/admin` before announcing the store.
+- Wompi takes a percentage fee per transaction (check current pricing on the dashboard) and pays out on their normal schedule.
+
+## 5. WhatsApp order messaging (optional)
+
+Lets the admin send shipping photos/updates to a customer's WhatsApp from the Orders tab, and see their replies right there — no separate app. This uses Meta's official **WhatsApp Business Cloud API**; there's no way to reliably send WhatsApp messages without it (unofficial libraries risk the number getting banned), and it does require a Meta Business account. Leave the `WHATSAPP_*` vars blank and the feature simply shows a "not connected" notice — nothing else breaks.
+
+**Setup:**
+
+1. Create a [Meta for Developers](https://developers.facebook.com) app, add the **WhatsApp** product. Meta gives you a free test phone number to start — good enough for development; add your own business number later in the same dashboard.
+2. Note the **Phone Number ID** shown on the WhatsApp → API Setup page → `WHATSAPP_PHONE_NUMBER_ID`.
+3. Generate a **permanent** access token (System Users → create a token with `whatsapp_business_messaging` permission — the temporary token on the API Setup page expires in 24 hours) → `WHATSAPP_ACCESS_TOKEN`.
+4. Make up any string for `WHATSAPP_VERIFY_TOKEN` — you'll enter the same value in the next step.
+5. In WhatsApp → Configuration, set the webhook URL to `https://<your-deployed-url>/api/webhook/whatsapp`, paste your verify token, and subscribe to the `messages` field.
+6. Copy the App Secret from the app's Settings → Basic page → `WHATSAPP_APP_SECRET` (used to verify inbound webhook requests are really from Meta).
+
+**The 24-hour rule (important):** Meta only allows free-form messages within 24 hours of the customer's *last* message to your number. Outside that window, a plain "your order shipped" text will fail — Meta requires a pre-approved message template instead, which isn't something this template auto-builds (it's a manual approval process in Meta's dashboard). In practice: if you send an update and it shows "Not delivered" in the thread, that's almost always why — ask the customer to send any WhatsApp message first to reopen the window, or approve a template in Meta's dashboard for cases outside it.
+
+**Cost:** Meta charges per conversation for business-initiated messages outside the free tier volume — check current pricing in the Meta dashboard before relying on this at scale.
+
+## Security
+
+Built with the assumption that this will be deployed for real clients handling real customer data, so the admin panel takes reasonable precautions:
+
+- **Session-based login**, not a password in a URL. Sessions are signed, `httpOnly` cookies (invisible to JavaScript, so they can't be stolen via XSS) and expire after 12 hours.
+- **Rate-limited login** — 8 attempts per 15 minutes per IP address, to blunt password-guessing.
+- **CSRF protection** — every state-changing admin request must carry a custom header that cross-site requests can't attach, on top of a `SameSite=Strict` cookie.
+- **Security headers** via `helmet`, including a Content-Security-Policy restricting where scripts/styles/frames can load from.
+- **Audit log** (`admin_audit.json`) — every login attempt, product change, and shipping update is recorded with a timestamp and IP.
+- **No sensitive files are ever web-servable** — `.env`, `orders.json`, `admin_audit.json`, `server.js`, `package.json` are all outside the reachable static paths, verified by request (not just by convention).
+- **Server-side price validation** — the client never dictates what something costs; `priceCart()` recomputes every total from `products.json` on the server.
+
+What this setup deliberately doesn't include: multi-user accounts/roles (one shared admin password per store), 2FA, and a hosted database (it's flat JSON files — see the persistent-disk note above). If a client needs any of those, they're the natural next upgrades.
+
+**Before selling this to a client:** make sure they set their own strong, unique `ADMIN_TOKEN` and `SESSION_SECRET` — don't ship a site with default or shared credentials.
+
+## Reusing this for a new client
+
+1. Duplicate the project (new repo, new deploy).
+2. Update branding/copy in `index.html` (store name, hero text, colors in the `:root` CSS variables).
+3. Clear out `products.json` (or leave it as a starting example) — the client fills in their own catalog through `/admin`.
+4. Set up their own Wompi account and env vars (each client needs their own Wompi merchant account — payouts go to their bank, not yours).
+5. Give the client their `/admin` URL and password.
+
+## Files
+
+- `index.html` — the storefront
+- `admin.html` — the admin panel (dashboard, products, orders + shipping + messages, trash)
+- `products.json` — product catalog: photos, prices in COP, stock
+- `server.js` — backend: checkout, Wompi signing + webhook verification, admin auth, product/order APIs, WhatsApp messaging, trash
+- `orders.json` — order log (auto-created, git-ignored)
+- `admin_audit.json` — admin action log (auto-created, git-ignored)
+- `trash.json` / `trash/` — recoverable deletes (auto-created, git-ignored)
+- `order_messages.json` — WhatsApp message log per order (auto-created, git-ignored)
+- `order-images/` — shipping-update photos sent to customers (auto-created, git-ignored)
+- `inbound-media/` — photos customers send back (auto-created, git-ignored)
+- `.env` — your secrets (git-ignored, never commit this)

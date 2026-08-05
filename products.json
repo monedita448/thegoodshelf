@@ -1,0 +1,65 @@
+[
+  {
+    "id": 1,
+    "tag": "Sneakers",
+    "name": "Jordan 11 Low \"Metallic Gold\"",
+    "desc": "White and gold low-top Jordan 11 — a standout in any rotation. Available by pre-order.",
+    "images": ["/images/jordan-11-low-metallic-gold.png"],
+    "price": 650000,
+    "stock": 4
+  },
+  {
+    "id": 2,
+    "tag": "Sneakers",
+    "name": "Salomon XT-6 Nostalgia",
+    "desc": "Technical trail-inspired silhouette in a crisp nostalgia colorway. Available by pre-order.",
+    "images": ["/images/salomon-xt6-nostalgia.png"],
+    "price": 480000,
+    "stock": 8
+  },
+  {
+    "id": 3,
+    "tag": "Sneakers",
+    "name": "Jordan 1 High OG \"Mocha\"",
+    "desc": "A modern classic in mocha and sail tones with premium leather detailing. Available by pre-order.",
+    "images": ["/images/jordan-1-high-mocha.png"],
+    "price": 720000,
+    "stock": 2
+  },
+  {
+    "id": 4,
+    "tag": "Bags",
+    "name": "Victoria's Secret Pink Tote Bag",
+    "desc": "Canvas flat-bottom tote in soft peach — an easy everyday carry. In stock.",
+    "images": ["/images/vs-pink-tote.png"],
+    "price": 180000,
+    "stock": 15
+  },
+  {
+    "id": 5,
+    "tag": "Sneakers",
+    "name": "Adidas Adistar Control 5W",
+    "desc": "Retro running silhouette with a bold color-blocked upper. Available by pre-order.",
+    "images": ["/images/adidas-adistar-control.png"],
+    "price": 420000,
+    "stock": 6
+  },
+  {
+    "id": 6,
+    "tag": "Bags",
+    "name": "Sprayground Trinity 24K Mini Backpack",
+    "desc": "Checkered and tribal-print mini backpack from the Trinity 24K collection. Available by pre-order.",
+    "images": ["/images/sprayground-trinity-24k.png"],
+    "price": 350000,
+    "stock": 3
+  },
+  {
+    "id": 7,
+    "tag": "Bags",
+    "name": "Jordan Perforated Collection",
+    "desc": "Embossed leather tote, crossbody, and mini duffel set with the Jordan wordmark. Available by pre-order.",
+    "images": ["/images/jordan-perforated-collection.png"],
+    "price": 890000,
+    "stock": 5
+  }
+]
