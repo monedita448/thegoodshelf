@@ -310,9 +310,9 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     "dashboard.totalSales": ["Total sales", "Ventas totales"],
     "dashboard.ordersToday": ["Orders today", "Pedidos de hoy"],
     "dashboard.awaitingShipment": ["Awaiting shipment", "Por enviar"],
-    "dashboard.lowStockItems": ["Low stock items", "Productos con poco stock"],
-    "dashboard.lowStockHeading": ["Low stock", "Poco stock"],
-    "dashboard.lowStockEmpty": ["Nothing running low right now.", "Nada con poco stock por ahora."],
+    "dashboard.lowStockItems": ["Low stock items", "Productos con poco inventario"],
+    "dashboard.lowStockHeading": ["Low stock", "Poco inventario"],
+    "dashboard.lowStockEmpty": ["Nothing running low right now.", "No hay productos con poco inventario por ahora."],
     "products.title": ["Products", "Productos"],
     "products.add": ["+ Add product", "+ Agregar producto"],
     "products.thName": ["Name", "Nombre"],
@@ -833,6 +833,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
   var ordersBody = document.getElementById("ordersBody");
   var ordersEmpty = document.getElementById("ordersEmpty");
   var expandedRef = null;
+  var shipEditMode = false;
 
   function loadOrders(){
     api("/api/admin/orders").then(function(res){
@@ -905,6 +906,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       row.addEventListener("click", function(){
         var ref = row.getAttribute("data-ref");
         expandedRef = (expandedRef === ref) ? null : ref;
+        shipEditMode = false;
         renderOrders(orders);
         if(expandedRef) wireDetail(orders.find(function(o){ return o.reference === expandedRef; }));
       });
@@ -936,15 +938,15 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
           '<h4>'+L("Update shipping","Actualizar envío")+'</h4>'+
           '<div class="shipForm">'+
             '<div><label>'+L("Status","Estado")+'</label>'+
-              '<select class="field" id="shStatus">'+
+              '<select class="field" id="shStatus"'+(shipEditMode ? '' : ' disabled')+'>'+
                 ["NOT_SHIPPED","PROCESSING","SHIPPED","DELIVERED"].map(function(s){
                   return '<option value="'+s+'"'+(o.shippingStatus===s?' selected':'')+'>'+shippingStatusLabel(s)+'</option>';
                 }).join("")+
               '</select>'+
             '</div>'+
-            '<div><label>'+L("Carrier","Transportadora")+'</label><input class="field" id="shCarrier" value="'+esc(o.carrier || "")+'" placeholder="Servientrega"></div>'+
-            '<div><label>'+L("Tracking #","Número de guía")+'</label><input class="field" id="shTracking" value="'+esc(o.trackingNumber || "")+'" placeholder="123456789"></div>'+
-            '<button class="btn btnPrimary" id="shSave">'+L("Save","Guardar")+'</button>'+
+            '<div><label>'+L("Carrier","Transportadora")+'</label><input class="field" id="shCarrier" value="'+esc(o.carrier || "")+'" placeholder="Servientrega"'+(shipEditMode ? '' : ' disabled')+'></div>'+
+            '<div><label>'+L("Tracking #","Número de guía")+'</label><input class="field" id="shTracking" value="'+esc(o.trackingNumber || "")+'" placeholder="123456789"'+(shipEditMode ? '' : ' disabled')+'></div>'+
+            '<button class="btn btnPrimary" id="shEditSave">'+(shipEditMode ? L("Save","Guardar") : L("Edit","Editar"))+'</button>'+
           '</div>'+
           '<div class="errMsg" id="shError"></div>'+
         '</div>'+
@@ -958,6 +960,19 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
             '</a>'+
             '<p style="color:var(--muted);font-size:.82rem;margin:8px 0 0">'+L("Opens a chat in your own WhatsApp, pre-filled and ready to send.","Abre un chat en tu propio WhatsApp, ya redactado y listo para enviar.")+'</p>'
           : '<p style="color:var(--muted);font-size:.86rem">'+L("Add a phone number to this order to message the customer on WhatsApp.","Agrega un número de teléfono a este pedido para escribirle al cliente por WhatsApp.")+'</p>')+
+      '</div>'+
+      '<div class="msgSection">'+
+        '<h4>'+L("Receipt","Recibo")+'</h4>'+
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+          '<a class="btn btnGhost" href="/api/admin/orders/'+encodeURIComponent(o.reference)+'/receipt" target="_blank" rel="noopener">'+L("View / print receipt","Ver / imprimir recibo")+'</a>'+
+          '<button class="btn btnPrimary" id="sendReceiptBtn">'+L("Email receipt to customer","Enviar recibo por correo")+'</button>'+
+        '</div>'+
+        '<p style="color:var(--muted);font-size:.82rem;margin:8px 0 0">'+L("Sends to "+esc(o.customer.email)+".","Se envía a "+esc(o.customer.email)+".")+'</p>'+
+      '</div>'+
+      '<div class="msgSection">'+
+        '<h4>'+L("Danger zone","Zona de peligro")+'</h4>'+
+        '<button class="btn btnDanger" id="deleteOrderBtn">'+L("Delete order","Eliminar pedido")+'</button>'+
+        '<p style="color:var(--muted);font-size:.82rem;margin:8px 0 0">'+L("This permanently removes the order record. This cannot be undone.","Esto elimina el registro del pedido de forma permanente. Esta acción no se puede deshacer.")+'</p>'+
       '</div>'
     );
   }
@@ -979,21 +994,51 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       });
     });
 
-    var saveBtn = document.getElementById("shSave");
-    if(saveBtn){
-      saveBtn.addEventListener("click", function(){
+    var editSaveBtn = document.getElementById("shEditSave");
+    if(editSaveBtn){
+      editSaveBtn.addEventListener("click", function(){
+        if(!shipEditMode){
+          shipEditMode = true;
+          ["shStatus","shCarrier","shTracking"].forEach(function(id){
+            document.getElementById(id).disabled = false;
+          });
+          editSaveBtn.textContent = L("Save","Guardar");
+          return;
+        }
         var body = {
           shippingStatus: document.getElementById("shStatus").value,
           carrier: document.getElementById("shCarrier").value.trim(),
           trackingNumber: document.getElementById("shTracking").value.trim()
         };
+        editSaveBtn.disabled = true;
         api("/api/admin/orders/"+order.reference+"/shipping", {method:"PATCH", body: JSON.stringify(body)}).then(function(res){
+          editSaveBtn.disabled = false;
           if(handle401(res)) return;
           if(!res.ok){
             document.getElementById("shError").textContent = res.data.error || L("Could not update shipping.","No se pudo actualizar el envío.");
             return;
           }
+          shipEditMode = false;
           showToast(L("Shipping updated.","Envío actualizado."));
+          loadOrders();
+        });
+      });
+    }
+
+    var deleteOrderBtn = document.getElementById("deleteOrderBtn");
+    if(deleteOrderBtn){
+      deleteOrderBtn.addEventListener("click", function(){
+        if(!confirm(L("Permanently delete order "+order.reference+"? This cannot be undone.","¿Eliminar de forma permanente el pedido "+order.reference+"? Esta acción no se puede deshacer."))) return;
+        deleteOrderBtn.disabled = true;
+        api("/api/admin/orders/"+order.reference, {method:"DELETE"}).then(function(res){
+          deleteOrderBtn.disabled = false;
+          if(handle401(res)) return;
+          if(!res.ok){
+            showToast(res.data.error || L("Could not delete the order.","No se pudo eliminar el pedido."));
+            return;
+          }
+          expandedRef = null;
+          showToast(L("Order deleted.","Pedido eliminado."));
           loadOrders();
         });
       });
@@ -1004,6 +1049,22 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       var number = toWhatsAppNumber(order.customer.phone);
       var greeting = "Hola " + order.customer.fullName.split(" ")[0] + ", te escribimos sobre tu pedido " + order.reference + ".";
       waLink.href = "https://wa.me/" + number + "?text=" + encodeURIComponent(greeting);
+    }
+
+    var sendReceiptBtn = document.getElementById("sendReceiptBtn");
+    if(sendReceiptBtn){
+      sendReceiptBtn.addEventListener("click", function(){
+        var original = sendReceiptBtn.textContent;
+        sendReceiptBtn.disabled = true;
+        sendReceiptBtn.textContent = L("Sending…","Enviando…");
+        api("/api/admin/orders/"+order.reference+"/send-receipt", {method:"POST"}).then(function(res){
+          sendReceiptBtn.disabled = false;
+          sendReceiptBtn.textContent = original;
+          if(handle401(res)) return;
+          if(!res.ok){ showToast(res.data.error || L("Could not send the receipt.","No se pudo enviar el recibo.")); return; }
+          showToast(L("Receipt sent.","Recibo enviado."));
+        });
+      });
     }
   }
 

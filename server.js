@@ -16,6 +16,7 @@ const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const multer = require('multer');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const ROOT = __dirname;
@@ -54,6 +55,26 @@ if (!process.env.SESSION_SECRET) {
     '[warn] SESSION_SECRET not set — using a random one-time secret. ' +
     'Admin logins will be invalidated every time the server restarts. Set SESSION_SECRET in .env.'
   );
+}
+
+// Emailing receipts is optional — the rest of the store works fine without
+// it. Without these set, "Email receipt" in /admin just returns a clear
+// error instead of failing silently.
+const SMTP_CONFIGURED = Boolean(process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS);
+if (!SMTP_CONFIGURED) {
+  console.warn(
+    '[warn] SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS not set — "Email receipt" in /admin will show an error ' +
+    'until these are set. See .env.example. Viewing/printing a receipt works either way.'
+  );
+}
+function getMailTransport() {
+  if (!SMTP_CONFIGURED) return null;
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT),
+    secure: Number(process.env.SMTP_PORT) === 465,
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+  });
 }
 
 const SHIPPING_STATUSES = ['NOT_SHIPPED', 'PROCESSING', 'SHIPPED', 'DELIVERED'];
@@ -221,6 +242,86 @@ function signIntegrity(reference, amountInCents, currency) {
 
 function getAtPath(obj, dotPath) {
   return dotPath.split('.').reduce((acc, key) => (acc == null ? undefined : acc[key]), obj);
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+const receiptMoneyFmt = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+function moneyCOP(cents) {
+  return receiptMoneyFmt.format(cents / 100);
+}
+
+const RECEIPT_STATUS_LABELS = { PENDING: 'Pendiente', APPROVED: 'Pagado', DECLINED: 'Rechazado', VOIDED: 'Anulado', ERROR: 'Error' };
+
+// Self-contained HTML receipt — viewable/printable in a new tab, and reused
+// as the body of the "email receipt" send. Inline styles only, no external
+// assets, so it renders identically in a browser tab and an email client.
+function renderReceiptHTML(order) {
+  const itemsRows = (order.items || []).map((it) => `
+    <tr>
+      <td style="padding:10px 0;border-bottom:1px solid #e7e0d5">${escapeHtml(it.name)}</td>
+      <td style="padding:10px 0;border-bottom:1px solid #e7e0d5;text-align:center">${it.qty}</td>
+      <td style="padding:10px 0;border-bottom:1px solid #e7e0d5;text-align:right">${moneyCOP(it.price * 100)}</td>
+      <td style="padding:10px 0;border-bottom:1px solid #e7e0d5;text-align:right">${moneyCOP(it.price * it.qty * 100)}</td>
+    </tr>`).join('');
+
+  const addr = order.shippingAddress || {};
+  const statusLabel = RECEIPT_STATUS_LABELS[order.status] || order.status;
+  const createdAt = order.createdAt ? new Date(order.createdAt).toLocaleString('es-CO') : '';
+
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recibo ${escapeHtml(order.reference)}</title>
+</head>
+<body style="font-family:Arial,Helvetica,sans-serif;color:#171717;background:#f7f3ec;margin:0;padding:32px">
+<div style="max-width:640px;margin:0 auto;background:#fffdf8;border:1px solid #e7e0d5;border-radius:14px;padding:32px">
+  <h1 style="font-size:22px;margin:0 0 4px">The Good Shelf</h1>
+  <p style="color:#66625a;font-size:13px;margin:0 0 4px">Recibo del pedido ${escapeHtml(order.reference)}</p>
+  <p style="color:#66625a;font-size:13px;margin:0 0 20px">
+    ${escapeHtml(createdAt)} &middot;
+    <span style="display:inline-block;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:bold;background:#e1efe4;color:#3f7a52">${escapeHtml(statusLabel)}</span>
+  </p>
+
+  <table style="width:100%;border-collapse:collapse;font-size:14px">
+    <tr>
+      <td style="vertical-align:top;width:50%;padding-bottom:20px">
+        <div style="color:#66625a;text-transform:uppercase;font-size:11px;letter-spacing:.04em;margin-bottom:4px">Facturar a</div>
+        ${escapeHtml(order.customer.fullName)}<br>
+        ${escapeHtml(order.customer.email)}<br>
+        ${order.customer.phone ? escapeHtml(order.customer.phone) + '<br>' : ''}
+      </td>
+      <td style="vertical-align:top;width:50%;padding-bottom:20px">
+        <div style="color:#66625a;text-transform:uppercase;font-size:11px;letter-spacing:.04em;margin-bottom:4px">Enviar a</div>
+        ${escapeHtml(addr.addressLine || '')}<br>
+        ${escapeHtml(addr.city || '')}${addr.region ? ', ' + escapeHtml(addr.region) : ''}
+      </td>
+    </tr>
+  </table>
+
+  <table style="width:100%;border-collapse:collapse;font-size:14px">
+    <thead>
+      <tr>
+        <th style="text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#66625a;padding-bottom:8px;border-bottom:2px solid #171717">Artículo</th>
+        <th style="text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#66625a;padding-bottom:8px;border-bottom:2px solid #171717">Cant.</th>
+        <th style="text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#66625a;padding-bottom:8px;border-bottom:2px solid #171717">Precio</th>
+        <th style="text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#66625a;padding-bottom:8px;border-bottom:2px solid #171717">Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${itemsRows}
+      <tr><td colspan="3" style="text-align:right;padding-top:14px;font-weight:bold;font-size:16px">Total</td><td style="text-align:right;padding-top:14px;font-weight:bold;font-size:16px">${moneyCOP(order.amountInCents)}</td></tr>
+    </tbody>
+  </table>
+
+  <p style="color:#66625a;font-size:13px;margin-top:28px">Gracias por comprar en The Good Shelf.</p>
+</div>
+</body>
+</html>`;
 }
 
 // Prices customers pay always come from this — never from the client.
@@ -659,6 +760,63 @@ app.patch('/api/admin/orders/:reference/shipping', requireAdmin, async (req, res
   await saveOrders(orders);
   await auditLog({ action: 'shipping_update', reference: req.params.reference, ip: req.ip, shippingStatus, trackingNumber, carrier });
   res.json(orders[idx]);
+});
+
+// Permanently removes an order record. The admin UI requires the user to
+// confirm before sending this request.
+app.delete('/api/admin/orders/:reference', requireAdmin, async (req, res) => {
+  const orders = loadOrders();
+  const idx = orders.findIndex((o) => o.reference === req.params.reference);
+  if (idx === -1) return res.status(404).json({ error: 'Order not found.' });
+
+  const [removed] = orders.splice(idx, 1);
+  await saveOrders(orders);
+  await auditLog({ action: 'order_deleted', reference: req.params.reference, ip: req.ip, customerEmail: removed.customer && removed.customer.email });
+  res.json({ ok: true });
+});
+
+// ---------- admin: receipts ----------
+
+// Viewable/printable in a new browser tab — the admin can save it as a PDF
+// with the browser's own print dialog (Ctrl/Cmd+P -> Save as PDF).
+app.get('/api/admin/orders/:reference/receipt', requireAdmin, (req, res) => {
+  const orders = loadOrders();
+  const order = orders.find((o) => o.reference === req.params.reference);
+  if (!order) return res.status(404).send('Order not found.');
+  res.set('Content-Type', 'text/html; charset=utf-8');
+  res.send(renderReceiptHTML(order));
+});
+
+// One click: emails the same receipt straight to the customer's address on
+// file. Needs SMTP_* set in .env — returns a clear error if they aren't.
+app.post('/api/admin/orders/:reference/send-receipt', requireAdmin, async (req, res) => {
+  const orders = loadOrders();
+  const order = orders.find((o) => o.reference === req.params.reference);
+  if (!order) return res.status(404).json({ error: 'Order not found.' });
+  if (!order.customer || !order.customer.email) {
+    return res.status(400).json({ error: 'This order has no customer email on file.' });
+  }
+
+  const transport = getMailTransport();
+  if (!transport) {
+    return res.status(400).json({
+      error: 'Email sending isn’t configured yet. Add SMTP_HOST, SMTP_PORT, SMTP_USER, and SMTP_PASS to .env — see .env.example.',
+    });
+  }
+
+  try {
+    await transport.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: order.customer.email,
+      subject: `Tu recibo de The Good Shelf — pedido ${order.reference}`,
+      html: renderReceiptHTML(order),
+    });
+    await auditLog({ action: 'receipt_emailed', reference: order.reference, to: order.customer.email, ip: req.ip });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(`POST /api/admin/orders/${req.params.reference}/send-receipt failed:`, err);
+    res.status(500).json({ error: 'Could not send the email. Check your SMTP settings in .env.' });
+  }
 });
 
 // ---------- admin: products ----------

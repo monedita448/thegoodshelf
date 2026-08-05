@@ -5,7 +5,7 @@ A standalone, turnkey template for Colombian online stores — no Shopify, no th
 ## What's included
 
 - **Storefront** — product grid with search/filter/sort, cart, sold-out/low-stock badges, a full product detail view (click any product for a bigger photo gallery, description, quantity picker, and Add to Cart), Wompi checkout that collects a shipping address, and an English/Spanish toggle (flag icons) in the top nav.
-- **Admin panel** (`/admin`) — password login, a dashboard (sales, orders today, low stock), full product management (multiple photos per product with drag-to-reorder and a click-to-expand viewer, inventory/stock tracking, add/edit/delete), order management (shipping status, tracking, carrier, and a one-click "Message on WhatsApp" button per order), a Recently Deleted tab so deletes are recoverable, and an English/Spanish toggle (flag icons, top right). No coding required to run day to day.
+- **Admin panel** (`/admin`) — password login, a dashboard (sales, orders today, low stock), full product management (multiple photos per product with drag-to-reorder and a click-to-expand viewer, inventory/stock tracking, add/edit/delete, category suggestions as you type), order management (shipping status, tracking, carrier, a one-click "Message on WhatsApp" button, and a printable receipt you can also email to the customer in one click), a Recently Deleted tab so deletes are recoverable, and an English/Spanish toggle (flag icons, top right). No coding required to run day to day.
 - **Security** — session-based login (not a token in a URL), rate-limited login attempts, CSRF protection, security headers, an audit log of every admin action, and sensitive files (`.env`, `orders.json`, `server.js`, etc.) are never servable over HTTP. See "Security" below for the full list.
 
 ## How it works
@@ -17,6 +17,7 @@ A standalone, turnkey template for Colombian online stores — no Shopify, no th
 - Every product has a `stock` count. Checkout blocks anyone from buying more than what's on hand, reserves stock the moment an order is placed, and automatically puts it back if the payment later gets declined or voided.
 - Deleting a product or removing one of its photos doesn't destroy it right away — it moves to the admin **Recently Deleted** tab, recoverable until it clears automatically every day at 11:59am in `STORE_TIMEZONE` (or empty it manually).
 - Each order has a **Message on WhatsApp** button. It opens a chat in the admin's own WhatsApp (app or Web) with the customer's number and a short greeting already filled in — no API keys, no setup, nothing that can break. The admin sends photos, tracking info, whatever, from inside their normal WhatsApp exactly like they would with any other contact.
+- Every order also has a **receipt** — viewable/printable in a new tab (save as PDF with the browser's own print dialog) and, if `SMTP_*` is set in `.env`, a one-click **Email receipt to customer** button that sends the same receipt straight to their inbox.
 - `orders.json`, `admin_audit.json`, and `trash.json` are flat files. All are git-ignored so real customer data and admin activity logs never end up in your repo.
 
 ## 1. Get Wompi sandbox keys (free, ~5 minutes)
@@ -70,6 +71,24 @@ Quick path with Railway or Render (paid disk):
 
 No setup needed. Each order in `/admin` has a **Message on WhatsApp** button — it opens a chat in the admin's own WhatsApp (app or Web, whichever the browser/device defaults to) with the customer's number and a short greeting pre-filled. From there the admin sends photos, tracking updates, whatever they'd normally send a contact — it's just their regular WhatsApp, nothing routes through this server. If a customer's phone number was entered as a plain 10-digit Colombian mobile number (no country code), the button assumes `+57` automatically.
 
+## 6. Emailing receipts (optional)
+
+Viewing/printing a receipt from `/admin` always works, no setup needed. To also let the admin send it straight to the customer's inbox with one click, add SMTP credentials to `.env`. The easiest free option is a Gmail account with an "app password":
+
+1. Go to your Google Account → **Security** → turn on **2-Step Verification** (if not already on).
+2. Under 2-Step Verification, open **App passwords**, generate one for "Mail".
+3. In `.env`, set:
+   ```
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=465
+   SMTP_USER=youraddress@gmail.com
+   SMTP_PASS=the16charapppassword
+   SMTP_FROM=The Good Shelf <youraddress@gmail.com>
+   ```
+4. Restart the server. The "Email receipt to customer" button in an order's Manage panel will now actually send.
+
+Any other SMTP provider (Brevo, Resend, Mailgun, etc.) works the same way — just swap in the host/port/username/password they give you. If `SMTP_*` isn't set, the button shows a clear error instead of failing silently, and the view/print link keeps working regardless.
+
 ## Security
 
 Built with the assumption that this will be deployed for real clients handling real customer data, so the admin panel takes reasonable precautions:
@@ -91,8 +110,26 @@ What this setup deliberately doesn't include: multi-user accounts/roles (one sha
 1. Duplicate the project (new repo, new deploy).
 2. Update branding/copy in `index.html` (store name, hero text, colors in the `:root` CSS variables).
 3. Clear out `products.json` (or leave it as a starting example) — the client fills in their own catalog through `/admin`.
-4. Set up their own Wompi account and env vars (each client needs their own Wompi merchant account — payouts go to their bank, not yours).
+4. Set up their own Wompi account and env vars (each client needs their own Wompi merchant account — payouts go to their bank, not yours). If they want the email-receipt button working, also set their own `SMTP_*` vars (see "Emailing receipts" above) — otherwise leave blank and the button just won't be offered as working until they add it.
 5. Give the client their `/admin` URL and password.
+
+## What needs backend setup, per client
+
+Everything below works out of the box with zero configuration, except the two marked **(needs setup)**:
+
+| Feature | Needs an account/keys? |
+|---|---|
+| Storefront (browse, search, cart, product detail) | No |
+| Admin login | No — just set `ADMIN_TOKEN`/`SESSION_SECRET` to your own values, no external account |
+| Product photos, stock, trash/undo | No — stored on the server's own disk |
+| Language toggle (EN/ES) | No |
+| Category suggestions | No |
+| WhatsApp messaging | No — opens the admin's own WhatsApp, no API |
+| View/print a receipt | No |
+| **Checkout / accepting payments** | **Yes — Wompi merchant account** (free to get sandbox keys; real payouts require merchant verification with a Colombian bank account, see "Going live") |
+| **Emailing receipts to customers** | **Yes — SMTP credentials** (optional; a free Gmail app password works, see "Emailing receipts" above) |
+
+So per new client, the only things that ever need setting up are: their own `ADMIN_TOKEN`/`SESSION_SECRET` (always), their own Wompi account (always, for real checkout), and SMTP (only if they want the one-click email-receipt button).
 
 ## Files
 

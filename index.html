@@ -253,6 +253,26 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
 }
 .toast.show{opacity:1}
 
+/* Floating cart reminder */
+.floatingCart{
+  position:fixed;bottom:22px;right:22px;
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--text);color:#fff;border:none;border-radius:999px;
+  padding:13px 20px 13px 16px;font-weight:700;font-size:.9rem;
+  box-shadow:var(--shadow-lg);z-index:55;
+  opacity:0;transform:translateY(14px) scale(.95);pointer-events:none;
+  transition:opacity .22s ease,transform .22s ease;
+}
+.floatingCart.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+.floatingCart svg{width:19px;height:19px;flex-shrink:0}
+.floatingCart .fcCount{
+  background:var(--accent);color:#fff;border-radius:999px;min-width:20px;height:20px;
+  display:inline-flex;align-items:center;justify-content:center;font-size:.72rem;padding:0 5px;
+  margin-left:-2px;
+}
+.floatingCart .fcDivider{width:1px;height:16px;background:rgba(255,255,255,.25)}
+.floatingCart .fcTotal{color:rgba(255,255,255,.8);font-weight:600}
+
 @media (max-width:960px){
   .grid{grid-template-columns:repeat(2,1fr)}
   .split{grid-template-columns:1fr}
@@ -273,6 +293,12 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
   .pdInfo h2{font-size:1.5rem}
   .pdPrice{font-size:1.1rem}
   #checkoutModalBody > div{padding:20px 18px !important}
+  .floatingCart{
+    left:14px;right:14px;bottom:14px;width:auto;
+    justify-content:space-between;padding:14px 18px;
+    transform:translateY(20px) scale(.97);
+  }
+  .floatingCart.show{transform:translateY(0) scale(1)}
 }
 @media (max-width:420px){
   .brand{font-size:1.35rem}
@@ -402,6 +428,15 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
     <button class="checkoutBtn" id="checkoutBtn" disabled data-i18n="cart.checkout">Checkout</button>
   </div>
 </aside>
+
+<!-- Floating cart reminder -->
+<button type="button" class="floatingCart" id="floatingCart" data-i18n-aria="cart.floatingAria" aria-label="View cart">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+  <span class="fcCount" id="floatingCartCount">0</span>
+  <span data-i18n="cart.floatingView">View cart</span>
+  <span class="fcDivider"></span>
+  <span class="fcTotal" id="floatingCartTotal">$0</span>
+</button>
 
 <!-- Product detail modal -->
 <div class="modalWrap" id="productWrap">
@@ -535,7 +570,9 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
     "footer.adminLogin": ["Admin login","Acceso administrador"],
     "cart.title": ["Your Cart","Tu carrito"],
     "cart.subtotal": ["Subtotal","Subtotal"],
-    "cart.checkout": ["Checkout","Pagar"]
+    "cart.checkout": ["Checkout","Pagar"],
+    "cart.floatingView": ["View cart","Ver carrito"],
+    "cart.floatingAria": ["View cart","Ver carrito"]
   };
   var lang = localStorage.getItem("tgsStoreLang") === "es" ? "es" : "en";
   function t(key){
@@ -554,6 +591,9 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
     });
     document.querySelectorAll("[data-i18n-placeholder]").forEach(function(el){
       el.placeholder = t(el.getAttribute("data-i18n-placeholder"));
+    });
+    document.querySelectorAll("[data-i18n-aria]").forEach(function(el){
+      el.setAttribute("aria-label", t(el.getAttribute("data-i18n-aria")));
     });
     document.querySelectorAll(".langBtn").forEach(function(btn){
       btn.classList.toggle("active", btn.getAttribute("data-lang") === lang);
@@ -683,12 +723,14 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
     renderProductDetail();
     productWrap.classList.add("show");
     overlay.classList.add("show");
+    updateFloatingCart();
   }
   function closeProductDetail(){
     productWrap.classList.remove("show");
     if(!cartDrawer.classList.contains("show") && !checkoutWrap.classList.contains("show")){
       overlay.classList.remove("show");
     }
+    updateFloatingCart();
   }
 
   function pdStockNote(stock){
@@ -809,6 +851,19 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
   var cartSubtotal = document.getElementById("cartSubtotal");
   var cartBadge = document.getElementById("cartBadge");
   var checkoutBtn = document.getElementById("checkoutBtn");
+  var floatingCart = document.getElementById("floatingCart");
+  var floatingCartCount = document.getElementById("floatingCartCount");
+  var floatingCartTotal = document.getElementById("floatingCartTotal");
+
+  // Shows a floating "you still have items in your cart" reminder whenever
+  // the cart has something in it and no drawer/modal is already covering it.
+  function updateFloatingCart(){
+    var anyModalOpen = cartDrawer.classList.contains("show") ||
+      checkoutWrap.classList.contains("show") ||
+      productWrap.classList.contains("show");
+    floatingCart.classList.toggle("show", cartCount() > 0 && !anyModalOpen);
+  }
+  floatingCart.addEventListener("click", openCart);
 
   function cartItemsPayload(){
     return Object.keys(state.cart).map(function(id){ return {id:Number(id), qty:state.cart[id]}; });
@@ -888,6 +943,9 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
       }).join("");
     }
     cartSubtotal.textContent = money(cartTotal());
+    floatingCartCount.textContent = count;
+    floatingCartTotal.textContent = money(cartTotal());
+    updateFloatingCart();
   }
 
   cartBody.addEventListener("click", function(e){
@@ -908,12 +966,14 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
   function openCart(){
     cartDrawer.classList.add("show");
     overlay.classList.add("show");
+    updateFloatingCart();
   }
   function closeCart(){
     cartDrawer.classList.remove("show");
     if(!checkoutWrap.classList.contains("show") && !productWrap.classList.contains("show")){
       overlay.classList.remove("show");
     }
+    updateFloatingCart();
   }
   cartToggle.addEventListener("click", openCart);
   closeCartBtn.addEventListener("click", closeCart);
@@ -927,12 +987,14 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
     renderCheckoutForm();
     checkoutWrap.classList.add("show");
     overlay.classList.add("show");
+    updateFloatingCart();
   }
   function closeCheckout(){
     checkoutWrap.classList.remove("show");
     if(!cartDrawer.classList.contains("show") && !productWrap.classList.contains("show")){
       overlay.classList.remove("show");
     }
+    updateFloatingCart();
   }
 
   function renderCheckoutForm(errorMsg){
@@ -1093,6 +1155,7 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
     );
     checkoutWrap.classList.add("show");
     overlay.classList.add("show");
+    updateFloatingCart();
     function close(){ closeCheckout(); }
     document.getElementById("orClose").addEventListener("click", close);
     document.getElementById("orDone").addEventListener("click", close);
