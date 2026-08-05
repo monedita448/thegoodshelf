@@ -638,7 +638,13 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     productFormWrap.innerHTML = (
       '<div class="formGrid">'+
         '<div><label>'+L("Name","Nombre")+'</label><input class="field" id="pfName" value="'+(isEdit ? esc(product.name) : '')+'"></div>'+
-        '<div><label>'+L("Category","Categoría")+'</label><input class="field" id="pfTag" value="'+(isEdit ? esc(product.tag) : '')+'"></div>'+
+        '<div><label>'+L("Category","Categoría")+'</label><input class="field" id="pfTag" list="pfTagList" autocomplete="off" value="'+(isEdit ? esc(product.tag) : '')+'">'+
+          '<datalist id="pfTagList">'+
+            Array.from(new Set(latestProducts.map(function(p){ return p.tag; }).filter(Boolean))).sort().map(function(tag){
+              return '<option value="'+esc(tag)+'">';
+            }).join("")+
+          '</datalist>'+
+        '</div>'+
         '<div><label>'+L("Price (COP)","Precio (COP)")+'</label><input class="field" id="pfPrice" type="number" min="1" step="1" value="'+(isEdit ? product.price : '')+'"></div>'+
         '<div><label>'+L("Stock on hand","Inventario disponible")+'</label><input class="field" id="pfStock" type="number" min="0" step="1" value="'+(isEdit ? product.stock : '0')+'"></div>'+
         '<div class="full"><label>'+L("Description","Descripción")+'</label><input class="field" id="pfDesc" value="'+(isEdit ? esc(product.desc) : '')+'"></div>'+
@@ -906,12 +912,12 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
   }
 
   function detailHTML(o){
-    var itemsHtml = o.items.map(function(it){
+    var itemsHtml = o.items.map(function(it, idx){
       var product = latestProducts.find(function(p){ return p.id === it.id; });
       var img = product && product.images && product.images[0];
       return (
         '<div style="margin-bottom:12px">'+
-          (img ? '<img src="'+esc(img)+'" alt="" style="width:64px;height:64px;border-radius:8px;object-fit:cover;margin-bottom:6px;background:#efe5d7;display:block">' : '')+
+          (img ? '<button type="button" class="thumbBtn" data-item-idx="'+idx+'" title="'+L("Click to view all photos","Haz clic para ver todas las fotos")+'"><img src="'+esc(img)+'" alt="" style="width:64px;height:64px;border-radius:8px;object-fit:cover;margin-bottom:6px;background:#efe5d7;display:block"></button>' : '')+
           '<p style="margin:0">'+esc(it.name)+' × '+it.qty+' — '+money(it.price*it.qty)+'</p>'+
         '</div>'
       );
@@ -965,6 +971,14 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
   }
 
   function wireDetail(order){
+    document.querySelectorAll("[data-item-idx]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var it = order.items[Number(btn.getAttribute("data-item-idx"))];
+        var product = it && latestProducts.find(function(p){ return p.id === it.id; });
+        if(product) openLightbox(product.images || [], 0);
+      });
+    });
+
     var saveBtn = document.getElementById("shSave");
     if(saveBtn){
       saveBtn.addEventListener("click", function(){
