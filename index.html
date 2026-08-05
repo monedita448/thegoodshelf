@@ -115,7 +115,8 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
 .pill.active{background:var(--text);color:#fff;border-color:var(--text)}
 
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.card{overflow:hidden;display:flex;flex-direction:column}
+.card{overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:box-shadow .15s ease}
+.card:hover{box-shadow:var(--shadow-lg)}
 .pimg{aspect-ratio:1.03;border-bottom:1px solid var(--line);background:#efe5d7;flex-shrink:0;position:relative}
 .pimg img{width:100%;height:100%;object-fit:cover}
 .soldBadge{position:absolute;top:10px;left:10px;background:var(--text);color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:5px 10px;border-radius:999px}
@@ -200,6 +201,46 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
 .confirmBox .checkmark{
   width:60px;height:60px;border-radius:50%;background:var(--success);color:#fff;font-size:1.6rem;
   display:grid;place-items:center;margin:0 auto 14px;
+}
+
+/* Product detail modal */
+.pdModal{width:min(880px,100%)}
+.pdGrid{display:grid;grid-template-columns:1fr 1fr}
+.pdImages{padding:26px}
+.pdMainImg{width:100%;aspect-ratio:1;border-radius:16px;overflow:hidden;background:#efe5d7;cursor:zoom-in;position:relative}
+.pdMainImg img{width:100%;height:100%;object-fit:cover}
+.pdSoldBadge{position:absolute;top:12px;left:12px;background:var(--text);color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:5px 10px;border-radius:999px}
+.pdThumbs{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.pdThumb{width:56px;height:56px;border-radius:10px;overflow:hidden;border:2px solid transparent;cursor:pointer;flex-shrink:0;padding:0;background:none}
+.pdThumb.active{border-color:var(--accent)}
+.pdThumb img{width:100%;height:100%;object-fit:cover}
+.pdInfo{padding:30px 30px 30px 8px;display:flex;flex-direction:column}
+.pdTag{font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.pdInfo h2{font-family:'Cormorant Garamond',serif;font-size:1.9rem;margin:6px 0 10px;line-height:1.1}
+.pdPrice{font-size:1.3rem;font-weight:800;margin-bottom:14px}
+.pdDesc{color:var(--muted);line-height:1.7;margin:0 0 18px}
+.pdStockNote{font-size:.86rem;font-weight:700;margin:0 0 14px}
+.pdStockNote.low{color:var(--accent)}
+.pdStockNote.out{color:#b23b3b}
+.pdStockNote.ok{color:var(--success)}
+.pdQtyRow{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.pdQtyRow .qtyStepper{margin-top:0}
+.pdActions{margin-top:auto}
+
+/* Full-screen image lightbox */
+.lightbox{position:fixed;inset:0;background:rgba(10,8,6,.92);z-index:90;display:none;align-items:center;justify-content:center}
+.lightbox.show{display:flex}
+.lightbox img{max-width:88vw;max-height:78vh;object-fit:contain;border-radius:10px;background:#000}
+.lightboxClose{position:absolute;top:20px;right:24px;width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:20px;line-height:1;cursor:pointer}
+.lightboxNav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:24px;cursor:pointer}
+.lightboxPrev{left:18px}
+.lightboxNext{right:18px}
+.lightboxDots{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);display:flex;gap:8px}
+.lightboxDots span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.35);cursor:pointer;display:inline-block}
+.lightboxDots span.active{background:#fff}
+@media (max-width:720px){
+  .pdGrid{grid-template-columns:1fr}
+  .pdInfo{padding:8px 24px 26px}
 }
 
 /* Toast */
@@ -343,9 +384,23 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
   </div>
 </aside>
 
+<!-- Product detail modal -->
+<div class="modalWrap" id="productWrap">
+  <div class="modal pdModal panel" id="productModalBody" style="position:relative"></div>
+</div>
+
 <!-- Checkout modal -->
 <div class="modalWrap" id="checkoutWrap">
   <div class="modal panel" id="checkoutModalBody" style="position:relative"></div>
+</div>
+
+<!-- Full-screen image lightbox -->
+<div class="lightbox" id="lightbox">
+  <button type="button" class="lightboxClose" id="lightboxClose">&times;</button>
+  <button type="button" class="lightboxNav lightboxPrev" id="lightboxPrev">&lsaquo;</button>
+  <img id="lightboxImg" src="" alt="">
+  <button type="button" class="lightboxNav lightboxNext" id="lightboxNext">&rsaquo;</button>
+  <div class="lightboxDots" id="lightboxDots"></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -534,10 +589,16 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
 
   grid.addEventListener("click", function(e){
     var addBtn = e.target.closest("[data-add]");
-    if(!addBtn) return;
-    var id = Number(addBtn.getAttribute("data-add"));
-    addToCart(id);
-    flashAdded(addBtn);
+    if(addBtn){
+      var id = Number(addBtn.getAttribute("data-add"));
+      addToCart(id);
+      flashAdded(addBtn);
+      return;
+    }
+    var card = e.target.closest(".card");
+    if(card){
+      openProductDetail(Number(card.getAttribute("data-id")));
+    }
   });
 
   function flashAdded(btn){
@@ -548,6 +609,154 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
       btn.textContent = original;
       btn.classList.remove("added");
     }, 900);
+  }
+
+  /* ---------- Full-screen image lightbox ---------- */
+  var lightbox = document.getElementById("lightbox");
+  var lightboxImg = document.getElementById("lightboxImg");
+  var lightboxDots = document.getElementById("lightboxDots");
+  var lightboxPrev = document.getElementById("lightboxPrev");
+  var lightboxNext = document.getElementById("lightboxNext");
+  var lbImages = [];
+  var lbIndex = 0;
+
+  function renderLightbox(){
+    lightboxImg.src = lbImages[lbIndex];
+    lightboxDots.innerHTML = lbImages.map(function(_, i){
+      return '<span class="'+(i === lbIndex ? "active" : "")+'" data-idx="'+i+'"></span>';
+    }).join("");
+    lightboxDots.querySelectorAll("span").forEach(function(dot){
+      dot.addEventListener("click", function(){ lbIndex = Number(dot.getAttribute("data-idx")); renderLightbox(); });
+    });
+    var multi = lbImages.length > 1;
+    lightboxPrev.style.display = multi ? "flex" : "none";
+    lightboxNext.style.display = multi ? "flex" : "none";
+    lightboxDots.style.display = multi ? "flex" : "none";
+  }
+  function openLightbox(images, startIndex){
+    images = (images || []).filter(Boolean);
+    if(!images.length) return;
+    lbImages = images;
+    lbIndex = startIndex || 0;
+    renderLightbox();
+    lightbox.classList.add("show");
+  }
+  function closeLightbox(){ lightbox.classList.remove("show"); }
+  document.getElementById("lightboxClose").addEventListener("click", closeLightbox);
+  lightbox.addEventListener("click", function(e){ if(e.target === lightbox) closeLightbox(); });
+  lightboxPrev.addEventListener("click", function(){ lbIndex = (lbIndex - 1 + lbImages.length) % lbImages.length; renderLightbox(); });
+  lightboxNext.addEventListener("click", function(){ lbIndex = (lbIndex + 1) % lbImages.length; renderLightbox(); });
+
+  /* ---------- Product detail modal ---------- */
+  var productWrap = document.getElementById("productWrap");
+  var productModalBody = document.getElementById("productModalBody");
+  var pdProduct = null;
+  var pdIndex = 0;
+  var pdQty = 1;
+
+  function openProductDetail(id){
+    var p = PRODUCTS.find(function(x){ return x.id === id; });
+    if(!p) return;
+    pdProduct = p;
+    pdIndex = 0;
+    var stock = Number.isInteger(p.stock) ? p.stock : 99;
+    pdQty = stock > 0 ? 1 : 0;
+    renderProductDetail();
+    productWrap.classList.add("show");
+    overlay.classList.add("show");
+  }
+  function closeProductDetail(){
+    productWrap.classList.remove("show");
+    if(!cartDrawer.classList.contains("show") && !checkoutWrap.classList.contains("show")){
+      overlay.classList.remove("show");
+    }
+  }
+
+  function pdStockNote(stock){
+    if(stock <= 0) return '<p class="pdStockNote out">'+L("Sold out","Agotado")+'</p>';
+    if(stock <= 3) return '<p class="pdStockNote low">'+L("Only "+stock+" left","Solo quedan "+stock)+'</p>';
+    return '<p class="pdStockNote ok">'+L("In stock","Disponible")+'</p>';
+  }
+
+  function renderProductDetail(){
+    var p = pdProduct;
+    if(!p) return;
+    var stock = Number.isInteger(p.stock) ? p.stock : 99;
+    var soldOut = stock <= 0;
+    var images = (p.images && p.images.length) ? p.images : [""];
+    var mainSrc = images[pdIndex] || images[0] || "";
+
+    productModalBody.innerHTML = (
+      '<button class="closeBtn modalClose" id="pdClose">✕</button>'+
+      '<div class="pdGrid">'+
+        '<div class="pdImages">'+
+          '<div class="pdMainImg" id="pdMainImg">'+
+            (soldOut ? '<span class="pdSoldBadge">'+L("Sold out","Agotado")+'</span>' : '')+
+            '<img id="pdMainImgTag" src="'+esc(mainSrc)+'" alt="'+esc(p.name)+'">'+
+          '</div>'+
+          (images.length > 1 ? (
+            '<div class="pdThumbs" id="pdThumbs">'+
+              images.map(function(src, i){
+                return '<button type="button" class="pdThumb'+(i===pdIndex?" active":"")+'" data-idx="'+i+'"><img src="'+esc(src)+'" alt=""></button>';
+              }).join("")+
+            '</div>'
+          ) : "")+
+        '</div>'+
+        '<div class="pdInfo">'+
+          '<span class="pdTag">'+esc(p.tag)+'</span>'+
+          '<h2>'+esc(p.name)+'</h2>'+
+          '<div class="pdPrice">'+money(p.price)+'</div>'+
+          '<p class="pdDesc">'+esc(p.desc)+'</p>'+
+          pdStockNote(stock)+
+          '<div class="pdActions">'+
+            (!soldOut ? (
+              '<div class="pdQtyRow">'+
+                '<span style="font-weight:700;font-size:.86rem;color:var(--muted)">'+L("Quantity","Cantidad")+'</span>'+
+                '<div class="qtyStepper">'+
+                  '<button type="button" id="pdQtyDec">−</button>'+
+                  '<span id="pdQtyVal">'+pdQty+'</span>'+
+                  '<button type="button" id="pdQtyInc">+</button>'+
+                '</div>'+
+              '</div>'
+            ) : "")+
+            '<button class="btn btnPrimary addBtn" id="pdAddBtn"'+(soldOut ? " disabled" : "")+' style="width:100%;justify-content:center">'+(soldOut ? L("Sold out","Agotado") : L("Add to Cart","Agregar al carrito"))+'</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>'
+    );
+
+    document.getElementById("pdClose").addEventListener("click", closeProductDetail);
+
+    document.getElementById("pdMainImg").addEventListener("click", function(){
+      openLightbox(images, pdIndex);
+    });
+
+    var thumbsEl = document.getElementById("pdThumbs");
+    if(thumbsEl){
+      thumbsEl.querySelectorAll(".pdThumb").forEach(function(btn){
+        btn.addEventListener("click", function(){
+          pdIndex = Number(btn.getAttribute("data-idx"));
+          document.getElementById("pdMainImgTag").src = images[pdIndex];
+          thumbsEl.querySelectorAll(".pdThumb").forEach(function(t){ t.classList.remove("active"); });
+          btn.classList.add("active");
+        });
+      });
+    }
+
+    if(!soldOut){
+      var qtyVal = document.getElementById("pdQtyVal");
+      document.getElementById("pdQtyDec").addEventListener("click", function(){
+        if(pdQty > 1){ pdQty--; qtyVal.textContent = pdQty; }
+      });
+      document.getElementById("pdQtyInc").addEventListener("click", function(){
+        if(pdQty < stock){ pdQty++; qtyVal.textContent = pdQty; }
+        else{ showToast(L("Only "+stock+" available","Solo quedan "+stock+" disponibles")); }
+      });
+      document.getElementById("pdAddBtn").addEventListener("click", function(){
+        addToCart(p.id, pdQty);
+        flashAdded(document.getElementById("pdAddBtn"));
+      });
+    }
   }
 
   /* ---------- Search / sort ---------- */
@@ -683,7 +892,7 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
   }
   function closeCart(){
     cartDrawer.classList.remove("show");
-    if(!checkoutWrap.classList.contains("show")){
+    if(!checkoutWrap.classList.contains("show") && !productWrap.classList.contains("show")){
       overlay.classList.remove("show");
     }
   }
@@ -702,7 +911,7 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
   }
   function closeCheckout(){
     checkoutWrap.classList.remove("show");
-    if(!cartDrawer.classList.contains("show")){
+    if(!cartDrawer.classList.contains("show") && !productWrap.classList.contains("show")){
       overlay.classList.remove("show");
     }
   }
@@ -878,12 +1087,19 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
   /* ---------- Overlay click closes topmost ---------- */
   overlay.addEventListener("click", function(){
     if(checkoutWrap.classList.contains("show")) closeCheckout();
+    else if(productWrap.classList.contains("show")) closeProductDetail();
     else if(cartDrawer.classList.contains("show")) closeCart();
   });
   document.addEventListener("keydown", function(e){
     if(e.key === "Escape"){
-      if(checkoutWrap.classList.contains("show")) closeCheckout();
+      if(lightbox.classList.contains("show")) closeLightbox();
+      else if(checkoutWrap.classList.contains("show")) closeCheckout();
+      else if(productWrap.classList.contains("show")) closeProductDetail();
       else if(cartDrawer.classList.contains("show")) closeCart();
+    }
+    if(lightbox.classList.contains("show")){
+      if(e.key === "ArrowLeft") lightboxPrev.click();
+      if(e.key === "ArrowRight") lightboxNext.click();
     }
   });
 

@@ -4,7 +4,7 @@ A standalone, turnkey template for Colombian online stores — no Shopify, no th
 
 ## What's included
 
-- **Storefront** — product grid with search/filter/sort, cart, sold-out/low-stock badges, Wompi checkout that collects a shipping address, and an English/Spanish toggle (flag icons) in the top nav.
+- **Storefront** — product grid with search/filter/sort, cart, sold-out/low-stock badges, a full product detail view (click any product for a bigger photo gallery, description, quantity picker, and Add to Cart), Wompi checkout that collects a shipping address, and an English/Spanish toggle (flag icons) in the top nav.
 - **Admin panel** (`/admin`) — password login, a dashboard (sales, orders today, low stock), full product management (multiple photos per product with drag-to-reorder and a click-to-expand viewer, inventory/stock tracking, add/edit/delete), order management (shipping status, tracking, carrier, and a one-click "Message on WhatsApp" button per order), a Recently Deleted tab so deletes are recoverable, and an English/Spanish toggle (flag icons, top right). No coding required to run day to day.
 - **Security** — session-based login (not a token in a URL), rate-limited login attempts, CSRF protection, security headers, an audit log of every admin action, and sensitive files (`.env`, `orders.json`, `server.js`, etc.) are never servable over HTTP. See "Security" below for the full list.
 
