@@ -30,7 +30,7 @@ fs.mkdirSync(TRASH_IMAGES_DIR, { recursive: true });
 
 // Deleted products/photos are held here — recoverable — until the daily
 // trash clear. "Local time" for a store means the timezone it operates in;
-// set STORE_TIMEZONE in .env (defaults to Colombia) so the 11:59am clear
+// set STORE_TIMEZONE in .env (defaults to Colombia) so the 11:59pm clear
 // lines up with the timezone the store owner actually works in.
 const STORE_TIMEZONE = process.env.STORE_TIMEZONE || 'America/Bogota';
 
@@ -214,7 +214,7 @@ async function purgeAllTrash() {
   return trash.length;
 }
 
-// Trash clears automatically once a day at 11:59am in the store's own
+// Trash clears automatically once a day at 11:59pm in the store's own
 // timezone (STORE_TIMEZONE) — not the server's timezone, which may be
 // hosted anywhere.
 let lastAutoPurgedOn = null;
@@ -227,7 +227,7 @@ setInterval(() => {
   const todayStr = `${parts.year}-${parts.month}-${parts.day}`;
   const hour = Number(parts.hour);
   const minute = Number(parts.minute);
-  if (hour === 11 && minute === 59 && lastAutoPurgedOn !== todayStr) {
+  if (hour === 23 && minute === 59 && lastAutoPurgedOn !== todayStr) {
     lastAutoPurgedOn = todayStr;
     purgeAllTrash().catch((err) => console.error('Daily trash purge failed:', err));
   }
