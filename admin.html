@@ -145,9 +145,38 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
   .shipForm{flex-direction:column;align-items:stretch}
   .shipForm > div{width:100%}
   .shipForm button{width:100%}
-}
-@media (max-width:640px){
-  .hideNarrow{display:none}
+
+  /* Tables become stacked cards on mobile so nothing ever needs to
+     scroll sideways — each row turns into a labeled, bordered card. */
+  .tableScroll{overflow-x:visible}
+  .cardTable{min-width:0!important;padding:10px}
+  .cardTable thead{display:none}
+  .cardTable, .cardTable tbody{display:block;width:100%}
+  .cardTable tr{
+    display:block;width:100%;border:1px solid var(--line);border-radius:12px;
+    padding:12px 14px;margin-bottom:10px;background:#fff;
+  }
+  .cardTable tr:last-child{margin-bottom:0}
+  .cardTable tr.detailRow{border:none;background:none;padding:0;margin:0 0 10px}
+  .cardTable tr.detailRow td{display:block;padding:0}
+  .cardTable td{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding:7px 0;border-bottom:none;font-size:.88rem;
+  }
+  .cardTable td[data-label]::before{
+    content:attr(data-label);flex-shrink:0;
+    font-size:.7rem;font-weight:700;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.03em;
+  }
+  .cardTable td.cardPrimary{
+    display:block;padding:0 0 8px;margin-bottom:6px;
+    border-bottom:1px solid var(--line);font-weight:700;font-size:.98rem;
+  }
+  .cardTable td.cardThumb{display:block;padding:0 0 8px}
+  .cardTable td.cardActions{display:block;padding-top:8px}
+  .cardTable td.cardActions .rowActions{width:100%}
+  .cardTable td.cardActions .rowActions button,
+  .cardTable td.cardActions > button{width:100%}
 }
 @media (max-width:480px){
   .statGrid{grid-template-columns:1fr 1fr;gap:10px}
@@ -230,7 +259,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       <div id="productFormWrap"></div>
       <div class="card">
         <div class="tableScroll">
-        <table>
+        <table class="cardTable">
           <thead><tr><th></th><th data-i18n="products.thName">Name</th><th data-i18n="products.thCategory">Category</th><th data-i18n="products.thPrice">Price</th><th data-i18n="products.thStock">Stock</th><th></th></tr></thead>
           <tbody id="productsBody"></tbody>
         </table>
@@ -246,7 +275,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
         <p style="color:var(--muted);font-size:.86rem;margin:-8px 0 16px" data-i18n="trash.description">Deleted products and photos land here and can be restored. This list clears automatically every day at 11:59pm (store time) — anything not restored by then is gone for good.</p>
         <div class="card">
           <div class="tableScroll">
-          <table>
+          <table class="cardTable">
             <thead><tr><th></th><th data-i18n="trash.thWhat">What</th><th data-i18n="trash.thDeleted">Deleted</th><th></th></tr></thead>
             <tbody id="trashBody"></tbody>
           </table>
@@ -265,8 +294,8 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
         </div>
       </div>
       <div class="card">
-        <table class="ordersTable">
-          <thead><tr><th data-i18n="orders.thRef">Reference</th><th data-i18n="orders.thCustomer">Customer</th><th data-i18n="orders.thTotal">Total</th><th class="hideNarrow" data-i18n="orders.thPayment">Payment</th><th data-i18n="orders.thShipping">Shipping</th><th class="hideNarrow" data-i18n="orders.thDate">Date</th><th></th></tr></thead>
+        <table class="ordersTable cardTable">
+          <thead><tr><th data-i18n="orders.thRef">Reference</th><th data-i18n="orders.thCustomer">Customer</th><th data-i18n="orders.thTotal">Total</th><th data-i18n="orders.thPayment">Payment</th><th data-i18n="orders.thShipping">Shipping</th><th data-i18n="orders.thDate">Date</th><th></th></tr></thead>
           <tbody id="ordersBody"></tbody>
         </table>
         <div class="emptyMsg" id="ordersEmpty" style="display:none" data-i18n="orders.empty">No orders yet.</div>
@@ -572,12 +601,12 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     productsBody.innerHTML = products.map(function(p){
       return (
         '<tr>'+
-          '<td><button type="button" class="thumbBtn" data-view="'+p.id+'" title="'+L("Click to view all photos","Haz clic para ver todas las fotos")+'"><img src="'+((p.images && p.images[0]) || '')+'" alt=""></button></td>'+
-          '<td>'+esc(p.name)+(p.desc ? '<br><span style="color:var(--muted);font-size:.8rem;font-weight:400">'+esc(p.desc)+'</span>' : '')+'</td>'+
-          '<td>'+esc(p.tag)+'</td>'+
-          '<td>'+money(p.price)+'</td>'+
-          '<td>'+stockCellHTML(p.stock)+'</td>'+
-          '<td><div class="rowActions">'+
+          '<td class="cardThumb"><button type="button" class="thumbBtn" data-view="'+p.id+'" title="'+L("Click to view all photos","Haz clic para ver todas las fotos")+'"><img src="'+((p.images && p.images[0]) || '')+'" alt=""></button></td>'+
+          '<td class="cardPrimary">'+esc(p.name)+(p.desc ? '<br><span style="color:var(--muted);font-size:.8rem;font-weight:400">'+esc(p.desc)+'</span>' : '')+'</td>'+
+          '<td data-label="'+t("products.thCategory")+'">'+esc(p.tag)+'</td>'+
+          '<td data-label="'+t("products.thPrice")+'">'+money(p.price)+'</td>'+
+          '<td data-label="'+t("products.thStock")+'">'+stockCellHTML(p.stock)+'</td>'+
+          '<td class="cardActions"><div class="rowActions">'+
             '<button class="smallBtn" data-edit="'+p.id+'">'+L("Edit","Editar")+'</button>'+
             '<button class="smallBtn danger" data-delete="'+p.id+'">'+L("Delete","Eliminar")+'</button>'+
           '</div></td>'+
@@ -891,16 +920,16 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     ordersEmpty.style.display = orders.length ? "none" : "block";
     ordersBody.innerHTML = orders.map(function(o){
       var rows = '<tr class="orderRowClickable" data-ref="'+esc(o.reference)+'">'+
-          '<td>'+esc(o.reference)+(o.isDemo ? ' <span class="statusChip st-PENDING" style="margin-left:4px">DEMO</span>' : '')+'</td>'+
-          '<td>'+esc(o.customer.fullName)+'<br><span style="color:var(--muted);font-size:.82rem">'+esc(o.customer.email)+'</span></td>'+
-          '<td>'+money(o.amountInCents/100)+'</td>'+
-          '<td class="hideNarrow"><span class="statusChip st-'+o.status+'">'+orderStatusLabel(o.status)+'</span></td>'+
-          '<td><span class="statusChip st-'+o.shippingStatus+'">'+shippingStatusLabel(o.shippingStatus)+'</span></td>'+
-          '<td class="hideNarrow" style="font-size:.82rem;color:var(--muted)">'+new Date(o.createdAt).toLocaleDateString()+'</td>'+
-          '<td><button class="smallBtn" data-manage="'+o.reference+'">'+L("Manage","Gestionar")+' <span class="caret'+(expandedRef===o.reference?' open':'')+'">▾</span></button></td>'+
+          '<td class="cardPrimary">'+esc(o.reference)+(o.isDemo ? ' <span class="statusChip st-PENDING" style="margin-left:4px">DEMO</span>' : '')+'</td>'+
+          '<td data-label="'+t("orders.thCustomer")+'">'+esc(o.customer.fullName)+'<br><span style="color:var(--muted);font-size:.82rem">'+esc(o.customer.email)+'</span></td>'+
+          '<td data-label="'+t("orders.thTotal")+'">'+money(o.amountInCents/100)+'</td>'+
+          '<td data-label="'+t("orders.thPayment")+'"><span class="statusChip st-'+o.status+'">'+orderStatusLabel(o.status)+'</span></td>'+
+          '<td data-label="'+t("orders.thShipping")+'"><span class="statusChip st-'+o.shippingStatus+'">'+shippingStatusLabel(o.shippingStatus)+'</span></td>'+
+          '<td data-label="'+t("orders.thDate")+'" style="font-size:.82rem;color:var(--muted)">'+new Date(o.createdAt).toLocaleDateString()+'</td>'+
+          '<td class="cardActions"><button class="smallBtn" data-manage="'+o.reference+'">'+L("Manage","Gestionar")+' <span class="caret'+(expandedRef===o.reference?' open':'')+'">▾</span></button></td>'+
         '</tr>';
       if(expandedRef === o.reference){
-        rows += '<tr><td colspan="7" style="padding:0"><div class="detailPanel">'+detailHTML(o)+'</div></td></tr>';
+        rows += '<tr class="detailRow"><td colspan="7" style="padding:0"><div class="detailPanel">'+detailHTML(o)+'</div></td></tr>';
       }
       return rows;
     }).join("");
@@ -1096,10 +1125,10 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
         : esc(t.productName || L("Photo","Foto")) + ' <span style="color:var(--muted);font-size:.82rem">'+L("(1 photo)","(1 foto)")+'</span>';
       return (
         '<tr>'+
-          '<td>'+(thumbSrc ? '<button type="button" class="thumbBtn" data-view="'+t.id+'"><img src="'+thumbSrc+'" alt=""></button>' : '')+'</td>'+
-          '<td>'+what+'</td>'+
-          '<td style="font-size:.82rem;color:var(--muted)">'+new Date(t.deletedAt).toLocaleString()+'</td>'+
-          '<td><div class="rowActions">'+
+          '<td class="cardThumb">'+(thumbSrc ? '<button type="button" class="thumbBtn" data-view="'+t.id+'"><img src="'+thumbSrc+'" alt=""></button>' : '')+'</td>'+
+          '<td class="cardPrimary">'+what+'</td>'+
+          '<td data-label="'+L("Deleted","Eliminado")+'" style="font-size:.82rem;color:var(--muted)">'+new Date(t.deletedAt).toLocaleString()+'</td>'+
+          '<td class="cardActions"><div class="rowActions">'+
             '<button class="smallBtn" data-restore="'+t.id+'">'+L("Restore","Restaurar")+'</button>'+
             '<button class="smallBtn danger" data-purge="'+t.id+'">'+L("Delete forever","Eliminar para siempre")+'</button>'+
           '</div></td>'+
