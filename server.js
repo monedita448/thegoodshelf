@@ -96,7 +96,9 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-      imgSrc: ["'self'", 'https:', 'data:'],
+      // Product photos can be pasted in from any external source, so images
+      // are allowed to load from anywhere (http or https), plus data: URIs.
+      imgSrc: ["'self'", 'https:', 'http:', 'data:'],
       connectSrc: ["'self'"],
       formAction: ["'self'", 'https://checkout.wompi.co'],
       frameAncestors: ["'none'"],
@@ -836,8 +838,12 @@ function validateProductInput(body, opts) {
   check('name', body.name, (v) => typeof v === 'string' && v.trim().length > 0 && v.length <= 160, 'name must be 1-160 characters.');
   check('tag', body.tag, (v) => typeof v === 'string' && v.trim().length > 0 && v.length <= 40, 'category must be 1-40 characters.');
   check('desc', body.desc, (v) => typeof v === 'string' && v.length <= 400, 'description must be under 400 characters.');
+  // Accepts any http(s) URL (including long, signed CDN links from Google
+  // Photos, Pinterest, Amazon, Unsplash, etc.) or a locally uploaded image
+  // path. Whitespace inside the URL itself isn't allowed, but %-encoded
+  // spaces and any other URL-safe characters are fine.
   const imgPattern = /^(https?:\/\/\S+|\/\S+)$/i;
-  check('images', body.images, (v) => Array.isArray(v) && v.length >= 1 && v.length <= 8 && v.every((u) => typeof u === 'string' && imgPattern.test(u) && u.length <= 500), 'images must be a list of 1-8 valid image URLs or uploaded image paths.');
+  check('images', body.images, (v) => Array.isArray(v) && v.length >= 1 && v.length <= 8 && v.every((u) => typeof u === 'string' && imgPattern.test(u) && u.length <= 2000), 'images must be a list of 1-8 valid image URLs or uploaded image paths.');
   check('price', body.price, (v) => Number.isInteger(v) && v > 0 && v <= 500000000, 'price must be a positive whole number (COP).');
   check('stock', body.stock, (v) => Number.isInteger(v) && v >= 0 && v <= 1000000, 'stock must be a whole number, 0 or greater.');
 
