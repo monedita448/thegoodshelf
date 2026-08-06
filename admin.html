@@ -606,6 +606,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
           if(!res.ok){ showToast(res.data.error || L("Could not delete product.","No se pudo eliminar el producto.")); return; }
           showToast(L("Moved to Recently Deleted.","Movido a Eliminados recientemente."));
           loadProducts();
+          loadTrash();
         });
       });
     });
@@ -826,6 +827,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
         productFormWrap.innerHTML = "";
         showToast(isEdit ? L("Product updated.","Producto actualizado.") : L("Product added.","Producto agregado."));
         loadProducts();
+        loadTrash();
       });
     });
   }
