@@ -689,13 +689,13 @@ function buildDemoOrders(products) {
     { fullName: 'Andrés Muñoz', email: 'andres.munoz@example.com', phone: '+57 306 789 0123', city: 'Bogotá' },
   ];
   const plans = [
-    { daysAgo: 6, status: 'APPROVED', shippingStatus: 'DELIVERED', items: [[pick(0), 1]], carrier: 'Servientrega', tracking: 'SV1029384756' },
-    { daysAgo: 4, status: 'APPROVED', shippingStatus: 'SHIPPED', items: [[pick(2), 1], [pick(3), 1]], carrier: 'Servientrega', tracking: 'SV5566778899' },
+    { daysAgo: 6, status: 'APPROVED', shippingStatus: 'DELIVERED', items: [[pick(0), 1]], carrier: null, tracking: null },
+    { daysAgo: 4, status: 'APPROVED', shippingStatus: 'SHIPPED', items: [[pick(2), 1], [pick(3), 1]], carrier: null, tracking: null },
     { daysAgo: 2, status: 'APPROVED', shippingStatus: 'PROCESSING', items: [[pick(5), 1]], carrier: null, tracking: null },
     { daysAgo: 0, status: 'APPROVED', shippingStatus: 'NOT_SHIPPED', items: [[pick(4), 1]], carrier: null, tracking: null },
     { daysAgo: 0, status: 'PENDING', shippingStatus: 'NOT_SHIPPED', items: [[pick(6), 1]], carrier: null, tracking: null },
     { daysAgo: 1, status: 'DECLINED', shippingStatus: 'NOT_SHIPPED', items: [[pick(1), 1]], carrier: null, tracking: null },
-    { daysAgo: 8, status: 'APPROVED', shippingStatus: 'DELIVERED', items: [[pick(3), 2]], carrier: 'Interrapidísimo', tracking: 'IR8877665544' },
+    { daysAgo: 8, status: 'APPROVED', shippingStatus: 'DELIVERED', items: [[pick(3), 2]], carrier: null, tracking: null },
     { daysAgo: 3, status: 'APPROVED', shippingStatus: 'PROCESSING', items: [[pick(0), 1], [pick(4), 1]], carrier: null, tracking: null },
   ];
 
