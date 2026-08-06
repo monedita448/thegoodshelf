@@ -179,7 +179,6 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
         <button class="tabBtn active" id="tabHome" data-i18n="tab.dashboard">Dashboard</button>
         <button class="tabBtn" id="tabProducts" data-i18n="tab.products">Products</button>
         <button class="tabBtn" id="tabOrders" data-i18n="tab.orders">Orders</button>
-        <button class="tabBtn" id="tabTrash" data-i18n="tab.trash">Recently Deleted</button>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
         <div class="langToggle" id="langToggle">
@@ -238,6 +237,23 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
         </div>
         <div class="emptyMsg" id="productsEmpty" style="display:none" data-i18n="products.empty">No products yet — add your first one above.</div>
       </div>
+
+      <div id="trashPanel" style="margin-top:36px;padding-top:24px;border-top:1px solid var(--line)">
+        <div class="panelHead">
+          <h2 data-i18n="trash.title">Recently Deleted</h2>
+          <button class="btn btnGhost" id="emptyTrashBtn" data-i18n="trash.emptyBtn">Empty now</button>
+        </div>
+        <p style="color:var(--muted);font-size:.86rem;margin:-8px 0 16px" data-i18n="trash.description">Deleted products and photos land here and can be restored. This list clears automatically every day at 11:59pm (store time) — anything not restored by then is gone for good.</p>
+        <div class="card">
+          <div class="tableScroll">
+          <table>
+            <thead><tr><th></th><th data-i18n="trash.thWhat">What</th><th data-i18n="trash.thDeleted">Deleted</th><th></th></tr></thead>
+            <tbody id="trashBody"></tbody>
+          </table>
+          </div>
+          <div class="emptyMsg" id="trashEmpty" style="display:none" data-i18n="trash.empty">Nothing here.</div>
+        </div>
+      </div>
     </section>
 
     <section class="panel" id="ordersPanel">
@@ -254,23 +270,6 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
           <tbody id="ordersBody"></tbody>
         </table>
         <div class="emptyMsg" id="ordersEmpty" style="display:none" data-i18n="orders.empty">No orders yet.</div>
-      </div>
-    </section>
-
-    <section class="panel" id="trashPanel">
-      <div class="panelHead">
-        <h2 data-i18n="trash.title">Recently Deleted</h2>
-        <button class="btn btnGhost" id="emptyTrashBtn" data-i18n="trash.emptyBtn">Empty now</button>
-      </div>
-      <p style="color:var(--muted);font-size:.86rem;margin:-8px 0 16px" data-i18n="trash.description">Deleted products and photos land here and can be restored. This list clears automatically every day at 11:59pm (store time) — anything not restored by then is gone for good.</p>
-      <div class="card">
-        <div class="tableScroll">
-        <table>
-          <thead><tr><th></th><th data-i18n="trash.thWhat">What</th><th data-i18n="trash.thDeleted">Deleted</th><th></th></tr></thead>
-          <tbody id="trashBody"></tbody>
-        </table>
-        </div>
-        <div class="emptyMsg" id="trashEmpty" style="display:none" data-i18n="trash.empty">Nothing here.</div>
       </div>
     </section>
   </main>
@@ -306,7 +305,6 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     "tab.dashboard": ["Dashboard", "Panel"],
     "tab.products": ["Products", "Productos"],
     "tab.orders": ["Orders", "Pedidos"],
-    "tab.trash": ["Recently Deleted", "Eliminados recientemente"],
     "logout": ["Log out", "Cerrar sesión"],
     "dashboard.title": ["Dashboard", "Panel"],
     "dashboard.totalSales": ["Total sales", "Ventas totales"],
@@ -447,6 +445,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     loadHome();
     loadProducts();
     loadOrders();
+    loadTrash();
   }
 
   function handle401(res){
@@ -488,13 +487,11 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
   var tabHome = document.getElementById("tabHome");
   var tabProducts = document.getElementById("tabProducts");
   var tabOrders = document.getElementById("tabOrders");
-  var tabTrash = document.getElementById("tabTrash");
   var homePanel = document.getElementById("homePanel");
   var productsPanel = document.getElementById("productsPanel");
   var ordersPanel = document.getElementById("ordersPanel");
-  var trashPanel = document.getElementById("trashPanel");
-  var allTabs = [tabHome, tabProducts, tabOrders, tabTrash];
-  var allPanels = [homePanel, productsPanel, ordersPanel, trashPanel];
+  var allTabs = [tabHome, tabProducts, tabOrders];
+  var allPanels = [homePanel, productsPanel, ordersPanel];
   function activateTab(tab, panel){
     allTabs.forEach(function(t){ t.classList.remove("active"); });
     allPanels.forEach(function(p){ p.classList.remove("active"); });
@@ -507,14 +504,12 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
   });
   tabProducts.addEventListener("click", function(){
     activateTab(tabProducts, productsPanel);
+    loadProducts();
+    loadTrash();
   });
   tabOrders.addEventListener("click", function(){
     activateTab(tabOrders, ordersPanel);
     loadOrders();
-  });
-  tabTrash.addEventListener("click", function(){
-    activateTab(tabTrash, trashPanel);
-    loadTrash();
   });
 
   /* ---------- Home / Dashboard ---------- */
