@@ -321,6 +321,9 @@ function renderReceiptHTML(order) {
   </table>
 
   <p style="color:#66625a;font-size:13px;margin-top:28px">Gracias por comprar en The Good Shelf.</p>
+  <p style="color:#a39c8f;font-size:11px;margin-top:20px;padding-top:16px;border-top:1px solid #e7e0d5">
+    <a href="https://colhq.com" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Made by COLhq.com</a>
+  </p>
 </div>
 </body>
 </html>`;
