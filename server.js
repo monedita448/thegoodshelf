@@ -840,6 +840,17 @@ function validateProductInput(body, opts) {
   check('images', body.images, (v) => Array.isArray(v) && v.length >= 1 && v.length <= 8 && v.every((u) => typeof u === 'string' && imgPattern.test(u) && u.length <= 500), 'images must be a list of 1-8 valid image URLs or uploaded image paths.');
   check('price', body.price, (v) => Number.isInteger(v) && v > 0 && v <= 500000000, 'price must be a positive whole number (COP).');
   check('stock', body.stock, (v) => Number.isInteger(v) && v >= 0 && v <= 1000000, 'stock must be a whole number, 0 or greater.');
+
+  // Size is always optional, even when creating a product (unlike the
+  // other fields, an empty/omitted value is never an error).
+  if (body.size !== undefined) {
+    if (typeof body.size !== 'string' || body.size.length > 40) {
+      errors.push('size must be under 40 characters.');
+    } else {
+      out.size = body.size.trim() || null;
+    }
+  }
+
   return { errors, out };
 }
 
@@ -887,7 +898,7 @@ app.post('/api/admin/products', requireAdmin, async (req, res) => {
 
   const products = loadProducts();
   const nextId = products.reduce((max, p) => Math.max(max, p.id), 0) + 1;
-  const product = { id: nextId, tag: out.tag.trim(), name: out.name.trim(), desc: out.desc, images: out.images, price: out.price, stock: out.stock };
+  const product = { id: nextId, tag: out.tag.trim(), name: out.name.trim(), desc: out.desc, images: out.images, price: out.price, stock: out.stock, size: out.size !== undefined ? out.size : null };
   products.push(product);
   await saveProducts(products);
   await auditLog({ action: 'product_create', productId: product.id, ip: req.ip });

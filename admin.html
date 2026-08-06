@@ -648,7 +648,10 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
           '</datalist>'+
         '</div>'+
         '<div><label>'+L("Price (COP)","Precio (COP)")+'</label><input class="field" id="pfPrice" type="number" min="1" step="1" value="'+(isEdit ? product.price : '')+'"></div>'+
-        '<div><label>'+L("Stock on hand","Inventario disponible")+'</label><input class="field" id="pfStock" type="number" min="0" step="1" value="'+(isEdit ? product.stock : '0')+'"></div>'+
+        '<div style="display:flex;gap:10px">'+
+          '<div style="width:100px;flex-shrink:0"><label>'+L("Stock","Inventario")+'</label><input class="field" id="pfStock" type="number" min="0" step="1" value="'+(isEdit ? product.stock : '0')+'"></div>'+
+          '<div style="flex:1"><label>'+L("Size (optional)","Talla (opcional)")+'</label><input class="field" id="pfSize" placeholder="'+L("e.g. M, US 8, EU 40, 500ml","ej. M, US 8, EU 40, 500ml")+'" value="'+(isEdit && product.size ? esc(product.size) : '')+'"></div>'+
+        '</div>'+
         '<div class="full"><label>'+L("Description","Descripción")+'</label><input class="field" id="pfDesc" value="'+(isEdit ? esc(product.desc) : '')+'"></div>'+
         '<div class="full">'+
           '<label>'+L("Product images","Fotos del producto")+'</label>'+
@@ -813,6 +816,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
         tag: document.getElementById("pfTag").value.trim(),
         price: Number(document.getElementById("pfPrice").value),
         stock: Number(document.getElementById("pfStock").value),
+        size: document.getElementById("pfSize").value.trim(),
         images: pfImages,
         desc: document.getElementById("pfDesc").value.trim()
       };
