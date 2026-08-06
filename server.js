@@ -28,11 +28,8 @@ const TRASH_PATH = path.join(ROOT, 'trash.json');
 const TRASH_IMAGES_DIR = path.join(ROOT, 'trash', 'images');
 fs.mkdirSync(TRASH_IMAGES_DIR, { recursive: true });
 
-// Deleted products/photos are held here — recoverable — until the daily
-// trash clear. "Local time" for a store means the timezone it operates in;
-// set STORE_TIMEZONE in .env (defaults to Colombia) so the 11:59pm clear
-// lines up with the timezone the store owner actually works in.
-const STORE_TIMEZONE = process.env.STORE_TIMEZONE || 'America/Bogota';
+// Deleted products, photos, and orders are held here — recoverable — for
+// 30 days after deletion (see TRASH_RETENTION_DAYS below).
 
 const APP_ENV = process.env.APP_ENV === 'production' ? 'production' : 'sandbox';
 const IS_PROD = APP_ENV === 'production';
@@ -225,24 +222,33 @@ async function purgeAllTrash() {
   return count;
 }
 
-// Trash clears automatically once a day at 11:59pm in the store's own
-// timezone (STORE_TIMEZONE) — not the server's timezone, which may be
-// hosted anywhere.
-let lastAutoPurgedOn = null;
+// Each trashed item (product, photo, or order) clears itself out 30 days
+// after it was deleted — not on a fixed daily clock, so nothing is ever
+// lost sooner than 30 days regardless of what time it was deleted.
+const TRASH_RETENTION_DAYS = 30;
+const TRASH_RETENTION_MS = TRASH_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+
+async function purgeExpiredTrash() {
+  const trash = loadTrash();
+  const cutoff = Date.now() - TRASH_RETENTION_MS;
+  const expired = trash.filter((t) => new Date(t.deletedAt).getTime() <= cutoff);
+  if (!expired.length) return 0;
+  const remaining = trash.filter((t) => new Date(t.deletedAt).getTime() > cutoff);
+  for (const entry of expired) await purgeTrashFiles(entry);
+  await saveTrash(remaining);
+  await auditLog({ action: 'trash_purged_expired', count: expired.length, retentionDays: TRASH_RETENTION_DAYS });
+  return expired.length;
+}
+
+// Checked hourly (a rolling 30-day expiry doesn't need a precise clock
+// time the way the old daily purge did), plus once shortly after boot so
+// nothing lingers until the first hourly tick if the server was restarted.
 setInterval(() => {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: STORE_TIMEZONE,
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', hour12: false,
-  }).formatToParts(new Date()).reduce((acc, p) => { acc[p.type] = p.value; return acc; }, {});
-  const todayStr = `${parts.year}-${parts.month}-${parts.day}`;
-  const hour = Number(parts.hour);
-  const minute = Number(parts.minute);
-  if (hour === 23 && minute === 59 && lastAutoPurgedOn !== todayStr) {
-    lastAutoPurgedOn = todayStr;
-    purgeAllTrash().catch((err) => console.error('Daily trash purge failed:', err));
-  }
-}, 60 * 1000).unref();
+  purgeExpiredTrash().catch((err) => console.error('Trash expiry purge failed:', err));
+}, 60 * 60 * 1000).unref();
+setTimeout(() => {
+  purgeExpiredTrash().catch((err) => console.error('Trash expiry purge failed:', err));
+}, 10 * 1000).unref();
 
 function genReference() {
   return 'TGS-' + Date.now() + '-' + crypto.randomBytes(4).toString('hex');

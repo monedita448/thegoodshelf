@@ -275,7 +275,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
           <h2 data-i18n="trash.title">Recently Deleted</h2>
           <button class="btn btnGhost" id="emptyTrashBtn" data-i18n="trash.emptyBtn">Empty now</button>
         </div>
-        <p style="color:var(--muted);font-size:.86rem;margin:-8px 0 16px" data-i18n="trash.description">Deleted products and photos land here and can be restored. This list clears automatically every day at 11:59pm (store time) — anything not restored by then is gone for good.</p>
+        <p style="color:var(--muted);font-size:.86rem;margin:-8px 0 16px" data-i18n="trash.description">Deleted products and photos land here and can be restored. Each item clears itself automatically 30 days after it's deleted — anything not restored by then is gone for good.</p>
         <div class="card">
           <div class="tableScroll">
           <table class="cardTable">
@@ -309,7 +309,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
           <h2 data-i18n="ordersTrash.title">Recently Deleted Orders</h2>
           <button class="btn btnGhost" id="emptyOrdersTrashBtn" data-i18n="trash.emptyBtn">Empty now</button>
         </div>
-        <p style="color:var(--muted);font-size:.86rem;margin:-8px 0 16px" data-i18n="ordersTrash.description">Deleted orders land here and can be restored, just in case. This list clears automatically every day at 11:59pm (store time) — anything not restored by then is gone for good.</p>
+        <p style="color:var(--muted);font-size:.86rem;margin:-8px 0 16px" data-i18n="ordersTrash.description">Deleted orders land here and can be restored, just in case. Each order clears itself automatically 30 days after it's deleted — anything not restored by then is gone for good.</p>
         <div class="card">
           <div class="tableScroll">
           <table class="cardTable">
@@ -385,12 +385,12 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     "orders.empty": ["No orders yet.", "Aún no hay pedidos."],
     "trash.title": ["Recently Deleted", "Eliminados recientemente"],
     "trash.emptyBtn": ["Empty now", "Vaciar ahora"],
-    "trash.description": ["Deleted products and photos land here and can be restored. This list clears automatically every day at 11:59pm (store time) — anything not restored by then is gone for good.", "Los productos y fotos eliminados llegan aquí y se pueden restaurar. Esta lista se vacía automáticamente todos los días a las 11:59pm (hora de la tienda) — lo que no se restaure antes de eso se pierde para siempre."],
+    "trash.description": ["Deleted products and photos land here and can be restored. Each item clears itself automatically 30 days after it's deleted — anything not restored by then is gone for good.", "Los productos y fotos eliminados llegan aquí y se pueden restaurar. Cada elemento se elimina automáticamente 30 días después de ser eliminado — lo que no se restaure antes de eso se pierde para siempre."],
     "trash.thWhat": ["What", "Qué"],
     "trash.thDeleted": ["Deleted", "Eliminado"],
     "trash.empty": ["Nothing here.", "No hay nada aquí."],
     "ordersTrash.title": ["Recently Deleted Orders", "Pedidos eliminados recientemente"],
-    "ordersTrash.description": ["Deleted orders land here and can be restored, just in case. This list clears automatically every day at 11:59pm (store time) — anything not restored by then is gone for good.", "Los pedidos eliminados llegan aquí y se pueden restaurar, por si acaso. Esta lista se vacía automáticamente todos los días a las 11:59pm (hora de la tienda) — lo que no se restaure antes de eso se pierde para siempre."],
+    "ordersTrash.description": ["Deleted orders land here and can be restored, just in case. Each order clears itself automatically 30 days after it's deleted — anything not restored by then is gone for good.", "Los pedidos eliminados llegan aquí y se pueden restaurar, por si acaso. Cada pedido se elimina automáticamente 30 días después de ser eliminado — lo que no se restaure antes de eso se pierde para siempre."],
     "ordersTrash.thWhat": ["Order", "Pedido"]
   };
   var lang = localStorage.getItem("tgsAdminLang") === "es" ? "es" : "en";
