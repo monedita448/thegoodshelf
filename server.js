@@ -206,12 +206,23 @@ async function purgeTrashFiles(entry) {
   }
 }
 
-async function purgeAllTrash() {
+// If `types` is given, only entries whose `type` is in that list are
+// purged (everything else stays); otherwise everything is purged. Used so
+// "Empty now" on the Products bin doesn't also wipe out trashed orders,
+// and vice versa. The daily auto-clear always purges everything.
+async function purgeTrash(types) {
   const trash = loadTrash();
-  for (const entry of trash) await purgeTrashFiles(entry);
-  await saveTrash([]);
-  if (trash.length) await auditLog({ action: 'trash_purged', count: trash.length });
-  return trash.length;
+  const toPurge = types ? trash.filter((t) => types.includes(t.type)) : trash;
+  const remaining = types ? trash.filter((t) => !types.includes(t.type)) : [];
+  for (const entry of toPurge) await purgeTrashFiles(entry);
+  await saveTrash(remaining);
+  return toPurge.length;
+}
+
+async function purgeAllTrash() {
+  const count = await purgeTrash(null);
+  if (count) await auditLog({ action: 'trash_purged', count });
+  return count;
 }
 
 // Trash clears automatically once a day at 11:59pm in the store's own
@@ -767,8 +778,9 @@ app.patch('/api/admin/orders/:reference/shipping', requireAdmin, async (req, res
   res.json(orders[idx]);
 });
 
-// Permanently removes an order record. The admin UI requires the user to
-// confirm before sending this request.
+// Soft-delete: the order moves to the trash (same "Recently Deleted"
+// system used for products) and can be restored until it's cleared.
+// The admin UI requires the user to confirm before sending this request.
 app.delete('/api/admin/orders/:reference', requireAdmin, async (req, res) => {
   const orders = loadOrders();
   const idx = orders.findIndex((o) => o.reference === req.params.reference);
@@ -776,7 +788,20 @@ app.delete('/api/admin/orders/:reference', requireAdmin, async (req, res) => {
 
   const [removed] = orders.splice(idx, 1);
   await saveOrders(orders);
-  await auditLog({ action: 'order_deleted', reference: req.params.reference, ip: req.ip, customerEmail: removed.customer && removed.customer.email });
+
+  const trash = loadTrash();
+  trash.push({
+    id: genTrashId(),
+    type: 'order',
+    deletedAt: new Date().toISOString(),
+    orderReference: removed.reference,
+    customerName: removed.customer && removed.customer.fullName,
+    order: removed,
+    files: [],
+  });
+  await saveTrash(trash);
+
+  await auditLog({ action: 'order_trashed', reference: req.params.reference, ip: req.ip, customerEmail: removed.customer && removed.customer.email });
   res.json({ ok: true });
 });
 
@@ -1028,6 +1053,18 @@ app.post('/api/admin/trash/:id/restore', requireAdmin, async (req, res) => {
     return res.json({ ok: true, type: 'product', product: restored });
   }
 
+  if (entry.type === 'order') {
+    const orders = loadOrders();
+    const refExists = orders.some((o) => o.reference === entry.order.reference);
+    const restored = refExists ? Object.assign({}, entry.order, { reference: genReference() }) : entry.order;
+    orders.push(restored);
+    await saveOrders(orders);
+    trash.splice(idx, 1);
+    await saveTrash(trash);
+    await auditLog({ action: 'trash_restore_order', reference: restored.reference, ip: req.ip });
+    return res.json({ ok: true, type: 'order', order: restored });
+  }
+
   // type === 'image'
   const products = loadProducts();
   const pIdx = products.findIndex((p) => p.id === entry.productId);
@@ -1057,9 +1094,13 @@ app.delete('/api/admin/trash/:id', requireAdmin, async (req, res) => {
   res.json({ ok: true });
 });
 
+// Body may include { types: ['product','image'] } or { types: ['order'] }
+// to empty just that bin. Omitting types (or sending an empty array)
+// empties everything, for backward compatibility.
 app.post('/api/admin/trash/empty', requireAdmin, async (req, res) => {
-  const count = await purgeAllTrash();
-  await auditLog({ action: 'trash_emptied_manually', count, ip: req.ip });
+  const types = Array.isArray(req.body && req.body.types) && req.body.types.length ? req.body.types : null;
+  const count = await purgeTrash(types);
+  await auditLog({ action: 'trash_emptied_manually', count, types: types || 'all', ip: req.ip });
   res.json({ ok: true, count });
 });
 

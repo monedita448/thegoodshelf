@@ -303,6 +303,23 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
         </table>
         <div class="emptyMsg" id="ordersEmpty" style="display:none" data-i18n="orders.empty">No orders yet.</div>
       </div>
+
+      <div id="ordersTrashPanel" style="margin-top:36px;padding-top:24px;border-top:1px solid var(--line)">
+        <div class="panelHead">
+          <h2 data-i18n="ordersTrash.title">Recently Deleted Orders</h2>
+          <button class="btn btnGhost" id="emptyOrdersTrashBtn" data-i18n="trash.emptyBtn">Empty now</button>
+        </div>
+        <p style="color:var(--muted);font-size:.86rem;margin:-8px 0 16px" data-i18n="ordersTrash.description">Deleted orders land here and can be restored, just in case. This list clears automatically every day at 11:59pm (store time) — anything not restored by then is gone for good.</p>
+        <div class="card">
+          <div class="tableScroll">
+          <table class="cardTable">
+            <thead><tr><th data-i18n="ordersTrash.thWhat">Order</th><th data-i18n="trash.thDeleted">Deleted</th><th></th></tr></thead>
+            <tbody id="ordersTrashBody"></tbody>
+          </table>
+          </div>
+          <div class="emptyMsg" id="ordersTrashEmpty" style="display:none" data-i18n="trash.empty">Nothing here.</div>
+        </div>
+      </div>
     </section>
   </main>
   <footer class="wrap" style="padding:6px 0 30px;text-align:center;color:var(--muted);font-size:.82rem">
@@ -371,7 +388,10 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     "trash.description": ["Deleted products and photos land here and can be restored. This list clears automatically every day at 11:59pm (store time) — anything not restored by then is gone for good.", "Los productos y fotos eliminados llegan aquí y se pueden restaurar. Esta lista se vacía automáticamente todos los días a las 11:59pm (hora de la tienda) — lo que no se restaure antes de eso se pierde para siempre."],
     "trash.thWhat": ["What", "Qué"],
     "trash.thDeleted": ["Deleted", "Eliminado"],
-    "trash.empty": ["Nothing here.", "No hay nada aquí."]
+    "trash.empty": ["Nothing here.", "No hay nada aquí."],
+    "ordersTrash.title": ["Recently Deleted Orders", "Pedidos eliminados recientemente"],
+    "ordersTrash.description": ["Deleted orders land here and can be restored, just in case. This list clears automatically every day at 11:59pm (store time) — anything not restored by then is gone for good.", "Los pedidos eliminados llegan aquí y se pueden restaurar, por si acaso. Esta lista se vacía automáticamente todos los días a las 11:59pm (hora de la tienda) — lo que no se restaure antes de eso se pierde para siempre."],
+    "ordersTrash.thWhat": ["Order", "Pedido"]
   };
   var lang = localStorage.getItem("tgsAdminLang") === "es" ? "es" : "en";
   function t(key){
@@ -546,6 +566,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
   tabOrders.addEventListener("click", function(){
     activateTab(tabOrders, ordersPanel);
     loadOrders();
+    loadTrash();
   });
 
   /* ---------- Home / Dashboard ---------- */
@@ -1011,7 +1032,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       '<div class="msgSection dangerZone">'+
         '<h4>'+L("Danger zone","Zona de peligro")+'</h4>'+
         '<button class="btn btnDanger" id="deleteOrderBtn">'+L("Delete order","Eliminar pedido")+'</button>'+
-        '<p style="color:#8a3a3a;font-size:.82rem;margin:8px 0 0">'+L("This permanently removes the order record. This cannot be undone.","Esto elimina el registro del pedido de forma permanente. Esta acción no se puede deshacer.")+'</p>'+
+        '<p style="color:#8a3a3a;font-size:.82rem;margin:8px 0 0">'+L("Moves this order to Recently Deleted Orders, where it can be restored until it's cleared.","Mueve este pedido a Pedidos eliminados recientemente, donde se puede restaurar hasta que se vacíe.")+'</p>'+
       '</div>'
     );
   }
@@ -1067,7 +1088,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     var deleteOrderBtn = document.getElementById("deleteOrderBtn");
     if(deleteOrderBtn){
       deleteOrderBtn.addEventListener("click", function(){
-        if(!confirm(L("Permanently delete order "+order.reference+"? This cannot be undone.","¿Eliminar de forma permanente el pedido "+order.reference+"? Esta acción no se puede deshacer."))) return;
+        if(!confirm(L("Move order "+order.reference+" to Recently Deleted Orders? You can restore it from there until it's cleared.","¿Mover el pedido "+order.reference+" a Pedidos eliminados recientemente? Puedes restaurarlo desde allí hasta que se vacíe."))) return;
         deleteOrderBtn.disabled = true;
         api("/api/admin/orders/"+order.reference, {method:"DELETE"}).then(function(res){
           deleteOrderBtn.disabled = false;
@@ -1077,8 +1098,9 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
             return;
           }
           expandedRef = null;
-          showToast(L("Order deleted.","Pedido eliminado."));
+          showToast(L("Moved to Recently Deleted Orders.","Movido a Pedidos eliminados recientemente."));
           loadOrders();
+          loadTrash();
         });
       });
     }
@@ -1110,11 +1132,15 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
   /* ---------- Trash ---------- */
   var trashBody = document.getElementById("trashBody");
   var trashEmpty = document.getElementById("trashEmpty");
+  var ordersTrashBody = document.getElementById("ordersTrashBody");
+  var ordersTrashEmpty = document.getElementById("ordersTrashEmpty");
 
   function loadTrash(){
     api("/api/admin/trash").then(function(res){
       if(handle401(res)) return;
-      renderTrash(res.data || []);
+      var all = res.data || [];
+      renderTrash(all.filter(function(t){ return t.type === "product" || t.type === "image"; }));
+      renderOrdersTrash(all.filter(function(t){ return t.type === "order"; }));
     });
   }
 
@@ -1178,12 +1204,67 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     });
   }
 
+  function renderOrdersTrash(trash){
+    ordersTrashEmpty.style.display = trash.length ? "none" : "block";
+    ordersTrashBody.innerHTML = trash.map(function(t){
+      var o = t.order || {};
+      var total = typeof o.amountInCents === "number" ? money(o.amountInCents/100) : "";
+      return (
+        '<tr>'+
+          '<td class="cardPrimary">'+esc(t.orderReference || o.reference || "")+
+            '<br><span style="color:var(--muted);font-size:.82rem;font-weight:400">'+esc(t.customerName || (o.customer && o.customer.fullName) || "")+(total ? " — "+total : "")+'</span></td>'+
+          '<td data-label="'+L("Deleted","Eliminado")+'" style="font-size:.82rem;color:var(--muted)">'+new Date(t.deletedAt).toLocaleString()+'</td>'+
+          '<td class="cardActions"><div class="rowActions">'+
+            '<button class="smallBtn" data-order-restore="'+t.id+'">'+L("Restore","Restaurar")+'</button>'+
+            '<button class="smallBtn danger" data-order-purge="'+t.id+'">'+L("Delete forever","Eliminar para siempre")+'</button>'+
+          '</div></td>'+
+        '</tr>'
+      );
+    }).join("");
+
+    ordersTrashBody.querySelectorAll("[data-order-restore]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var id = btn.getAttribute("data-order-restore");
+        api("/api/admin/trash/"+id+"/restore", {method:"POST"}).then(function(res){
+          if(handle401(res)) return;
+          if(!res.ok){ showToast(res.data.error || L("Could not restore.","No se pudo restaurar.")); return; }
+          showToast(L("Order restored.","Pedido restaurado."));
+          loadTrash();
+          loadOrders();
+          loadHome();
+        });
+      });
+    });
+    ordersTrashBody.querySelectorAll("[data-order-purge]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var id = btn.getAttribute("data-order-purge");
+        if(!confirm(L("Permanently delete this order? This cannot be undone.","¿Eliminar este pedido de forma permanente? Esta acción no se puede deshacer."))) return;
+        api("/api/admin/trash/"+id, {method:"DELETE"}).then(function(res){
+          if(handle401(res)) return;
+          if(!res.ok){ showToast(res.data.error || L("Could not delete.","No se pudo eliminar.")); return; }
+          showToast(L("Permanently deleted.","Eliminado de forma permanente."));
+          loadTrash();
+        });
+      });
+    });
+  }
+
   document.getElementById("emptyTrashBtn").addEventListener("click", function(){
     if(!confirm(L("Permanently delete everything in Recently Deleted? This cannot be undone.","¿Eliminar de forma permanente todo lo que está en Eliminados recientemente? Esta acción no se puede deshacer."))) return;
-    api("/api/admin/trash/empty", {method:"POST"}).then(function(res){
+    api("/api/admin/trash/empty", {method:"POST", body: JSON.stringify({types:["product","image"]})}).then(function(res){
       if(handle401(res)) return;
       if(!res.ok){ showToast(res.data.error || L("Could not empty Recently Deleted.","No se pudo vaciar Eliminados recientemente.")); return; }
       showToast(L("Recently Deleted cleared.","Eliminados recientemente vaciado."));
+      loadTrash();
+    });
+  });
+
+  document.getElementById("emptyOrdersTrashBtn").addEventListener("click", function(){
+    if(!confirm(L("Permanently delete every deleted order? This cannot be undone.","¿Eliminar de forma permanente todos los pedidos eliminados? Esta acción no se puede deshacer."))) return;
+    api("/api/admin/trash/empty", {method:"POST", body: JSON.stringify({types:["order"]})}).then(function(res){
+      if(handle401(res)) return;
+      if(!res.ok){ showToast(res.data.error || L("Could not empty Recently Deleted Orders.","No se pudo vaciar Pedidos eliminados recientemente.")); return; }
+      showToast(L("Recently Deleted Orders cleared.","Pedidos eliminados recientemente vaciado."));
       loadTrash();
     });
   });

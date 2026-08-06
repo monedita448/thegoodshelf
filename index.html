@@ -624,7 +624,7 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
           (soldOut ? '<span class="soldBadge">'+L("Sold out","Agotado")+'</span>' : '')+
           '<img alt="'+esc(p.name)+'" src="'+((p.images && p.images[0]) || '')+'"></div>'+
         '<div class="pc">'+
-          '<div class="meta"><span class="tag">'+esc(p.tag)+'</span><span class="price">'+money(p.price)+'</span></div>'+
+          '<div class="meta"><span class="tag">'+esc(p.tag)+(p.size ? ' · '+esc(p.size) : '')+'</span><span class="price">'+money(p.price)+'</span></div>'+
           '<h3>'+esc(p.name)+'</h3>'+
           '<p>'+esc(p.desc)+'</p>'+
           (!soldOut && stock <= 3 ? '<p class="lowStockNote">'+L("Only "+stock+" left","Solo quedan "+stock)+'</p>' : '')+
@@ -767,6 +767,7 @@ h1{margin:20px 0 12px;font-family:'Cormorant Garamond',serif;font-size:clamp(2.6
         '</div>'+
         '<div class="pdInfo">'+
           '<span class="pdTag">'+esc(p.tag)+'</span>'+
+          (p.size ? '<div style="font-size:.86rem;color:var(--muted);font-weight:600;margin-top:3px">'+L("Size: ","Talla: ")+esc(p.size)+'</div>' : '')+
           '<h2>'+esc(p.name)+'</h2>'+
           '<div class="pdPrice">'+money(p.price)+'</div>'+
           '<p class="pdDesc">'+esc(p.desc)+'</p>'+
