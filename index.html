@@ -57,6 +57,44 @@
       letter-spacing:.02em;
       font-weight:700;
     }
+    .navRight{display:flex;align-items:center}
+    .cartBtn{
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:44px;
+      height:44px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.65);
+      color:var(--text);
+      cursor:pointer;
+      touch-action:manipulation;
+      -webkit-tap-highlight-color:transparent;
+      transition:border-color .3s ease,background-color .3s ease,transform .18s cubic-bezier(.22,1,.36,1);
+    }
+    .cartBtn:hover{border-color:#d6c8b5}
+    .cartBtn:active{transform:scale(.92)}
+    .cartBtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    .cartCount{
+      position:absolute;
+      top:-4px;
+      right:-4px;
+      min-width:20px;
+      height:20px;
+      padding:0 5px;
+      border-radius:999px;
+      background:var(--accent);
+      color:#fff;
+      font-size:.7rem;
+      font-weight:700;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .cartCount.bump{animation:countPop .4s cubic-bezier(.22,1,.36,1)}
+    @keyframes countPop{0%{transform:scale(.6)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
 
     .hero{
       min-height:calc(100svh - 68px);
@@ -136,6 +174,14 @@
       border-bottom:1px solid var(--line);
       background:linear-gradient(145deg,#efe5d7,#fff);
       overflow:hidden;
+      position:relative;
+    }
+    .pimg::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -1px 0 rgba(0,0,0,.04);
+      pointer-events:none;
     }
     .pimg img{
       width:100%;
@@ -158,10 +204,13 @@
       text-transform:uppercase;
       color:var(--accent);
     }
-    .price{font-weight:800}
+    .price{font-weight:800;color:var(--accent);font-size:1.02rem}
     .pc h3{
       margin:0 0 8px;
-      font-size:1.05rem;
+      font-size:1.06rem;
+      font-weight:650;
+      letter-spacing:-.01em;
+      line-height:1.3;
     }
     .pc p{
       margin:0;
@@ -192,13 +241,49 @@
       transition:transform .18s cubic-bezier(.22,1,.36,1),border-color .3s ease,background-color .3s ease,color .3s ease,box-shadow .3s ease;
     }
     .smallBtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-    .smallBtn.is-added{
-      background:var(--text);
+    .actions .smallBtn.is-added{
+      background:var(--accent);
       color:#fff;
-      border-color:var(--text);
+      border-color:var(--accent);
       animation:pop .35s cubic-bezier(.22,1,.36,1);
     }
     @keyframes pop{0%{transform:scale(1)}40%{transform:scale(.92)}100%{transform:scale(1)}}
+    .card .actions .smallBtn:last-child{
+      background:var(--text);
+      color:#fff;
+      border-color:var(--text);
+    }
+    .card .actions .smallBtn:last-child:not(.is-added):hover{box-shadow:0 10px 22px rgba(0,0,0,.16)}
+    .gridFeat{margin-bottom:34px}
+    .featuredCard .pimg{aspect-ratio:1}
+    .featuredBadge{
+      position:absolute;
+      top:12px;
+      left:12px;
+      z-index:2;
+      padding:5px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.92);
+      color:var(--text);
+      font-size:.66rem;
+      font-weight:700;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      box-shadow:0 4px 14px rgba(0,0,0,.1);
+    }
+    .featHead{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:10px;
+      margin:4px 0 16px;
+    }
+    .featHead h3{
+      margin:0;
+      font-family:'Cormorant Garamond',serif;
+      font-size:clamp(1.35rem,2.4vw,1.8rem);
+      line-height:1.1;
+    }
     @media (hover:hover) and (pointer:fine){
       .card:hover{transform:translateY(-6px);box-shadow:0 30px 60px rgba(0,0,0,.13)}
       .card:hover .pimg img{transform:scale(1.06)}
@@ -324,6 +409,16 @@
   <header class="nav">
     <div class="wrap navin">
       <div class="brand">TGS</div>
+      <div class="navRight">
+        <button class="cartBtn" type="button" aria-label="Cart">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="9" cy="20" r="1.4"></circle>
+            <circle cx="17" cy="20" r="1.4"></circle>
+            <path d="M3 3h2l2.4 12.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 8H6"></path>
+          </svg>
+          <span class="cartCount" aria-live="polite">0</span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -344,8 +439,10 @@
         </div>
       </div>
 
+      <div id="featured"></div>
+
       <div class="grid">
-        <article class="card panel reveal">
+        <article class="card panel reveal" data-featured>
           <div class="pimg"><img alt="Organic creamy unsalted almond butter" src="https://images.unsplash.com/photo-1608797178974-15b35a64ede9?auto=format&amp;fit=crop&amp;w=900&amp;q=80"></div>
           <div class="pc">
             <div class="meta"><span class="tag">Pantry</span><span class="price">$18</span></div>
@@ -355,7 +452,7 @@
           </div>
         </article>
 
-        <article class="card panel reveal">
+        <article class="card panel reveal" data-featured>
           <div class="pimg"><img alt="Organic extra virgin olive oil" src="https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&amp;fit=crop&amp;w=900&amp;q=80"></div>
           <div class="pc">
             <div class="meta"><span class="tag">Cooking</span><span class="price">$22</span></div>
@@ -385,7 +482,7 @@
           </div>
         </article>
 
-        <article class="card panel reveal">
+        <article class="card panel reveal" data-featured>
           <div class="pimg"><img alt="Dark roast coffee beans" src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&amp;w=900&amp;q=80"></div>
           <div class="pc">
             <div class="meta"><span class="tag">Coffee</span><span class="price">$16</span></div>
@@ -405,7 +502,7 @@
           </div>
         </article>
 
-        <article class="card panel reveal">
+        <article class="card panel reveal" data-featured>
           <div class="pimg"><img alt="Premium granola clusters" src="https://images.unsplash.com/photo-1517093157656-b9eccef91cb1?auto=format&fit=crop&amp;w=900&amp;q=80"></div>
           <div class="pc">
             <div class="meta"><span class="tag">Breakfast</span><span class="price">$14</span></div>
@@ -457,6 +554,35 @@
   </footer>
   <script>
     (function(){
+      var featuredEl=document.getElementById('featured');
+      if(!featuredEl) return;
+      var srcCards=document.querySelectorAll('.grid > .card[data-featured]');
+      if(!srcCards.length){
+        featuredEl.parentNode.removeChild(featuredEl);
+        return;
+      }
+      var html='';
+      for(var i=0;i<srcCards.length;i++){
+        var card=srcCards[i];
+        var img=card.querySelector('.pimg img');
+        var tag=card.querySelector('.tag');
+        var price=card.querySelector('.price');
+        var title=card.querySelector('h3');
+        var desc=card.querySelector('.pc p');
+        html+='<article class="card panel featuredCard reveal">'
+          +'<div class="pimg"><span class="featuredBadge">Featured</span>'
+          +'<img alt="'+(img?img.getAttribute('alt'):'')+'" src="'+(img?img.getAttribute('src'):'')+'"></div>'
+          +'<div class="pc">'
+          +'<div class="meta"><span class="tag">'+(tag?tag.textContent.trim():'')+'</span><span class="price">'+(price?price.textContent.trim():'')+'</span></div>'
+          +'<h3>'+(title?title.textContent.trim():'')+'</h3>'
+          +'<p>'+(desc?desc.textContent.trim():'')+'</p>'
+          +'<div class="actions"><button class="smallBtn">Details</button><button class="smallBtn">Add</button></div>'
+          +'</div></article>';
+      }
+      featuredEl.innerHTML='<div class="featHead reveal"><span class="eyebrow">Handpicked</span><h3>Featured picks</h3></div><div class="grid gridFeat">'+html+'</div>';
+    })();
+
+    (function(){
       var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       var revealEls=document.querySelectorAll('.reveal');
       function stagger(el){
@@ -485,8 +611,8 @@
     })();
 
     (function(){
-      var grid=document.querySelector('.grid');
-      if(!grid) return;
+      var cartCountEl=document.querySelector('.cartCount');
+      var count=0;
       var toast=null;
       function showToast(msg){
         if(!toast){
@@ -501,18 +627,31 @@
         clearTimeout(showToast._t);
         showToast._t=setTimeout(function(){toast.classList.remove('show')},1900);
       }
-      grid.addEventListener('click',function(e){
-        var btn=e.target.closest('.smallBtn');
-        if(!btn||btn.classList.contains('is-added')) return;
+      function bumpCart(){
+        count+=1;
+        if(cartCountEl){
+          cartCountEl.textContent=count;
+          cartCountEl.classList.remove('bump');
+          void cartCountEl.offsetWidth;
+          cartCountEl.classList.add('bump');
+        }
+      }
+      function handleAdd(btn){
+        if(btn.classList.contains('is-added')) return;
         if(btn.textContent.trim().toLowerCase()!=='add') return;
         var original=btn.textContent;
         btn.classList.add('is-added');
         btn.textContent='Added ✓';
+        bumpCart();
         showToast('Added to your shelf');
         setTimeout(function(){
           btn.classList.remove('is-added');
           btn.textContent=original;
         },1700);
+      }
+      document.addEventListener('click',function(e){
+        var btn=e.target.closest('.smallBtn');
+        if(btn) handleAdd(btn);
       });
     })();
   </script>
