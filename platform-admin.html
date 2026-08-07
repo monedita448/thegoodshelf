@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Plataforma — MiTienda by COLHQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f3ec;
+  --panel:#fffdf8;
+  --text:#171717;
+  --muted:#66625a;
+  --line:#e7e0d5;
+  --accent:#8a6f4d;
+  --danger:#b23b3b;
+  --success:#3f7a52;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-text-size-adjust:100%}
+a{color:inherit}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.wrap{width:min(1100px,calc(100% - 32px));margin:0 auto}
+h1,h2,h3{font-family:'Cormorant Garamond',serif;margin:0}
+
+/* Login */
+#loginScreen{min-height:100vh;display:grid;place-items:center;padding:20px}
+.loginCard{width:min(360px,100%);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:32px;box-shadow:0 12px 30px rgba(0,0,0,.08)}
+.loginCard h1{font-size:1.6rem;margin-bottom:2px}
+.loginTag{font-weight:800;font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.loginCard p{color:var(--muted);font-size:.9rem;margin:0 0 20px}
+.field{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:#fff;margin-bottom:12px;outline:none}
+.field:focus{border-color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:10px;font-weight:700;font-size:.92rem;border:1px solid transparent}
+.btnPrimary{background:var(--text);color:#fff;width:100%}
+.btnGhost{border-color:var(--line);background:#fff;color:var(--text);width:auto}
+.btnDanger{background:var(--danger);color:#fff;width:auto}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.errMsg{color:var(--danger);font-size:.86rem;margin-top:10px;min-height:1.2em}
+
+/* App shell */
+#app{display:none}
+.topbar{position:sticky;top:0;background:rgba(247,243,236,.96);border-bottom:1px solid var(--line);z-index:5}
+.topbarin{display:flex;align-items:center;justify-content:space-between;padding:14px 0;gap:16px;flex-wrap:wrap}
+.brand{font-size:1.3rem;font-weight:700}
+.brand span{color:var(--accent)}
+.subtitle{font-size:.82rem;color:var(--muted);margin-top:2px}
+.topRight{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.langToggle{display:flex;gap:2px;border:1px solid var(--line);border-radius:999px;padding:3px;background:#fff}
+.langBtn{border:none;background:none;padding:5px 8px;border-radius:999px;font-size:1rem;line-height:1;opacity:.4;filter:grayscale(70%);transition:opacity .15s ease,filter .15s ease}
+.langBtn.active{opacity:1;filter:none;background:var(--bg)}
+main{padding:24px 0 60px}
+.panelHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+.panelHead h2{font-size:1.45rem}
+.panelHead .btn{width:auto}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:20px}
+
+.statGrid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:20px}
+.statCard{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+.statLabel{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+.statValue{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;margin-top:6px}
+.statNote{font-size:.68rem;color:var(--muted);margin-top:4px}
+
+.expiringHead{display:flex;justify-content:space-between;align-items:center;padding:16px 16px 0}
+.expiringHead h3{font-size:.95rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.expiringCount{padding:2px 10px;border-radius:999px;font-size:.76rem;font-weight:700;background:#f0e9d8;color:#8a6f4d}
+.expRow{display:flex;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);font-size:.9rem}
+.expRow:last-child{border-bottom:none}
+.expName{font-weight:700}
+.expDate{color:var(--muted);font-size:.82rem;white-space:nowrap}
+
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+tr:last-child td{border-bottom:none}
+td .rowActions{display:flex;gap:8px;flex-wrap:wrap}
+.smallBtn{padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:.82rem;font-weight:700;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.statusChip{padding:4px 10px;border-radius:999px;font-size:.76rem;font-weight:700;display:inline-block}
+.st-active{background:#e1efe4;color:var(--success)}
+.st-trial{background:#f0e9d8;color:#8a6f4d}
+.st-suspended{background:#f6e2e2;color:var(--danger)}
+.st-cancelled{background:#ececec;color:var(--muted)}
+.planChip{padding:4px 10px;border-radius:999px;font-size:.76rem;font-weight:700;display:inline-block;background:#efe7d8;color:#6b5f47}
+.emptyMsg{padding:40px;text-align:center;color:var(--muted)}
+
+.formGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:18px}
+.formGrid .full{grid-column:1 / -1}
+.formGrid label{display:block;font-size:.8rem;color:var(--muted);font-weight:700;margin-bottom:5px}
+.formGrid .field{margin-bottom:0}
+.formGrid select.field{height:46px}
+.formActions{display:flex;gap:10px;grid-column:1 / -1;flex-wrap:wrap}
+.formActions .btn{width:auto}
+
+.detailHead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:20px 20px 0}
+.detailHead h2{font-size:1.5rem}
+.detailGrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;padding:18px 20px}
+.detailGrid h4{margin:14px 0 6px;font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.detailGrid h4:first-child{margin-top:0}
+.detailGrid p{margin:0 0 4px;font-size:.9rem}
+.actionsBox{border-top:1px solid var(--line);padding:16px 20px 20px;background:#faf6ef}
+.actionsBox h4{margin:0 0 12px;font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.actionRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.actionRow label{font-size:.86rem;font-weight:600;min-width:130px}
+.actionRow select.field,.actionRow input.field{width:auto;margin:0}
+.actionRow .btn{width:auto}
+.actionRow .btnPrimary,.actionRow .btnDanger{flex:1;min-width:140px}
+
+@media (max-width:720px){
+  .statGrid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .statCard{padding:14px}
+  .statValue{font-size:1.5rem}
+  .formGrid{grid-template-columns:1fr}
+  .detailGrid{grid-template-columns:1fr}
+  .brand{font-size:1.1rem}
+  .topbarin{gap:10px}
+  .cardTable, .cardTable tbody{display:block;width:100%}
+  .cardTable thead{display:none}
+  .cardTable tr{
+    display:block;width:100%;border:1px solid var(--line);border-radius:12px;
+    padding:12px 14px;margin-bottom:10px;background:#fff;
+  }
+  .cardTable tr:last-child{margin-bottom:0}
+  .cardTable td{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding:7px 0;border-bottom:none;font-size:.88rem;
+  }
+  .cardTable td[data-label]::before{
+    content:attr(data-label);flex-shrink:0;
+    font-size:.7rem;font-weight:700;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.03em;
+  }
+  .cardTable td.cardPrimary{
+    display:block;padding:0 0 8px;margin-bottom:6px;
+    border-bottom:1px solid var(--line);font-weight:700;font-size:.98rem;
+  }
+  .cardTable td.cardActions{display:block;padding-top:8px}
+  .cardTable td.cardActions .rowActions{width:100%}
+  .cardTable td.cardActions .rowActions .smallBtn{width:100%;justify-content:center}
+  .actionRow .btnPrimary,.actionRow .btnDanger{min-width:120px}
+}
+
+.toast{
+  position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
+  background:var(--text);color:#fff;padding:12px 20px;border-radius:999px;font-weight:700;font-size:.86rem;
+  z-index:80;opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="loginCard">
+    <div class="loginTag">MiTienda by COLHQ</div>
+    <h1 data-i18n="login.title">Administración de la plataforma</h1>
+    <p data-i18n="login.subtitle">Acceso exclusivo para el equipo de COLHQ</p>
+    <input class="field" id="loginPassword" type="password" placeholder="Contraseña de plataforma" data-i18n-placeholder="login.passwordPlaceholder" autocomplete="current-password">
+    <button class="btn btnPrimary" id="loginBtn" data-i18n="login.submit">Iniciar sesión</button>
+    <div class="errMsg" id="loginError"></div>
+  </div>
+</div>
+
+<div id="app">
+  <header class="topbar">
+    <div class="wrap topbarin">
+      <div>
+        <div class="brand">MiTienda <span>by COLHQ</span></div>
+        <div class="subtitle" data-i18n="top.subtitle">Administración de la plataforma</div>
+      </div>
+      <div class="topRight">
+        <div class="langToggle">
+          <button class="langBtn" data-lang="en">🇺🇸</button>
+          <button class="langBtn active" data-lang="es">🇨🇴</button>
+        </div>
+        <button class="btn btnGhost" id="logoutBtn" data-i18n="logout">Cerrar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div id="mainView">
+      <div class="panelHead">
+        <h2 data-i18n="dash.heading">Panel de la plataforma</h2>
+        <button class="btn btnPrimary" id="addStoreBtn" data-i18n="dash.addStore">+ Agregar tienda</button>
+      </div>
+
+      <div id="addStorePanel" class="card" style="display:none">
+        <div class="formGrid">
+          <div class="full">
+            <label data-i18n="add.storeName">Nombre de la tienda</label>
+            <input id="asName" class="field" maxlength="60">
+          </div>
+          <div>
+            <label data-i18n="add.ownerName">Nombre del propietario</label>
+            <input id="asOwner" class="field" maxlength="120">
+          </div>
+          <div>
+            <label data-i18n="add.ownerEmail">Correo del propietario</label>
+            <input id="asEmail" class="field" maxlength="160" type="email">
+          </div>
+          <div>
+            <label data-i18n="add.whatsapp">WhatsApp</label>
+            <input id="asWhatsapp" class="field" maxlength="20" placeholder="+57 300 000 0000">
+          </div>
+          <div>
+            <label data-i18n="add.businessType">Tipo de negocio</label>
+            <select id="asBusiness" class="field"></select>
+          </div>
+          <div>
+            <label data-i18n="add.plan">Plan</label>
+            <select id="asPlan" class="field"></select>
+          </div>
+          <div>
+            <label data-i18n="add.status">Estado</label>
+            <select id="asStatus" class="field"></select>
+          </div>
+          <div>
+            <label data-i18n="add.trialEndsAt">Fin de la prueba (YYYY-MM-DD)</label>
+            <input id="asTrial" type="date" class="field">
+          </div>
+          <div class="errMsg full" id="addError"></div>
+          <div class="formActions">
+            <button class="btn btnPrimary" id="btnCreateStore" data-i18n="add.create">Crear tienda</button>
+            <button class="btn btnGhost" id="btnCancelAdd" data-i18n="add.cancel">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="statGrid">
+        <div class="statCard"><div class="statLabel" data-i18n="stat.total">Total de tiendas</div><div class="statValue" id="statTotal">0</div></div>
+        <div class="statCard"><div class="statLabel" data-i18n="stat.active">Activas</div><div class="statValue" id="statActive">0</div></div>
+        <div class="statCard"><div class="statLabel" data-i18n="stat.trial">Pruebas</div><div class="statValue" id="statTrial">0</div></div>
+        <div class="statCard"><div class="statLabel" data-i18n="stat.suspended">Suspendidas</div><div class="statValue" id="statSuspended">0</div></div>
+        <div class="statCard"><div class="statLabel" data-i18n="stat.newThisMonth">Nuevas este mes</div><div class="statValue" id="statNew">0</div></div>
+        <div class="statCard"><div class="statLabel" data-i18n="stat.mrr">MRR est.</div><div class="statValue" id="statMrr">$0</div><div class="statNote" data-i18n="stat.mrrProvisional">Provisional</div></div>
+      </div>
+
+      <div class="card">
+        <div class="expiringHead">
+          <h3 data-i18n="expiring.title">Pruebas por vencer</h3>
+          <span class="expiringCount" id="expiringCount">0</span>
+        </div>
+        <div id="expiringList"></div>
+        <div class="emptyMsg" id="expiringEmpty" data-i18n="expiring.empty">No hay pruebas por vencer en los próximos 7 días.</div>
+      </div>
+
+      <div class="card">
+        <div class="panelHead" style="padding:16px 16px 0">
+          <h3 data-i18n="stores.title">Tiendas</h3>
+        </div>
+        <table class="cardTable">
+          <thead><tr>
+            <th data-i18n="stores.thStore">Tienda</th>
+            <th data-i18n="stores.thOwner">Propietario</th>
+            <th data-i18n="stores.thBusiness">Negocio</th>
+            <th data-i18n="stores.thPlan">Plan</th>
+            <th data-i18n="stores.thStatus">Estado</th>
+            <th data-i18n="stores.thCreated">Creada</th>
+            <th data-i18n="stores.thLastActivity">Última actividad</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="storesBody"></tbody>
+        </table>
+        <div class="emptyMsg" id="storesEmpty" style="display:none" data-i18n="stores.empty">Aún no hay tiendas en la plataforma. Agrega la primera arriba.</div>
+      </div>
+    </div>
+
+    <div id="storeDetail" style="display:none">
+      <button class="btn btnGhost" id="detailBack" style="margin-bottom:14px" data-i18n="detail.back">← Volver a tiendas</button>
+      <div class="card">
+        <div class="detailHead">
+          <h2 id="detailName"></h2>
+          <div id="detailStatusChip"></div>
+        </div>
+        <div class="detailGrid">
+          <div>
+            <h4 data-i18n="detail.storeInfo">Información de la tienda</h4>
+            <p><b data-i18n="detail.created">Creada:</b> <span id="detailCreated">—</span></p>
+            <p><b data-i18n="detail.lastActivity">Última actividad:</b> <span id="detailLastActivity">—</span></p>
+            <p><b data-i18n="detail.businessType">Tipo de negocio:</b> <span id="detailBusiness">—</span></p>
+          </div>
+          <div>
+            <h4 data-i18n="detail.ownerContact">Propietario / contacto</h4>
+            <p id="detailOwner">—</p>
+            <p id="detailEmail">—</p>
+            <p id="detailWhatsapp">—</p>
+          </div>
+          <div>
+            <h4 data-i18n="detail.plan">Plan</h4>
+            <p id="detailPlan"></p>
+            <h4 data-i18n="detail.trialEndsAt">Fin de la prueba</h4>
+            <p id="detailTrialEnds">—</p>
+            <h4 data-i18n="detail.subscriptionStatus">Estado de suscripción</h4>
+            <p id="detailSubStatus">—</p>
+          </div>
+        </div>
+        <div class="actionsBox">
+          <h4 data-i18n="detail.actions">Acciones de plataforma</h4>
+          <div class="actionRow">
+            <button class="btn btnPrimary" id="btnActivate" data-i18n="detail.activate">Activar</button>
+            <button class="btn btnDanger" id="btnSuspend" data-i18n="detail.suspend">Suspender</button>
+          </div>
+          <div class="actionRow">
+            <label data-i18n="detail.changePlan">Cambiar plan</label>
+            <select id="planSelect" class="field"></select>
+            <button class="btn btnGhost" id="btnChangePlan" data-i18n="detail.apply">Aplicar</button>
+          </div>
+          <div class="actionRow">
+            <label data-i18n="detail.extendTrial">Extender prueba</label>
+            <input type="date" id="trialDate" class="field">
+            <button class="btn btnGhost" id="btnExtendTrial" data-i18n="detail.apply">Aplicar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+  "use strict";
+
+  var mrrFmt = new Intl.NumberFormat("en-US", {style:"currency", currency:"USD", maximumFractionDigits:0});
+  function money(n){ return mrrFmt.format(n || 0); }
+  function esc(s){
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];
+    });
+  }
+
+  /* ---------- Language — Spanish first, English supported ---------- */
+  var I18N = {
+    "login.title": ["Platform administration", "Administración de la plataforma"],
+    "login.subtitle": ["Restricted access — COLHQ staff only", "Acceso exclusivo para el equipo de COLHQ"],
+    "login.passwordPlaceholder": ["Platform password", "Contraseña de plataforma"],
+    "login.submit": ["Log in", "Iniciar sesión"],
+    "logout": ["Log out", "Cerrar sesión"],
+    "top.subtitle": ["Platform administration", "Administración de la plataforma"],
+    "dash.heading": ["Platform dashboard", "Panel de la plataforma"],
+    "dash.addStore": ["+ Add store", "+ Agregar tienda"],
+    "stat.total": ["Total stores", "Total de tiendas"],
+    "stat.active": ["Active", "Activas"],
+    "stat.trial": ["Trial", "Pruebas"],
+    "stat.suspended": ["Suspended", "Suspendidas"],
+    "stat.newThisMonth": ["New this month", "Nuevas este mes"],
+    "stat.mrr": ["Est. MRR", "MRR est."],
+    "stat.mrrProvisional": ["Provisional", "Provisional"],
+    "expiring.title": ["Trials expiring soon", "Pruebas por vencer"],
+    "expiring.empty": ["No trials expiring in the next 7 days.", "No hay pruebas por vencer en los próximos 7 días."],
+    "stores.title": ["Stores", "Tiendas"],
+    "stores.thStore": ["Store", "Tienda"],
+    "stores.thOwner": ["Owner", "Propietario"],
+    "stores.thBusiness": ["Business", "Negocio"],
+    "stores.thPlan": ["Plan", "Plan"],
+    "stores.thStatus": ["Status", "Estado"],
+    "stores.thCreated": ["Created", "Creada"],
+    "stores.thLastActivity": ["Last activity", "Última actividad"],
+    "stores.view": ["View", "Ver"],
+    "stores.empty": ["No stores on the platform yet. Add the first one above.", "Aún no hay tiendas en la plataforma. Agrega la primera arriba."],
+    "add.storeName": ["Store name", "Nombre de la tienda"],
+    "add.ownerName": ["Owner name", "Nombre del propietario"],
+    "add.ownerEmail": ["Owner email", "Correo del propietario"],
+    "add.whatsapp": ["WhatsApp", "WhatsApp"],
+    "add.businessType": ["Business type", "Tipo de negocio"],
+    "add.plan": ["Plan", "Plan"],
+    "add.status": ["Status", "Estado"],
+    "add.trialEndsAt": ["Trial ends (YYYY-MM-DD)", "Fin de la prueba (YYYY-MM-DD)"],
+    "add.create": ["Create store", "Crear tienda"],
+    "add.cancel": ["Cancel", "Cancelar"],
+    "detail.back": ["← Back to stores", "← Volver a tiendas"],
+    "detail.storeInfo": ["Store information", "Información de la tienda"],
+    "detail.ownerContact": ["Owner / contact", "Propietario / contacto"],
+    "detail.created": ["Created", "Creada"],
+    "detail.lastActivity": ["Last activity", "Última actividad"],
+    "detail.businessType": ["Business type", "Tipo de negocio"],
+    "detail.plan": ["Plan", "Plan"],
+    "detail.trialEndsAt": ["Trial expiration", "Fin de la prueba"],
+    "detail.subscriptionStatus": ["Subscription status", "Estado de suscripción"],
+    "detail.actions": ["Platform actions", "Acciones de plataforma"],
+    "detail.activate": ["Activate", "Activar"],
+    "detail.suspend": ["Suspend", "Suspender"],
+    "detail.changePlan": ["Change plan", "Cambiar plan"],
+    "detail.extendTrial": ["Extend trial", "Extender prueba"],
+    "detail.apply": ["Apply", "Aplicar"],
+    "toast.created": ["Store created.", "Tienda creada."],
+    "toast.saved": ["Saved.", "Guardado."],
+    "toast.planChanged": ["Plan updated.", "Plan actualizado."],
+    "toast.trialUpdated": ["Trial updated.", "Prueba actualizada."],
+    "toast.statusChanged": ["Status updated.", "Estado actualizado."],
+    "toast.error": ["Could not complete the action.", "No se pudo completar la acción."],
+    "toast.errorName": ["Store name is required.", "El nombre de la tienda es obligatorio."],
+    "plan.trial": ["Trial", "Prueba"],
+    "plan.basic": ["Basic", "Básico"],
+    "plan.pro": ["Pro", "Pro"],
+    "plan.enterprise": ["Enterprise", "Empresarial"],
+    "status.active": ["Active", "Activa"],
+    "status.trial": ["Trial", "Prueba"],
+    "status.suspended": ["Suspended", "Suspendida"],
+    "status.cancelled": ["Cancelled", "Cancelada"],
+    "subStatus.none": ["None", "Sin suscripción"],
+    "subStatus.trial": ["Trial", "Prueba"],
+    "subStatus.active": ["Active", "Activa"],
+    "subStatus.past_due": ["Past due", "Pago vencido"],
+    "subStatus.cancelled": ["Cancelled", "Cancelada"],
+    "biz.fashion": ["Fashion", "Moda"],
+    "biz.beauty": ["Beauty", "Belleza"],
+    "biz.technology": ["Technology", "Tecnología"],
+    "biz.food": ["Food", "Comida"],
+    "biz.home": ["Home", "Hogar"],
+    "biz.other": ["Other", "Otro"],
+    "generic.none": ["None", "Sin definir"]
+  };
+  var lang = localStorage.getItem("tgsPlatformLang") === "en" ? "en" : "es";
+  function t(key){
+    var pair = I18N[key];
+    if(!pair) return key;
+    return lang === "es" ? pair[1] : pair[0];
+  }
+  function L(en, es){ return lang === "es" ? es : en; }
+  function applyI18n(){
+    document.documentElement.lang = lang;
+    document.title = lang === "es" ? "Plataforma — MiTienda by COLHQ" : "Platform — MiTienda by COLHQ";
+    document.querySelectorAll("[data-i18n]").forEach(function(el){
+      el.textContent = t(el.getAttribute("data-i18n"));
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(function(el){
+      el.placeholder = t(el.getAttribute("data-i18n-placeholder"));
+    });
+    document.querySelectorAll(".langBtn").forEach(function(btn){
+      btn.classList.toggle("active", btn.getAttribute("data-lang") === lang);
+    });
+  }
+
+  /* ---------- API wrapper — same CSRF pattern as the store admin ---------- */
+  function api(path, opts){
+    opts = opts || {};
+    var headers = Object.assign({"Content-Type":"application/json", "X-Requested-With":"tgs-platform-admin"}, opts.headers || {});
+    return fetch(path, Object.assign({credentials:"same-origin"}, opts, {headers: headers}))
+      .then(function(r){
+        return r.json().catch(function(){ return {}; }).then(function(data){
+          return {ok:r.ok, status:r.status, data:data};
+        });
+      });
+  }
+
+  /* ---------- Label helpers ---------- */
+  function labelOf(map, key){
+    var pair = map[key];
+    if(!pair) return key ? String(key) : "—";
+    return lang === "es" ? pair[1] : pair[0];
+  }
+  function planLabel(p){ return labelOf(I18N, "plan." + p); }
+  function statusLabel(s){ return labelOf(I18N, "status." + s); }
+  function subStatusLabel(s){ return labelOf(I18N, "subStatus." + s); }
+  function businessLabel(b){ return b ? labelOf(I18N, "biz." + b) : t("generic.none"); }
+
+  var STATUS_CLASS = {active:"st-active", trial:"st-trial", suspended:"st-suspended", cancelled:"st-cancelled"};
+  function statusChip(s){
+    return '<span class="statusChip '+(STATUS_CLASS[s]||"st-cancelled")+'">'+esc(statusLabel(s))+'</span>';
+  }
+
+  /* ---------- Date formatting ---------- */
+  function fmtDate(iso){
+    if(!iso) return "—";
+    var s = String(iso);
+    if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    var d = new Date(iso);
+    if(isNaN(d)) return "—";
+    return d.toLocaleDateString(lang === "es" ? "es-CO" : "en-US", {year:"numeric", month:"short", day:"numeric"});
+  }
+
+  var toast = document.getElementById("toast");
+  var toastTimer;
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toast.classList.remove("show"); }, 2400);
+  }
+
+  function handle401(res){
+    if(res.status === 401){ showLogin(); return true; }
+    return false;
+  }
+
+  /* ---------- View switching ---------- */
+  function showLogin(){
+    document.getElementById("loginScreen").style.display = "grid";
+    document.getElementById("app").style.display = "none";
+  }
+  function showApp(){
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    showMain();
+    fillSelects();
+    refresh();
+  }
+  function showMain(){
+    document.getElementById("mainView").style.display = "block";
+    document.getElementById("storeDetail").style.display = "none";
+    document.getElementById("addStorePanel").style.display = "none";
+  }
+  function showDetail(){
+    document.getElementById("mainView").style.display = "none";
+    document.getElementById("storeDetail").style.display = "block";
+  }
+
+  function refresh(){
+    loadDashboard();
+    loadStores();
+  }
+
+  /* ---------- Login / logout ---------- */
+  var loginBtn = document.getElementById("loginBtn");
+  var loginPassword = document.getElementById("loginPassword");
+  var loginError = document.getElementById("loginError");
+
+  function doLogin(){
+    loginError.textContent = "";
+    loginBtn.disabled = true;
+    api("/api/platform/admin/login", {method:"POST", body: JSON.stringify({password: loginPassword.value})})
+      .then(function(res){
+        loginBtn.disabled = false;
+        if(!res.ok){
+          loginError.textContent = res.data.error || L("Login failed.","Error al iniciar sesión.");
+          return;
+        }
+        loginPassword.value = "";
+        showApp();
+      }).catch(function(){
+        loginBtn.disabled = false;
+        loginError.textContent = L("Could not reach the server.","No se pudo conectar con el servidor.");
+      });
+  }
+  loginBtn.addEventListener("click", doLogin);
+  loginPassword.addEventListener("keydown", function(e){ if(e.key === "Enter") doLogin(); });
+
+  document.getElementById("logoutBtn").addEventListener("click", function(){
+    api("/api/platform/admin/logout", {method:"POST"}).then(function(res){
+      if(res.ok || res.status === 401){ showLogin(); }
+    });
+  });
+
+  /* ---------- Selects ---------- */
+  var STORE_PLANS = ["trial", "basic", "pro", "enterprise"];
+  var STORE_STATUSES = ["active", "trial", "suspended", "cancelled"];
+  var BUSINESS_TYPES = ["fashion", "beauty", "technology", "food", "home", "other"];
+
+  function fillSelect(sel, values, labelFn, selected){
+    sel.innerHTML = values.map(function(v){
+      return '<option value="'+v+'"'+(v === selected ? " selected" : "")+'>'+esc(labelFn(v))+'</option>';
+    }).join("");
+  }
+  function fillSelects(){
+    fillSelect(document.getElementById("asPlan"), STORE_PLANS, planLabel, "trial");
+    fillSelect(document.getElementById("asStatus"), STORE_STATUSES, statusLabel, "trial");
+    fillSelect(document.getElementById("asBusiness"), BUSINESS_TYPES, businessLabel, "fashion");
+    fillSelect(document.getElementById("planSelect"), STORE_PLANS, planLabel, "trial");
+  }
+
+  /* ---------- Dashboard ---------- */
+  function loadDashboard(){
+    api("/api/platform/admin/dashboard").then(function(res){
+      if(handle401(res)) return;
+      if(!res.ok) return;
+      var d = res.data;
+      document.getElementById("statTotal").textContent = d.totalStores;
+      document.getElementById("statActive").textContent = d.activeStores;
+      document.getElementById("statTrial").textContent = d.trialStores;
+      document.getElementById("statSuspended").textContent = d.suspendedStores;
+      document.getElementById("statNew").textContent = d.newStoresThisMonth;
+      document.getElementById("statMrr").textContent = money(d.estimatedMRR);
+      document.getElementById("expiringCount").textContent = d.storesExpiringSoonCount;
+      var list = document.getElementById("expiringList");
+      var empty = document.getElementById("expiringEmpty");
+      if(!d.storesExpiringSoon || !d.storesExpiringSoon.length){
+        list.innerHTML = "";
+        empty.style.display = "block";
+        return;
+      }
+      empty.style.display = "none";
+      list.innerHTML = d.storesExpiringSoon.map(function(s){
+        return '<div class="expRow"><span class="expName">'+esc(s.storeName)+'</span><span class="expDate">'+esc(fmtDate(s.trialEndsAt))+' · '+esc(planLabel(s.plan))+'</span></div>';
+      }).join("");
+    });
+  }
+
+  /* ---------- Stores list ---------- */
+  var stores = [];
+  function loadStores(){
+    api("/api/platform/admin/stores").then(function(res){
+      if(handle401(res)) return;
+      if(!res.ok) return;
+      stores = res.data || [];
+      renderStores();
+    });
+  }
+
+  function renderStores(){
+    var tbody = document.getElementById("storesBody");
+    document.getElementById("storesEmpty").style.display = stores.length ? "none" : "block";
+    tbody.innerHTML = stores.map(function(s){
+      return '<tr>'+
+        '<td class="cardPrimary" data-label="'+t("stores.thStore")+'">'+esc(s.storeName)+'</td>'+
+        '<td data-label="'+t("stores.thOwner")+'">'+esc(s.ownerName || "—")+'</td>'+
+        '<td data-label="'+t("stores.thBusiness")+'">'+esc(businessLabel(s.businessType))+'</td>'+
+        '<td data-label="'+t("stores.thPlan")+'"><span class="planChip">'+esc(planLabel(s.plan))+'</span></td>'+
+        '<td data-label="'+t("stores.thStatus")+'">'+statusChip(s.status)+'</td>'+
+        '<td data-label="'+t("stores.thCreated")+'" style="font-size:.82rem;color:var(--muted)">'+esc(fmtDate(s.createdAt))+'</td>'+
+        '<td data-label="'+t("stores.thLastActivity")+'" style="font-size:.82rem;color:var(--muted)">'+esc(fmtDate(s.lastActivityAt))+'</td>'+
+        '<td class="cardActions"><div class="rowActions"><button class="smallBtn" data-action="view" data-id="'+esc(s.id)+'">'+t("stores.view")+'</button></div></td>'+
+      '</tr>';
+    }).join("");
+  }
+
+  document.getElementById("storesBody").addEventListener("click", function(e){
+    var btn = e.target && e.target.closest ? e.target.closest("button[data-action]") : null;
+    if(!btn) return;
+    if(btn.getAttribute("data-action") === "view") openStore(btn.getAttribute("data-id"));
+  });
+
+  /* ---------- Store detail ---------- */
+  var currentStoreId = null;
+  function openStore(id){
+    api("/api/platform/admin/stores/" + encodeURIComponent(id)).then(function(res){
+      if(handle401(res)) return;
+      if(!res.ok){ showToast(res.data.error || t("toast.error")); return; }
+      currentStoreId = id;
+      renderStoreDetail(res.data);
+      showDetail();
+    });
+  }
+
+  function renderStoreDetail(s){
+    document.getElementById("detailName").textContent = s.storeName;
+    document.getElementById("detailStatusChip").innerHTML = statusChip(s.status);
+    document.getElementById("detailCreated").textContent = fmtDate(s.createdAt);
+    document.getElementById("detailLastActivity").textContent = fmtDate(s.lastActivityAt);
+    document.getElementById("detailBusiness").textContent = businessLabel(s.businessType);
+    document.getElementById("detailOwner").textContent = s.ownerName || "—";
+    document.getElementById("detailEmail").textContent = s.ownerEmail || "—";
+    document.getElementById("detailWhatsapp").textContent = s.whatsapp || "—";
+    document.getElementById("detailPlan").innerHTML = '<span class="planChip">'+esc(planLabel(s.plan))+'</span>';
+    document.getElementById("detailTrialEnds").textContent = fmtDate(s.trialEndsAt);
+    document.getElementById("detailSubStatus").textContent = subStatusLabel(s.subscriptionStatus);
+    document.getElementById("btnActivate").disabled = s.status === "active";
+    document.getElementById("btnSuspend").disabled = s.status === "suspended";
+    fillSelect(document.getElementById("planSelect"), STORE_PLANS, planLabel, s.plan);
+    document.getElementById("trialDate").value = s.trialEndsAt || "";
+  }
+
+  document.getElementById("detailBack").addEventListener("click", function(){
+    currentStoreId = null;
+    showMain();
+    refresh();
+  });
+
+  /* ---------- Platform actions (audit logged server-side) ---------- */
+  function patchStatus(status){
+    if(!currentStoreId) return;
+    api("/api/platform/admin/stores/" + encodeURIComponent(currentStoreId) + "/status", {method:"PATCH", body: JSON.stringify({status: status})})
+      .then(function(res){
+        if(handle401(res)) return;
+        if(!res.ok){ showToast(res.data.error || t("toast.error")); return; }
+        showToast(t("toast.statusChanged"));
+        openStore(currentStoreId);
+        refresh();
+      });
+  }
+  document.getElementById("btnActivate").addEventListener("click", function(){ patchStatus("active"); });
+  document.getElementById("btnSuspend").addEventListener("click", function(){ patchStatus("suspended"); });
+
+  document.getElementById("btnChangePlan").addEventListener("click", function(){
+    if(!currentStoreId) return;
+    var plan = document.getElementById("planSelect").value;
+    api("/api/platform/admin/stores/" + encodeURIComponent(currentStoreId), {method:"PUT", body: JSON.stringify({plan: plan})})
+      .then(function(res){
+        if(handle401(res)) return;
+        if(!res.ok){ showToast(res.data.error || t("toast.error")); return; }
+        showToast(t("toast.planChanged"));
+        openStore(currentStoreId);
+        refresh();
+      });
+  });
+
+  document.getElementById("btnExtendTrial").addEventListener("click", function(){
+    if(!currentStoreId) return;
+    var trialEndsAt = document.getElementById("trialDate").value || null;
+    api("/api/platform/admin/stores/" + encodeURIComponent(currentStoreId), {method:"PUT", body: JSON.stringify({trialEndsAt: trialEndsAt})})
+      .then(function(res){
+        if(handle401(res)) return;
+        if(!res.ok){ showToast(res.data.error || t("toast.error")); return; }
+        showToast(t("toast.trialUpdated"));
+        openStore(currentStoreId);
+        refresh();
+      });
+  });
+
+  /* ---------- Add store ---------- */
+  var addStoreBtn = document.getElementById("addStoreBtn");
+  var addStorePanel = document.getElementById("addStorePanel");
+  addStoreBtn.addEventListener("click", function(){
+    document.getElementById("addError").textContent = "";
+    addStorePanel.style.display = addStorePanel.style.display === "none" ? "block" : "none";
+  });
+  document.getElementById("btnCancelAdd").addEventListener("click", function(){
+    addStorePanel.style.display = "none";
+    document.getElementById("addError").textContent = "";
+  });
+
+  document.getElementById("btnCreateStore").addEventListener("click", function(){
+    var name = document.getElementById("asName").value.trim();
+    var addError = document.getElementById("addError");
+    addError.textContent = "";
+    if(!name){ addError.textContent = t("toast.errorName"); return; }
+    var payload = {
+      storeName: name,
+      ownerName: document.getElementById("asOwner").value.trim() || null,
+      ownerEmail: document.getElementById("asEmail").value.trim() || null,
+      whatsapp: document.getElementById("asWhatsapp").value.trim() || null,
+      businessType: document.getElementById("asBusiness").value,
+      plan: document.getElementById("asPlan").value,
+      status: document.getElementById("asStatus").value,
+      trialEndsAt: document.getElementById("asTrial").value || null
+    };
+    api("/api/platform/admin/stores", {method:"POST", body: JSON.stringify(payload)})
+      .then(function(res){
+        if(handle401(res)) return;
+        if(!res.ok){ addError.textContent = res.data.error || t("toast.error"); return; }
+        addStorePanel.style.display = "none";
+        document.getElementById("asName").value = "";
+        document.getElementById("asOwner").value = "";
+        document.getElementById("asEmail").value = "";
+        document.getElementById("asWhatsapp").value = "";
+        document.getElementById("asTrial").value = "";
+        addError.textContent = "";
+        showToast(t("toast.created"));
+        refresh();
+      });
+  });
+
+  /* ---------- Language toggle ---------- */
+  document.querySelectorAll(".langBtn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var newLang = btn.getAttribute("data-lang");
+      if(newLang === lang) return;
+      lang = newLang;
+      localStorage.setItem("tgsPlatformLang", lang);
+      applyI18n();
+      renderStores();
+      fillSelects();
+      if(currentStoreId){
+        api("/api/platform/admin/stores/" + encodeURIComponent(currentStoreId)).then(function(res){
+          if(res.ok) renderStoreDetail(res.data);
+        });
+      }
+    });
+  });
+  applyI18n();
+
+  /* ---------- Init ---------- */
+  api("/api/platform/admin/session").then(function(res){
+    if(res.data && res.data.loggedIn){ showApp(); }
+    else{ showLogin(); }
+  }).catch(function(){ showLogin(); });
+
+})();
+</script>
+</body>
+</html>

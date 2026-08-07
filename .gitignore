@@ -9,5 +9,6 @@ admin_audit.json
 trash.json
 settings.json
 inventory_history.json
+platform_stores.json
 trash/
 .DS_Store

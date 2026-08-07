@@ -32,6 +32,11 @@ const INVENTORY_HISTORY_PATH = path.join(ROOT, 'inventory_history.json');
 const CUSTOMERS_PATH = path.join(ROOT, 'customers.json');
 const EXPENSES_PATH = path.join(ROOT, 'expenses.json');
 const PLATFORM_PATH = path.join(ROOT, 'platform.json');
+// Platform-owner runtime data (F1): which stores exist on the MiTienda
+// platform, who owns them, and their plan/status. This is COLHQ's view of
+// the platform, NOT the store owner's data — it stays git-ignored and is
+// never served to the storefront or the store admin panel.
+const PLATFORM_STORES_PATH = path.join(ROOT, 'platform_stores.json');
 fs.mkdirSync(TRASH_IMAGES_DIR, { recursive: true });
 
 // Platform identity (MiTienda by COLHQ) lives in platform.json — git-tracked,
@@ -81,7 +86,7 @@ const WOMPI_API_BASE = APP_ENV === 'production'
   ? 'https://production.wompi.co/v1'
   : 'https://sandbox.wompi.co/v1';
 
-const REQUIRED_ENV = ['WOMPI_PUBLIC_KEY', 'WOMPI_INTEGRITY_SECRET', 'WOMPI_EVENTS_SECRET', 'SITE_URL', 'ADMIN_TOKEN'];
+const REQUIRED_ENV = ['WOMPI_PUBLIC_KEY', 'WOMPI_INTEGRITY_SECRET', 'WOMPI_EVENTS_SECRET', 'SITE_URL', 'ADMIN_TOKEN', 'PLATFORM_ADMIN_TOKEN'];
 const missingEnv = REQUIRED_ENV.filter((k) => !process.env[k]);
 if (missingEnv.length) {
   console.warn(
@@ -136,6 +141,26 @@ const SESSION_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
 const AJAX_HEADER = 'x-requested-with';
 const AJAX_HEADER_VALUE = 'tgs-admin';
 
+// Platform-owner administration (F1). Entirely separate from the store admin
+// above: these authenticate against their own PLATFORM_ADMIN_TOKEN env var
+// and use their own session cookie + CSRF header value, so a logged-in store
+// admin is never automatically a platform owner. Platform credentials and
+// session cookies are never exposed to the storefront or store admin panel.
+const PLATFORM_SESSION_COOKIE = 'tgs_platform_session';
+const PLATFORM_SESSION_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
+const PLATFORM_AJAX_HEADER_VALUE = 'tgs-platform-admin';
+
+// Allowed plan/status/subscription values for platform store records.
+const STORE_PLANS = ['trial', 'basic', 'pro', 'enterprise'];
+const STORE_STATUSES = ['active', 'trial', 'suspended', 'cancelled'];
+const STORE_SUBSCRIPTION_STATUSES = ['none', 'trial', 'active', 'past_due', 'cancelled'];
+
+// PROVISIONAL plan pricing (USD/month). Placeholder constants only — there is
+// no real billing behind these numbers yet; MRR is a derived estimate. When
+// subscription billing is implemented, this gets replaced by real pricing.
+const PLAN_PRICING_USD = { trial: 0, basic: 29, pro: 49, enterprise: 99 };
+const TRIAL_EXPIRING_SOON_DAYS = 7;
+
 // ---------- security middleware ----------
 
 app.set('trust proxy', 1);
@@ -170,6 +195,11 @@ app.get('/', (req, res) => res.sendFile(path.join(ROOT, 'index.html')));
 app.get('/index.html', (req, res) => res.sendFile(path.join(ROOT, 'index.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(ROOT, 'admin.html')));
 app.get('/admin.html', (req, res) => res.sendFile(path.join(ROOT, 'admin.html')));
+// Platform-owner dashboard (F1) — for COLHQ/MiTienda staff, not store owners.
+// Served like admin.html: the page itself is static; every data route behind
+// it is guarded by platform authentication (requirePlatformAdmin).
+app.get('/platform-admin', (req, res) => res.sendFile(path.join(ROOT, 'platform-admin.html')));
+app.get('/platform-admin.html', (req, res) => res.sendFile(path.join(ROOT, 'platform-admin.html')));
 app.get('/products.json', (req, res) => res.json(loadProducts()));
 
 // ---------- helpers ----------
@@ -239,6 +269,30 @@ function saveExpenses(expenses) {
     fsp.writeFile(EXPENSES_PATH, JSON.stringify(expenses, null, 2))
   );
   return expensesWriteQueue;
+}
+
+// ---------- platform stores (COLHQ's registry of stores on the platform) ----------
+//
+// This is the platform owner's data layer (F1): one record per store on the
+// platform, kept separately from each store's own settings/products/orders.
+// It follows the same flat-file + serialized-write-queue convention as the
+// rest of the project. No store owner code reads or writes this file.
+
+function loadPlatformStores() {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(PLATFORM_STORES_PATH, 'utf8'));
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+let platformStoresWriteQueue = Promise.resolve();
+function savePlatformStores(stores) {
+  platformStoresWriteQueue = platformStoresWriteQueue.then(() =>
+    fsp.writeFile(PLATFORM_STORES_PATH, JSON.stringify(stores, null, 2))
+  );
+  return platformStoresWriteQueue;
 }
 
 // ---------- trash (recoverable delete for products + photos) ----------
@@ -915,6 +969,81 @@ function requireAdmin(req, res, next) {
 }
 
 const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many login attempts. Please wait and try again.' },
+});
+
+// ---------- platform-owner session store (F1) ----------
+//
+// A completely separate session system from the store-admin sessions above:
+// its own in-memory map, its own cookie name, its own token check. The two
+// never cross, so a store-admin session can never be used against platform
+// routes (and vice versa), and platform credentials are never part of the
+// store-side request flow.
+
+const platformSessions = new Map(); // sessionId -> { createdAt, expiresAt, ip }
+
+function createPlatformSession(ip) {
+  const id = crypto.randomBytes(32).toString('hex');
+  const now = Date.now();
+  platformSessions.set(id, { createdAt: now, expiresAt: now + PLATFORM_SESSION_TTL_MS, ip });
+  return id;
+}
+function getPlatformSession(id) {
+  if (!id) return null;
+  const s = platformSessions.get(id);
+  if (!s) return null;
+  if (Date.now() > s.expiresAt) {
+    platformSessions.delete(id);
+    return null;
+  }
+  return s;
+}
+function destroyPlatformSession(id) {
+  platformSessions.delete(id);
+}
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, s] of platformSessions) {
+    if (now > s.expiresAt) platformSessions.delete(id);
+  }
+}, 15 * 60 * 1000).unref();
+
+function platformPasswordMatches(input) {
+  const expected = process.env.PLATFORM_ADMIN_TOKEN || '';
+  if (!expected || typeof input !== 'string') return false;
+  const a = crypto.createHash('sha256').update(input).digest();
+  const b = crypto.createHash('sha256').update(expected).digest();
+  return crypto.timingSafeEqual(a, b);
+}
+
+// Same CSRF mitigation as the store admin surface: browsers only attach
+// custom headers to same-origin requests, so a cross-site form/img/script
+// can't trigger state-changing platform requests even with a valid platform
+// cookie present. Combined with SameSite=Strict on the platform cookie.
+function requirePlatformAjaxHeader(req, res, next) {
+  if (req.method !== 'GET' && req.headers[AJAX_HEADER] !== PLATFORM_AJAX_HEADER_VALUE) {
+    return res.status(403).json({ error: 'Forbidden.' });
+  }
+  next();
+}
+app.use('/api/platform/admin', requirePlatformAjaxHeader);
+
+// Platform authentication. Only a valid platform-owner session (created by
+// logging in with PLATFORM_ADMIN_TOKEN) passes; a store-admin session cookie
+// is never accepted here.
+function requirePlatformAdmin(req, res, next) {
+  const sessionId = req.signedCookies[PLATFORM_SESSION_COOKIE];
+  const session = getPlatformSession(sessionId);
+  if (!session) return res.status(401).json({ error: 'Not logged in.' });
+  req.platformSession = session;
+  next();
+}
+
+const platformLoginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 8,
   standardHeaders: true,
@@ -2261,6 +2390,261 @@ app.post('/api/admin/setup', requireAdmin, async (req, res) => {
   await saveStoreSettings(value);
   await auditLog({ action: 'setup_completed', storeId: value.storeId, ip: req.ip });
   res.json({ ok: true, settings: publicSettings(value) });
+});
+
+// ---------- platform owner administration (F1) ----------
+//
+// COLHQ/MiTienda staff manage every store on the platform here. These routes
+// are guarded by platform authentication only (PLATFORM_ADMIN_TOKEN + the
+// dedicated platform session) — the store-admin session never opens them.
+// No real billing, no multi-store routing, no "login as store", no store
+// deletion yet — those are deliberately out of scope for this phase.
+
+const PLATFORM_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const TRIAL_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+// Validates an incoming platform store record. `storeName` is required on
+// create; every other field is optional and keeps its previous value on
+// update (partial). Returns { errors, out } like the other validators.
+function validatePlatformStoreInput(body, opts) {
+  opts = opts || {};
+  const errors = [];
+  const out = {};
+  function check(field, val, ok, msg) {
+    if (val === undefined) {
+      if (!opts.partial) errors.push(field + ' is required.');
+      return;
+    }
+    if (!ok(val)) errors.push(msg);
+    else out[field] = val;
+  }
+  function opt(field, val, ok, msg) {
+    if (val === undefined) return;
+    if (!ok(val)) errors.push(msg);
+    else out[field] = val;
+  }
+  check('storeName', body.storeName,
+    (v) => typeof v === 'string' && v.trim().length > 0 && v.trim().length <= 60,
+    'storeName must be 1-60 characters.');
+  opt('ownerName', body.ownerName,
+    (v) => v === null || (typeof v === 'string' && v.length <= 120),
+    'ownerName must be 120 characters or fewer.');
+  opt('ownerEmail', body.ownerEmail,
+    (v) => v === null || (typeof v === 'string' && v.length <= 160 && PLATFORM_EMAIL_RE.test(v.trim())),
+    'ownerEmail must be a valid email address.');
+  opt('whatsapp', body.whatsapp,
+    (v) => v === null || (typeof v === 'string' && v.length <= 20 && PHONE_RE.test(v.trim())),
+    'whatsapp must contain only digits (plus an optional leading +).');
+  opt('businessType', body.businessType,
+    (v) => v === null || BUSINESS_TYPES.includes(v),
+    'businessType must be one of: ' + BUSINESS_TYPES.join(', ') + '.');
+  opt('plan', body.plan,
+    (v) => STORE_PLANS.includes(v),
+    'plan must be one of: ' + STORE_PLANS.join(', ') + '.');
+  opt('status', body.status,
+    (v) => STORE_STATUSES.includes(v),
+    'status must be one of: ' + STORE_STATUSES.join(', ') + '.');
+  opt('subscriptionStatus', body.subscriptionStatus,
+    (v) => STORE_SUBSCRIPTION_STATUSES.includes(v),
+    'subscriptionStatus must be one of: ' + STORE_SUBSCRIPTION_STATUSES.join(', ') + '.');
+  opt('trialEndsAt', body.trialEndsAt,
+    (v) => v === null || TRIAL_DATE_RE.test(v),
+    'trialEndsAt must be a YYYY-MM-DD date or null.');
+
+  if (out.storeName !== undefined) out.storeName = out.storeName.trim();
+  if (out.ownerName !== undefined && out.ownerName !== null) out.ownerName = out.ownerName.trim();
+  if (out.ownerEmail !== undefined && out.ownerEmail !== null) out.ownerEmail = out.ownerEmail.trim();
+  if (out.whatsapp !== undefined && out.whatsapp !== null) out.whatsapp = out.whatsapp.trim();
+  return { errors, out };
+}
+
+app.post('/api/platform/admin/login', platformLoginLimiter, async (req, res) => {
+  const { password } = req.body || {};
+  const ip = req.ip;
+  if (!platformPasswordMatches(password)) {
+    await auditLog({ action: 'platform_login_failed', ip, scope: 'platform' });
+    return res.status(401).json({ error: 'Incorrect platform password.' });
+  }
+  const sessionId = createPlatformSession(ip);
+  res.cookie(PLATFORM_SESSION_COOKIE, sessionId, {
+    httpOnly: true,
+    signed: true,
+    sameSite: 'strict',
+    secure: IS_PROD,
+    maxAge: PLATFORM_SESSION_TTL_MS,
+  });
+  await auditLog({ action: 'platform_login_success', ip, scope: 'platform' });
+  res.json({ ok: true });
+});
+
+app.post('/api/platform/admin/logout', requirePlatformAdmin, async (req, res) => {
+  destroyPlatformSession(req.signedCookies[PLATFORM_SESSION_COOKIE]);
+  res.clearCookie(PLATFORM_SESSION_COOKIE);
+  await auditLog({ action: 'platform_logout', ip: req.ip, scope: 'platform' });
+  res.json({ ok: true });
+});
+
+app.get('/api/platform/admin/session', (req, res) => {
+  const session = getPlatformSession(req.signedCookies[PLATFORM_SESSION_COOKIE]);
+  res.json({ loggedIn: Boolean(session) });
+});
+
+// Aggregated platform health: store counts, new-stores-this-month, trials
+// expiring soon, and an estimated MRR derived from the PROVISIONAL plan
+// pricing constants above (no real billing behind it yet).
+function platformDashboard() {
+  const stores = loadPlatformStores();
+  const now = new Date();
+  const monthKey = localDateKey(now).slice(0, 7);
+  const todayKey = localDateKey(now);
+  const expiringCutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  expiringCutoff.setDate(expiringCutoff.getDate() + TRIAL_EXPIRING_SOON_DAYS);
+  const cutoffStr = localDateKey(expiringCutoff);
+
+  let activeStores = 0;
+  let trialStores = 0;
+  let suspendedStores = 0;
+  let cancelledStores = 0;
+  let newStoresThisMonth = 0;
+  let estimatedMRR = 0;
+  const storesExpiringSoon = [];
+
+  for (const s of stores) {
+    if (String(s.createdAt || '').slice(0, 7) === monthKey) newStoresThisMonth += 1;
+
+    if (s.status === 'active') activeStores += 1;
+    else if (s.status === 'trial') trialStores += 1;
+    else if (s.status === 'suspended') suspendedStores += 1;
+    else if (s.status === 'cancelled') cancelledStores += 1;
+
+    // MRR: only live, paying stores count. Trial/suspended/cancelled stores
+    // contribute nothing. PROVISIONAL — placeholder pricing, see notes above.
+    if (s.status === 'active' && s.plan !== 'trial' && PLAN_PRICING_USD[s.plan] !== undefined) {
+      estimatedMRR += PLAN_PRICING_USD[s.plan];
+    }
+
+    // A store still on a trial whose trial end lands inside the window.
+    const isTrialish = s.plan === 'trial' || s.status === 'trial' || s.subscriptionStatus === 'trial';
+    if (isTrialish && s.trialEndsAt && s.trialEndsAt >= todayKey && s.trialEndsAt <= cutoffStr) {
+      storesExpiringSoon.push({ id: s.id, storeName: s.storeName, trialEndsAt: s.trialEndsAt, plan: s.plan });
+    }
+  }
+
+  storesExpiringSoon.sort((a, b) => (a.trialEndsAt < b.trialEndsAt ? -1 : 1));
+
+  return {
+    totalStores: stores.length,
+    activeStores,
+    trialStores,
+    suspendedStores,
+    cancelledStores,
+    newStoresThisMonth,
+    storesExpiringSoon,
+    storesExpiringSoonCount: storesExpiringSoon.length,
+    estimatedMRR,
+    mrrProvisional: true,
+  };
+}
+
+app.get('/api/platform/admin/dashboard', requirePlatformAdmin, (req, res) => {
+  res.json(platformDashboard());
+});
+
+app.get('/api/platform/admin/stores', requirePlatformAdmin, (req, res) => {
+  const stores = loadPlatformStores()
+    .slice()
+    .sort((a, b) => new Date(b.lastActivityAt || b.createdAt || 0) - new Date(a.lastActivityAt || a.createdAt || 0));
+  res.json(stores);
+});
+
+app.get('/api/platform/admin/stores/:id', requirePlatformAdmin, (req, res) => {
+  const store = loadPlatformStores().find((s) => s.id === req.params.id);
+  if (!store) return res.status(404).json({ error: 'Store not found.' });
+  res.json(store);
+});
+
+app.post('/api/platform/admin/stores', requirePlatformAdmin, async (req, res) => {
+  const { errors, out } = validatePlatformStoreInput(req.body || {});
+  if (errors.length) return res.status(400).json({ error: errors.join(' ') });
+
+  const now = new Date().toISOString();
+  const plan = out.plan || 'trial';
+  const store = {
+    id: crypto.randomBytes(8).toString('hex'),
+    storeName: out.storeName,
+    ownerName: out.ownerName !== undefined ? out.ownerName : null,
+    ownerEmail: out.ownerEmail !== undefined ? out.ownerEmail : null,
+    whatsapp: out.whatsapp !== undefined ? out.whatsapp : null,
+    businessType: out.businessType !== undefined ? out.businessType : null,
+    plan,
+    status: out.status || 'trial',
+    trialEndsAt: out.trialEndsAt !== undefined ? out.trialEndsAt : null,
+    subscriptionStatus: out.subscriptionStatus || (plan === 'trial' ? 'trial' : 'none'),
+    createdAt: now,
+    updatedAt: now,
+    lastActivityAt: now,
+  };
+
+  const stores = loadPlatformStores();
+  stores.push(store);
+  await savePlatformStores(stores);
+  await auditLog({
+    action: 'platform_store_create', storeId: store.id, storeName: store.storeName,
+    plan, status: store.status, ip: req.ip, scope: 'platform',
+  });
+  res.status(201).json(store);
+});
+
+// Profile/plan/trial update ("Change plan" and "Extend trial" both land here,
+// plus general store profile edits). Status changes go through the dedicated
+// PATCH /status route below so every suspend/activate is audited as its own
+// action.
+app.put('/api/platform/admin/stores/:id', requirePlatformAdmin, async (req, res) => {
+  const stores = loadPlatformStores();
+  const idx = stores.findIndex((s) => s.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Store not found.' });
+
+  const { errors, out } = validatePlatformStoreInput(req.body || {}, { partial: true });
+  if (errors.length) return res.status(400).json({ error: errors.join(' ') });
+
+  const before = Object.assign({}, stores[idx]);
+  for (const key of ['storeName', 'ownerName', 'ownerEmail', 'whatsapp', 'businessType', 'plan', 'trialEndsAt', 'subscriptionStatus']) {
+    if (out[key] !== undefined) stores[idx][key] = out[key];
+  }
+  stores[idx].updatedAt = new Date().toISOString();
+  stores[idx].lastActivityAt = stores[idx].updatedAt;
+  await savePlatformStores(stores);
+
+  const changed = Object.keys(out).filter((k) => out[k] !== before[k]);
+  await auditLog({
+    action: 'platform_store_update', storeId: req.params.id, changed: changed.join(',') || 'none',
+    fromPlan: before.plan, toPlan: stores[idx].plan, ip: req.ip, scope: 'platform',
+  });
+  res.json(stores[idx]);
+});
+
+// Platform-only status action: activate / suspend / (trial/cancelled). Every
+// change is audit logged with before+after so platform owner actions are
+// traceable.
+app.patch('/api/platform/admin/stores/:id/status', requirePlatformAdmin, async (req, res) => {
+  const { status } = req.body || {};
+  if (!STORE_STATUSES.includes(status)) {
+    return res.status(400).json({ error: 'status must be one of: ' + STORE_STATUSES.join(', ') + '.' });
+  }
+  const stores = loadPlatformStores();
+  const idx = stores.findIndex((s) => s.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Store not found.' });
+
+  const from = stores[idx].status;
+  stores[idx].status = status;
+  stores[idx].updatedAt = new Date().toISOString();
+  stores[idx].lastActivityAt = stores[idx].updatedAt;
+  await savePlatformStores(stores);
+  await auditLog({
+    action: 'platform_store_status_change', storeId: req.params.id, from, to: status,
+    ip: req.ip, scope: 'platform',
+  });
+  res.json(stores[idx]);
 });
 
 app.get('/api/health', (req, res) => {

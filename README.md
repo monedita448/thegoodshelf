@@ -89,6 +89,36 @@ Viewing/printing a receipt from `/admin` always works, no setup needed. To also 
 
 Any other SMTP provider (Brevo, Resend, Mailgun, etc.) works the same way — just swap in the host/port/username/password they give you. If `SMTP_*` isn't set, the button shows a clear error instead of failing silently, and the view/print link keeps working regardless.
 
+## 7. Platform owner dashboard (COLHQ staff only)
+
+Two different logins exist, and they must never be confused:
+
+- **Store admin** (`/admin`) — the individual store owner manages *their own* store (products, orders, customers, finance, settings). Logged in with `ADMIN_TOKEN`.
+- **Platform owner** (`/platform-admin`) — **COLHQ/MiTienda staff** manage the platform: every store on it, its owner, plan, status, and trial. Logged in with `PLATFORM_ADMIN_TOKEN`, which is a **separate** environment variable. A store-admin session **never** grants platform access, and the platform dashboard never inherits a store's name, theme, or logo — it's always branded "MiTienda by COLHQ".
+
+### Platform owner features (Phase F1)
+
+- Dashboard metrics: total / active / trial / suspended stores, new this month, and an estimated MRR (provisional placeholder derived from internal plan pricing — **no real billing yet**).
+- Store registry: list all stores, view a store's full record (owner/contact, business type, plan, status, trial expiration, subscription status, created/last-activity dates).
+- Platform-only actions: **Activate**, **Suspend**, **Change plan**, **Extend trial** — every one is audit-logged.
+- Add a new store record to the platform registry.
+
+### Platform data & API
+
+- `platform_stores.json` — git-ignored runtime file holding the platform's store registry (one record per store: `id, storeName, ownerName, ownerEmail, whatsapp, businessType, plan, status, trialEndsAt, subscriptionStatus, createdAt, updatedAt, lastActivityAt`). Allowed `plan`: `trial|basic|pro|enterprise`; allowed `status`: `active|trial|suspended|cancelled`; allowed `subscriptionStatus`: `none|trial|active|past_due|cancelled`. It's separate from each store's own `settings.json`/`products.json`/`orders.json` and is never served to the storefront or store admin.
+- All platform routes live under `/api/platform/admin/*` and require platform authentication (`requirePlatformAdmin`, its own session cookie + CSRF header value):
+  - `POST /api/platform/admin/login` · `POST /api/platform/admin/logout` · `GET /api/platform/admin/session`
+  - `GET /api/platform/admin/dashboard`
+  - `GET /api/platform/admin/stores` · `GET /api/platform/admin/stores/:id`
+  - `POST /api/platform/admin/stores`
+  - `PUT /api/platform/admin/stores/:id`
+  - `PATCH /api/platform/admin/stores/:id/status`
+- To use it locally: set `PLATFORM_ADMIN_TOKEN` in `.env` (see `.env.example`), then open `http://localhost:3000/platform-admin`.
+
+### Intentionally not implemented (yet)
+
+No real subscription billing, no "login as store", no store deletion, and no multi-store routing/tenancy — the app still runs as a single-store platform. The platform registry is the foundation those features will build on.
+
 ## Security
 
 Built with the assumption that this will be deployed for real clients handling real customer data, so the admin panel takes reasonable precautions:
@@ -134,10 +164,12 @@ So per new client, the only things that ever need setting up are: their own `ADM
 ## Files
 
 - `index.html` — the storefront
-- `admin.html` — the admin panel (dashboard, products, orders + shipping + WhatsApp, trash)
+- `admin.html` — the store owner's admin panel (dashboard, products, orders + shipping + WhatsApp, trash)
+- `platform-admin.html` — the platform owner dashboard (COLHQ staff only, separate login)
 - `products.json` — product catalog: photos, prices in COP, stock
 - `server.js` — backend: checkout, Wompi signing + webhook verification, admin auth, product/order APIs, trash
 - `orders.json` — order log (auto-created, git-ignored)
 - `admin_audit.json` — admin action log (auto-created, git-ignored)
 - `trash.json` / `trash/` — recoverable deletes (auto-created, git-ignored)
+- `platform_stores.json` — platform store registry (auto-created, git-ignored)
 - `.env` — your secrets (git-ignored, never commit this)
