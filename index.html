@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script>document.documentElement.classList.add('js')</script>
   <style>
     :root{
       --bg:#f7f3ec;
@@ -21,12 +22,14 @@
       --radius:24px;
     }
     *{box-sizing:border-box}
+    html,body{overflow-x:clip}
     html{scroll-behavior:smooth}
     body{
       margin:0;
       font-family:Inter,system-ui,sans-serif;
       background:linear-gradient(180deg,#fbf8f2 0%,#f4efe7 100%);
       color:var(--text);
+      -webkit-tap-highlight-color:transparent;
     }
     a{text-decoration:none;color:inherit}
     img{max-width:100%;display:block}
@@ -132,11 +135,13 @@
       aspect-ratio:1.03;
       border-bottom:1px solid var(--line);
       background:linear-gradient(145deg,#efe5d7,#fff);
+      overflow:hidden;
     }
     .pimg img{
       width:100%;
       height:100%;
       object-fit:cover;
+      transition:transform .8s cubic-bezier(.22,1,.36,1);
     }
     .pc{padding:16px 16px 18px}
     .meta{
@@ -178,8 +183,29 @@
       font-weight:700;
       color:var(--text);
       cursor:pointer;
+      touch-action:manipulation;
+      -webkit-tap-highlight-color:transparent;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      transition:transform .18s cubic-bezier(.22,1,.36,1),border-color .3s ease,background-color .3s ease,color .3s ease,box-shadow .3s ease;
     }
-    .smallBtn:hover{border-color:#d6c8b5}
+    .smallBtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    .smallBtn.is-added{
+      background:var(--text);
+      color:#fff;
+      border-color:var(--text);
+      animation:pop .35s cubic-bezier(.22,1,.36,1);
+    }
+    @keyframes pop{0%{transform:scale(1)}40%{transform:scale(.92)}100%{transform:scale(1)}}
+    @media (hover:hover) and (pointer:fine){
+      .card:hover{transform:translateY(-6px);box-shadow:0 30px 60px rgba(0,0,0,.13)}
+      .card:hover .pimg img{transform:scale(1.06)}
+      .smallBtn:hover{border-color:#d6c8b5}
+      .smallBtn:not(.is-added):hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(0,0,0,.07)}
+    }
+    .actions .smallBtn:active{transform:scale(.97)}
 
     .about{padding:0 0 84px}
     .split{
@@ -236,6 +262,47 @@
       padding-top:18px;
     }
 
+    html.js .reveal{
+      opacity:0;
+      transform:translateY(22px);
+      transition:opacity .7s ease,transform .5s cubic-bezier(.22,1,.36,1),box-shadow .5s cubic-bezier(.22,1,.36,1);
+    }
+    html.js .reveal.is-visible{opacity:1;transform:none}
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:28px;
+      transform:translate(-50%,16px);
+      background:var(--text);
+      color:#fff;
+      padding:12px 20px;
+      border-radius:999px;
+      font-size:.92rem;
+      font-weight:600;
+      letter-spacing:.02em;
+      box-shadow:0 18px 44px rgba(0,0,0,.22);
+      opacity:0;
+      visibility:hidden;
+      transition:opacity .35s ease,transform .35s cubic-bezier(.22,1,.36,1),visibility .35s;
+      z-index:60;
+      pointer-events:none;
+      max-width:calc(100vw - 40px);
+      text-align:center;
+    }
+    .toast.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
+
+    @media (prefers-reduced-motion:reduce){
+      html{scroll-behavior:auto}
+      *,*::before,*::after{
+        animation-duration:.01ms!important;
+        animation-iteration-count:1!important;
+        transition-duration:.01ms!important;
+        transition-delay:0s!important;
+      }
+      html.js .reveal{opacity:1;transform:none}
+    }
+
     @media (max-width:960px){
       .grid{grid-template-columns:repeat(2,1fr)}
       .split{grid-template-columns:1fr}
@@ -262,7 +329,7 @@
 
   <main id="home">
     <section class="hero wrap">
-      <div class="heroCard">
+      <div class="heroCard reveal">
         <span class="eyebrow">Medellín • Curated everyday living</span>
         <h1>The Good Shelf</h1>
         <p class="sub">Where convenience meets good taste.<br>Everyday essentials, beautifully curated.</p>
@@ -270,7 +337,7 @@
     </section>
 
     <section id="shop" class="shop wrap">
-      <div class="sectionHead">
+      <div class="sectionHead reveal">
         <div>
           <h2>Curated essentials for everyday living.</h2>
           <p>Thoughtful pantry staples, refined basics, and products that feel simple, useful, and elevated.</p>
@@ -278,7 +345,7 @@
       </div>
 
       <div class="grid">
-        <article class="card panel">
+        <article class="card panel reveal">
           <div class="pimg"><img alt="Organic creamy unsalted almond butter" src="https://images.unsplash.com/photo-1608797178974-15b35a64ede9?auto=format&amp;fit=crop&amp;w=900&amp;q=80"></div>
           <div class="pc">
             <div class="meta"><span class="tag">Pantry</span><span class="price">$18</span></div>
@@ -288,7 +355,7 @@
           </div>
         </article>
 
-        <article class="card panel">
+        <article class="card panel reveal">
           <div class="pimg"><img alt="Organic extra virgin olive oil" src="https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&amp;fit=crop&amp;w=900&amp;q=80"></div>
           <div class="pc">
             <div class="meta"><span class="tag">Cooking</span><span class="price">$22</span></div>
@@ -298,7 +365,7 @@
           </div>
         </article>
 
-        <article class="card panel">
+        <article class="card panel reveal">
           <div class="pimg"><img alt="Organic whole grain pasta" src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&amp;fit=crop&amp;w=900&amp;q=80"></div>
           <div class="pc">
             <div class="meta"><span class="tag">Dinner</span><span class="price">$12</span></div>
@@ -308,7 +375,7 @@
           </div>
         </article>
 
-        <article class="card panel">
+        <article class="card panel reveal">
           <div class="pimg"><img alt="Organic rolled oats" src="https://images.unsplash.com/photo-1515023115689-589c33041d3c?auto=format&amp;fit=crop&amp;w=900&amp;q=80"></div>
           <div class="pc">
             <div class="meta"><span class="tag">Breakfast</span><span class="price">$10</span></div>
@@ -318,7 +385,7 @@
           </div>
         </article>
 
-        <article class="card panel">
+        <article class="card panel reveal">
           <div class="pimg"><img alt="Dark roast coffee beans" src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&amp;w=900&amp;q=80"></div>
           <div class="pc">
             <div class="meta"><span class="tag">Coffee</span><span class="price">$16</span></div>
@@ -328,7 +395,7 @@
           </div>
         </article>
 
-        <article class="card panel">
+        <article class="card panel reveal">
           <div class="pimg"><img alt="Artisan sea salt" src="https://images.unsplash.com/photo-1515023115689-589c33041d3c?auto=format&fit=crop&amp;w=900&amp;q=80"></div>
           <div class="pc">
             <div class="meta"><span class="tag">Seasoning</span><span class="price">$8</span></div>
@@ -338,7 +405,7 @@
           </div>
         </article>
 
-        <article class="card panel">
+        <article class="card panel reveal">
           <div class="pimg"><img alt="Premium granola clusters" src="https://images.unsplash.com/photo-1517093157656-b9eccef91cb1?auto=format&fit=crop&amp;w=900&amp;q=80"></div>
           <div class="pc">
             <div class="meta"><span class="tag">Breakfast</span><span class="price">$14</span></div>
@@ -348,7 +415,7 @@
           </div>
         </article>
 
-        <article class="card panel">
+        <article class="card panel reveal">
           <div class="pimg"><img alt="Herbal tea assortment" src="https://images.unsplash.com/photo-1515823662972-da6a2e4d3002?auto=format&amp;fit=crop&amp;w=900&amp;q=80"></div>
           <div class="pc">
             <div class="meta"><span class="tag">Wellness</span><span class="price">$11</span></div>
@@ -362,7 +429,7 @@
 
     <section id="about" class="about wrap">
       <div class="split">
-        <div class="textBlock panel">
+        <div class="textBlock panel reveal">
           <h2>About the shelf</h2>
           <p>The Good Shelf is designed as a modern everyday store with a refined point of view. It is meant to feel familiar, curated, and worth browsing.</p>
           <p>Built for Medellín, made to feel good for expats and locals alike.</p>
@@ -373,7 +440,7 @@
           </div>
         </div>
 
-        <div class="textBlock panel">
+        <div class="textBlock panel reveal">
           <h2>Payment Methods</h2>
           <p>CashApp | Zelle | Nequi | Solana | BTC</p>
           <p><a class="btn btnGhost" href="#home">Back to Top</a></p>
@@ -388,5 +455,66 @@
       <div>Where convenience meets good taste.</div>
     </div>
   </footer>
+  <script>
+    (function(){
+      var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var revealEls=document.querySelectorAll('.reveal');
+      function stagger(el){
+        var parent=el.parentElement;
+        if(!parent) return 0;
+        return Math.min(Array.prototype.indexOf.call(parent.children,el)*60,360);
+      }
+      if(reduce||!('IntersectionObserver' in window)){
+        for(var i=0;i<revealEls.length;i++) revealEls[i].classList.add('is-visible');
+        return;
+      }
+      var io=new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(!entry.isIntersecting) return;
+          var el=entry.target;
+          el.style.transitionDelay=stagger(el)+'ms';
+          el.classList.add('is-visible');
+          el.addEventListener('transitionend',function clearDelay(){
+            el.style.transitionDelay='';
+            el.removeEventListener('transitionend',clearDelay);
+          });
+          io.unobserve(el);
+        });
+      },{threshold:.15,rootMargin:'0px 0px -40px 0px'});
+      for(var j=0;j<revealEls.length;j++) io.observe(revealEls[j]);
+    })();
+
+    (function(){
+      var grid=document.querySelector('.grid');
+      if(!grid) return;
+      var toast=null;
+      function showToast(msg){
+        if(!toast){
+          toast=document.createElement('div');
+          toast.className='toast';
+          toast.setAttribute('role','status');
+          toast.setAttribute('aria-live','polite');
+          document.body.appendChild(toast);
+        }
+        toast.textContent=msg;
+        toast.classList.add('show');
+        clearTimeout(showToast._t);
+        showToast._t=setTimeout(function(){toast.classList.remove('show')},1900);
+      }
+      grid.addEventListener('click',function(e){
+        var btn=e.target.closest('.smallBtn');
+        if(!btn||btn.classList.contains('is-added')) return;
+        if(btn.textContent.trim().toLowerCase()!=='add') return;
+        var original=btn.textContent;
+        btn.classList.add('is-added');
+        btn.textContent='Added ✓';
+        showToast('Added to your shelf');
+        setTimeout(function(){
+          btn.classList.remove('is-added');
+          btn.textContent=original;
+        },1700);
+      });
+    })();
+  </script>
 </body>
 </html>
