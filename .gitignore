@@ -3,7 +3,11 @@ node_modules/
 .env.*
 !.env.example
 orders.json
+customers.json
+expenses.json
 admin_audit.json
 trash.json
+settings.json
+inventory_history.json
 trash/
 .DS_Store

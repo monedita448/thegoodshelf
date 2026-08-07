@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Admin — The Good Shelf</title>
+<title>Admin — MiTienda by COLHQ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -41,6 +41,40 @@ h1,h2,h3{font-family:'Cormorant Garamond',serif;margin:0}
 .btnGhost{border-color:var(--line);background:#fff}
 .btnDanger{background:var(--danger);color:#fff}
 .errMsg{color:var(--danger);font-size:.86rem;margin-top:10px;min-height:1.2em}
+
+/* First-run setup wizard */
+#setupScreen{display:none;min-height:100vh;place-items:center;padding:24px;background:var(--bg)}
+.setupCard{width:min(560px,100%);background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 30px rgba(0,0,0,.08);overflow:hidden}
+.setupHead{padding:22px 28px 18px;border-bottom:1px solid var(--line);text-align:center}
+.setupLogo{font-weight:800;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.setupHead h1{font-size:1.55rem}
+.setupSteps{display:flex;gap:8px;justify-content:center;margin-top:14px}
+.setupDot{width:30px;height:30px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;border:1px solid var(--line);color:var(--muted);background:#fff;transition:background .15s ease,color .15s ease}
+.setupDot.active{background:var(--text);color:#fff;border-color:var(--text)}
+.setupDot.done{background:var(--success);color:#fff;border-color:var(--success)}
+.setupBody{padding:26px 28px}
+.setupStep{display:none}
+.setupStep.active{display:block}
+.setupStep h2{font-size:1.2rem}
+.setupStep > p{color:var(--muted);margin:2px 0 16px;font-size:.95rem}
+.suLabel{display:block;font-size:.8rem;font-weight:700;margin:4px 0 6px;color:var(--muted)}
+.suOptions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.suOptions.suThemes{grid-template-columns:repeat(2,1fr)}
+.suOpt{border:1.5px solid var(--line);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;background:#fff;transition:border-color .15s ease,box-shadow .15s ease}
+.suOpt:hover{border-color:var(--accent)}
+.suOpt.selected{border-color:var(--text);box-shadow:0 0 0 2px var(--text)}
+.suOptName{font-weight:700;font-size:.92rem;margin-top:8px}
+.suOptDesc{color:var(--muted);font-size:.78rem;margin-top:2px}
+.suSwatch{display:flex;justify-content:center;gap:4px;margin-top:10px}
+.suSwatch i{width:18px;height:18px;border-radius:6px;border:1px solid rgba(0,0,0,.12);display:inline-block}
+.suDone{text-align:center;padding:18px 0 8px}
+.suCheck{width:64px;height:64px;border-radius:999px;background:var(--success);color:#fff;font-size:1.9rem;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.setupFoot{display:flex;gap:10px;align-items:center;padding:16px 28px 24px;border-top:1px solid var(--line)}
+.setupFoot .btn{width:auto;padding:11px 26px}
+.setupFoot .btnPrimary{flex:1}
+.suSpacer{flex:1}
+#suLogout{color:var(--muted);font-size:.82rem;text-decoration:underline;white-space:nowrap}
+@media (max-width:520px){.suOptions{grid-template-columns:repeat(2,1fr)}}
 
 /* Dashboard */
 #dashboard{display:none}
@@ -110,6 +144,39 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
 .statCard.warn .statValue{color:var(--danger)}
 .lowStockRow{display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);font-size:.9rem}
 .lowStockRow:last-child{border-bottom:none}
+.inventorySummary{display:flex;flex-wrap:wrap;gap:6px 18px;padding:16px 16px 0;font-size:.85rem;color:var(--muted)}
+.inventorySummary b{color:var(--text)}
+.inventorySummary .sep{opacity:.4}
+.invRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);font-size:.9rem}
+.invRow:last-child{border-bottom:none}
+.invDelta{font-weight:700;white-space:nowrap}
+.invDelta.up{color:var(--success)}
+.invDelta.down{color:var(--danger)}
+.salesRow{display:flex;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.salesRow:last-child{border-bottom:none}
+.salesMain{min-width:0}
+.salesRef{font-weight:700;font-size:.9rem}
+.salesCust{display:block;font-size:.82rem;color:var(--muted);margin-top:1px}
+.salesItems{display:block;font-size:.82rem;color:var(--text);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70vw}
+.salesMeta{font-size:.78rem;color:var(--muted)}
+.salesDate{display:block;font-size:.74rem;color:var(--muted);margin-top:2px}
+.salesRight{text-align:right;flex-shrink:0}
+.salesTotal{display:block;font-weight:700;font-size:.9rem}
+.salesProfit{display:block;font-size:.78rem;color:var(--success);margin-top:2px}
+.payChip{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.72rem;font-weight:600;background:#efe7d8;color:#6b5f47;margin-top:4px}
+.custRow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.custRow:last-child{border-bottom:none}
+.custMain{min-width:0;flex:1 1 220px}
+.custName{font-weight:700;font-size:.95rem;display:block}
+.custPhone{display:block;font-size:.82rem;color:var(--muted);margin-top:2px}
+.custMeta{display:block;font-size:.78rem;color:var(--muted);margin-top:4px}
+.custMeta b{color:var(--text)}
+.custActions{display:flex;gap:8px;align-items:center}
+.custActions .smallBtn{text-decoration:none;color:var(--text)}
+.custActions .smallBtn.wa{color:#1faa59;border-color:#bfe8cd}
+.expCatChip{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.72rem;font-weight:600;background:#efe7d8;color:#6b5f47}
+#efErr{color:var(--danger);font-size:.86rem}
+.salesProfitHint{padding:10px 14px;font-size:.82rem;color:#8a6d3b;background:#fbf6e9;border-top:1px solid var(--line)}
 @media (max-width:720px){
   .statGrid{grid-template-columns:1fr 1fr}
 }
@@ -186,6 +253,31 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
   .loginCard{padding:24px}
   .langBtn{padding:4px 6px;font-size:.9rem}
 }
+
+/* Settings — grouped sections, mobile-first. */
+.settingsGroup{padding:20px 18px 0}
+.settingsGroup h3{margin:0 0 12px;font-size:.95rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.settingsGroup .formGrid{margin-bottom:0}
+.settingsGroup + .settingsGroup{border-top:1px solid var(--line)}
+.settingsActions{display:flex;gap:10px;padding:18px}
+.settingsActions .btn{flex:1;width:auto}
+.checkRow{padding:10px 0}
+.checkLabel{display:flex;align-items:center;gap:10px;font-size:.9rem;font-weight:600;color:var(--text);cursor:pointer}
+.checkLabel input[type="checkbox"]{width:18px;height:18px;flex-shrink:0;accent-color:var(--accent)}
+.logoPreview{margin-top:10px;display:flex;align-items:center;gap:12px;font-size:.84rem}
+.logoPreview[hidden]{display:none}
+.logoPreview img{max-width:120px;max-height:56px;object-fit:contain;border:1px solid var(--line);border-radius:10px;background:#fff;padding:6px}
+.logoPreview.err{color:var(--danger)}
+.storePreview{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.spHeader{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-bottom:1px solid var(--line);font-weight:700;font-size:.92rem}
+.spLogo img{height:26px;width:auto;max-width:120px;object-fit:contain}
+.spTag{color:var(--muted);font-size:.78rem;font-weight:400;margin-left:auto;text-align:right}
+.spFooter{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 14px;color:var(--muted);font-size:.78rem}
+.spFooter [hidden]{display:none}
+@media (max-width:480px){
+  .settingsActions{flex-direction:column}
+  .settingsActions .btn{width:100%}
+}
 </style>
 </head>
 <body>
@@ -193,7 +285,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
 <div id="loginScreen">
   <div class="loginCard">
     <h1>Admin</h1>
-    <p data-i18n="login.subtitle">The Good Shelf — store management</p>
+    <p data-i18n="login.subtitle">MiTienda by COLHQ — store management</p>
     <input class="field" id="loginPassword" type="password" placeholder="Admin password" data-i18n-placeholder="login.passwordPlaceholder" autocomplete="current-password">
     <button class="btn btnPrimary" id="loginBtn" data-i18n="login.submit">Log in</button>
     <div class="errMsg" id="loginError"></div>
@@ -203,14 +295,85 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
   </div>
 </div>
 
+<!-- First-run setup wizard (Spanish first — target market is Colombia) -->
+<div id="setupScreen">
+  <div class="setupCard">
+    <div class="setupHead">
+      <div class="setupLogo">MiTienda by COLHQ</div>
+      <h1>Configura tu tienda</h1>
+      <div class="setupSteps">
+        <span class="setupDot active">1</span>
+        <span class="setupDot">2</span>
+        <span class="setupDot">3</span>
+        <span class="setupDot">4</span>
+        <span class="setupDot">5</span>
+      </div>
+    </div>
+
+    <div class="setupBody">
+      <div class="setupStep active" id="suStep1">
+        <h2>Paso 1 de 5</h2>
+        <p>Nombre de tu tienda</p>
+        <input class="field" id="suName" maxlength="60" placeholder="Ej: Mi Tienda de Moda">
+      </div>
+
+      <div class="setupStep" id="suStep2">
+        <h2>Paso 2 de 5</h2>
+        <p>¿Qué vendes?</p>
+        <div class="suOptions" id="suType"></div>
+      </div>
+
+      <div class="setupStep" id="suStep3">
+        <h2>Paso 3 de 5</h2>
+        <p>Selecciona diseño</p>
+        <div class="suOptions suThemes" id="suTheme"></div>
+      </div>
+
+      <div class="setupStep" id="suStep4">
+        <h2>Paso 4 de 5</h2>
+        <p>Contacto</p>
+        <label class="suLabel">WhatsApp</label>
+        <input class="field" id="suWhatsapp" placeholder="+57 300 000 0000">
+        <label class="suLabel">Instagram</label>
+        <input class="field" id="suInstagram" placeholder="@tutienda">
+      </div>
+
+      <div class="setupStep" id="suStep5">
+        <h2>Paso 5 de 5</h2>
+        <p>Pagos</p>
+        <div class="suOptions" id="suPayment"></div>
+      </div>
+
+      <div class="setupStep suDone" id="suDone">
+        <div class="suCheck">✓</div>
+        <h2>Tu tienda está lista</h2>
+        <p>Ya puedes agregar tus productos y recibir tus primeros pedidos.</p>
+      </div>
+    </div>
+
+    <div class="errMsg" id="suError" style="padding:0 28px"></div>
+
+    <div class="setupFoot">
+      <button class="btn btnGhost" id="suBack">Atrás</button>
+      <button class="btn btnPrimary" id="suNext">Siguiente</button>
+      <button class="btn btnPrimary" id="suFinish" hidden>Ir al panel</button>
+      <span class="suSpacer"></span>
+      <a href="#" id="suLogout">Cerrar sesión</a>
+    </div>
+  </div>
+</div>
+
 <div id="dashboard">
   <header class="topbar">
     <div class="wrap topbarin">
-      <div class="brand">The Good Shelf — Admin</div>
+      <div class="brand">MiTienda by COLHQ — Admin</div>
       <div class="tabs">
         <button class="tabBtn active" id="tabHome" data-i18n="tab.dashboard">Dashboard</button>
         <button class="tabBtn" id="tabProducts" data-i18n="tab.products">Products</button>
         <button class="tabBtn" id="tabOrders" data-i18n="tab.orders">Orders</button>
+        <button class="tabBtn" id="tabCustomers" data-i18n="tab.customers">Customers</button>
+        <button class="tabBtn" id="tabFinance" data-i18n="tab.finance">Finance</button>
+        <button class="tabBtn" id="tabSettings" data-i18n="tab.settings">Settings</button>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
         <div class="langToggle" id="langToggle">
@@ -229,12 +392,48 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       </div>
       <div class="statGrid">
         <div class="statCard">
+          <div class="statLabel" data-i18n="dashboard.salesToday">Sales today</div>
+          <div class="statValue" id="statSalesToday">—</div>
+        </div>
+        <div class="statCard">
+          <div class="statLabel" data-i18n="dashboard.salesWeek">Sales this week</div>
+          <div class="statValue" id="statSalesWeek">—</div>
+        </div>
+        <div class="statCard">
+          <div class="statLabel" data-i18n="dashboard.salesMonth">Sales this month</div>
+          <div class="statValue" id="statSalesMonth">—</div>
+        </div>
+        <div class="statCard">
           <div class="statLabel" data-i18n="dashboard.totalSales">Total sales</div>
           <div class="statValue" id="statSales">—</div>
         </div>
         <div class="statCard">
+          <div class="statLabel" data-i18n="dashboard.orders">Orders</div>
+          <div class="statValue" id="statOrderCount">—</div>
+        </div>
+        <div class="statCard">
+          <div class="statLabel" data-i18n="dashboard.averageOrder">Avg. order value</div>
+          <div class="statValue" id="statAvgOrder">—</div>
+        </div>
+        <div class="statCard" id="statProfitCard">
+          <div class="statLabel" data-i18n="dashboard.grossProfit">Est. gross profit</div>
+          <div class="statValue" id="statGrossProfit">—</div>
+        </div>
+        <div class="statCard">
           <div class="statLabel" data-i18n="dashboard.ordersToday">Orders today</div>
           <div class="statValue" id="statOrdersToday">—</div>
+        </div>
+        <div class="statCard">
+          <div class="statLabel" data-i18n="dashboard.totalCustomers">Total customers</div>
+          <div class="statValue" id="statCustomers">—</div>
+        </div>
+        <div class="statCard">
+          <div class="statLabel" data-i18n="dashboard.newCustomersMonth">New this month</div>
+          <div class="statValue" id="statNewCustomers">—</div>
+        </div>
+        <div class="statCard">
+          <div class="statLabel" data-i18n="dashboard.repeatCustomers">Repeat customers</div>
+          <div class="statValue" id="statRepeatCustomers">—</div>
         </div>
         <div class="statCard" id="statAwaitingCard">
           <div class="statLabel" data-i18n="dashboard.awaitingShipment">Awaiting shipment</div>
@@ -244,6 +443,10 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
           <div class="statLabel" data-i18n="dashboard.lowStockItems">Low stock items</div>
           <div class="statValue" id="statLowStockCount">—</div>
         </div>
+        <div class="statCard">
+          <div class="statLabel" data-i18n="dashboard.inventoryValue">Inventory value</div>
+          <div class="statValue" id="statInventory" style="font-size:1.4rem">—</div>
+        </div>
       </div>
       <div class="card">
         <div class="panelHead" style="padding:16px 16px 0">
@@ -251,6 +454,15 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
         </div>
         <div id="lowStockList"></div>
         <div class="emptyMsg" id="lowStockEmpty" style="display:none" data-i18n="dashboard.lowStockEmpty">Nothing running low right now.</div>
+      </div>
+      <div class="card" style="margin-top:24px">
+        <div class="panelHead" style="padding:16px 16px 0">
+          <h3 style="font-family:Inter,sans-serif;font-size:.95rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em" data-i18n="dashboard.salesHistory">Sales history</h3>
+        </div>
+        <p style="color:var(--muted);font-size:.82rem;padding:0 16px;margin:6px 0 0" data-i18n="dashboard.salesHistoryHint">Latest orders with profit estimated from your product cost prices.</p>
+        <div id="salesHistoryList"></div>
+        <div class="salesProfitHint" id="profitHint" style="display:none" data-i18n="dashboard.profitHint">Set cost prices on your products for accurate profit estimates.</div>
+        <div class="emptyMsg" id="salesHistoryEmpty" style="display:none" data-i18n="dashboard.salesHistoryEmpty">No sales yet.</div>
       </div>
     </section>
 
@@ -261,9 +473,10 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       </div>
       <div id="productFormWrap"></div>
       <div class="card">
+        <div class="inventorySummary" id="inventorySummary"></div>
         <div class="tableScroll">
         <table class="cardTable">
-          <thead><tr><th></th><th data-i18n="products.thName">Name</th><th data-i18n="products.thCategory">Category</th><th data-i18n="products.thPrice">Price</th><th data-i18n="products.thStock">Stock</th><th></th></tr></thead>
+          <thead><tr><th></th><th data-i18n="products.thName">Name</th><th data-i18n="products.thCategory">Category</th><th data-i18n="products.thPrice">Price</th><th data-i18n="products.thStock">Stock</th><th data-i18n="products.thMargin">Margin</th><th data-i18n="products.thValue">Value</th><th></th></tr></thead>
           <tbody id="productsBody"></tbody>
         </table>
         </div>
@@ -284,6 +497,16 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
           </table>
           </div>
           <div class="emptyMsg" id="trashEmpty" style="display:none" data-i18n="trash.empty">Nothing here.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:36px;padding-top:24px;border-top:1px solid var(--line)">
+        <div class="panelHead">
+          <h2 data-i18n="products.inventoryHistory">Inventory history</h2>
+        </div>
+        <div class="card">
+          <div id="inventoryHistoryList"></div>
+          <div class="emptyMsg" id="inventoryHistoryEmpty" style="display:none" data-i18n="products.historyEmpty">No stock changes recorded yet.</div>
         </div>
       </div>
     </section>
@@ -321,6 +544,265 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
         </div>
       </div>
     </section>
+
+    <section class="panel" id="customersPanel">
+      <div class="panelHead">
+        <h2 data-i18n="customers.title">Customers</h2>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <a class="btn btnGhost" href="/api/admin/customers/export" data-i18n="customers.export">Export CSV</a>
+        </div>
+      </div>
+      <p style="color:var(--muted);font-size:.86rem;margin:-8px 0 16px" data-i18n="customers.exportNote">Customers are added automatically when someone checks out. Export a spreadsheet-ready CSV anytime.</p>
+
+      <div id="customersListWrap">
+        <div class="card">
+          <div id="customersList"></div>
+          <div class="emptyMsg" id="customersEmpty" style="display:none" data-i18n="customers.empty">No customers yet. New customers are added automatically when someone checks out.</div>
+        </div>
+      </div>
+
+      <div id="customerDetail" style="display:none">
+        <div class="panelHead">
+          <h2 id="custDetailTitle">—</h2>
+          <button class="btn btnGhost" id="custBack" data-i18n="customers.back">← Back to customers</button>
+        </div>
+        <div class="card">
+          <div class="detailGrid" style="padding:16px 18px">
+            <div>
+              <h4 data-i18n="customers.customerInfo">Customer information</h4>
+              <p id="custDetailInfo">—</p>
+            </div>
+            <div>
+              <h4 data-i18n="customers.totals">Totals</h4>
+              <p id="custDetailTotals">—</p>
+              <p id="custDetailWa"></p>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:20px">
+          <div class="panelHead" style="padding:16px 16px 0">
+            <h3 style="font-family:Inter,sans-serif;font-size:.95rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em" data-i18n="customers.purchaseHistory">Purchase history</h3>
+          </div>
+          <div class="tableScroll">
+          <table class="cardTable">
+            <thead><tr><th data-i18n="customers.thOrder">Order</th><th data-i18n="customers.thProducts">Products</th><th data-i18n="customers.thDate">Date</th><th data-i18n="customers.thAmount">Amount</th><th data-i18n="customers.thStatus">Status</th></tr></thead>
+            <tbody id="custOrdersBody"></tbody>
+          </table>
+          </div>
+          <div class="emptyMsg" id="custOrdersEmpty" style="display:none" data-i18n="customers.ordersEmpty">No orders for this customer.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="financePanel">
+      <div class="panelHead">
+        <h2 data-i18n="finance.title">Finances</h2>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <a class="btn btnGhost" href="/api/admin/expenses/export" data-i18n="finance.exportExpenses">Export expenses</a>
+          <a class="btn btnGhost" href="/api/admin/sales/export" data-i18n="finance.exportSummary">Export sales summary</a>
+        </div>
+      </div>
+      <p style="color:var(--muted);font-size:.86rem;margin:-8px 0 16px" data-i18n="finance.exportNote">Track your costs and keep the numbers simple. Exports download as spreadsheet-ready CSV files.</p>
+
+      <div class="statGrid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+        <div class="statCard">
+          <div class="statLabel" data-i18n="finance.salesMonth">Sales this month</div>
+          <div class="statValue" id="finSalesMonth">—</div>
+        </div>
+        <div class="statCard">
+          <div class="statLabel" data-i18n="finance.productCosts">Product costs</div>
+          <div class="statValue" id="finCosts">—</div>
+        </div>
+        <div class="statCard">
+          <div class="statLabel" data-i18n="finance.expensesMonth">Expenses</div>
+          <div class="statValue" id="finExpenses">—</div>
+        </div>
+        <div class="statCard" id="finNetCard">
+          <div class="statLabel" data-i18n="finance.netProfit">Net profit</div>
+          <div class="statValue" id="finNet">—</div>
+        </div>
+        <div class="statCard">
+          <div class="statLabel" data-i18n="finance.margin">Margin</div>
+          <div class="statValue" id="finMargin" style="font-size:1.5rem">—</div>
+        </div>
+      </div>
+
+      <div class="formGrid" id="financeForm">
+        <div class="full" style="padding:0 0 4px">
+          <strong data-i18n="finance.addExpense">Add expense</strong>
+        </div>
+        <div>
+          <label for="efCategory" data-i18n="finance.category">Category</label>
+          <select class="field" id="efCategory">
+            <option value="delivery" data-i18n="expenseCat.delivery">Delivery</option>
+            <option value="advertising" data-i18n="expenseCat.advertising">Advertising</option>
+            <option value="packaging" data-i18n="expenseCat.packaging">Packaging</option>
+            <option value="rent" data-i18n="expenseCat.rent">Rent</option>
+            <option value="salaries" data-i18n="expenseCat.salaries">Salaries</option>
+            <option value="supplies" data-i18n="expenseCat.supplies">Supplies</option>
+            <option value="other" data-i18n="expenseCat.other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label for="efAmount" data-i18n="finance.amount">Amount (COP)</label>
+          <input class="field" id="efAmount" type="number" min="1" step="1" inputmode="numeric">
+        </div>
+        <div>
+          <label for="efDate" data-i18n="finance.date">Date</label>
+          <input class="field" id="efDate" type="date">
+        </div>
+        <div>
+          <label for="efPayment" data-i18n="finance.paymentMethod">Payment method</label>
+          <select class="field" id="efPayment">
+            <option value="cash" data-i18n="payment.cash">Cash</option>
+            <option value="nequi" data-i18n="payment.nequi">Nequi</option>
+            <option value="bank" data-i18n="payment.bank">Bank transfer</option>
+            <option value="other" data-i18n="payment.other">Other</option>
+          </select>
+        </div>
+        <div class="full">
+          <label for="efDesc" data-i18n="finance.description">Description</label>
+          <input class="field" id="efDesc" maxlength="200" placeholder="e.g. Mercado Libre ad for July">
+        </div>
+        <div class="full errMsg" id="efErr" style="display:none"></div>
+        <div class="formActions">
+          <button class="btn btnPrimary" id="efSubmit" style="width:auto;padding:11px 24px" data-i18n="finance.add">Add expense</button>
+          <button class="btn btnGhost" id="efCancel" style="display:none" data-i18n="finance.cancel">Cancel</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="panelHead" style="padding:16px 16px 0">
+          <h3 style="font-family:Inter,sans-serif;font-size:.95rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em" data-i18n="finance.expenseList">Expenses</h3>
+        </div>
+        <div class="tableScroll">
+        <table class="cardTable">
+          <thead><tr><th data-i18n="finance.thDate">Date</th><th data-i18n="finance.thCategory">Category</th><th data-i18n="finance.thDescription">Description</th><th data-i18n="finance.thAmount">Amount</th><th data-i18n="finance.thPaid">Paid via</th><th></th></tr></thead>
+          <tbody id="financeList"></tbody>
+        </table>
+        </div>
+        <div class="emptyMsg" id="financeEmpty" style="display:none" data-i18n="finance.empty">No expenses yet. Add your first expense above.</div>
+      </div>
+    </section>
+
+    <section class="panel" id="settingsPanel">
+      <div class="panelHead">
+        <h2 data-i18n="settings.title">Store settings</h2>
+      </div>
+      <div class="card">
+        <div class="settingsGroup">
+          <h3 data-i18n="settings.previewHeading">Live preview</h3>
+          <div class="storePreview" id="storePreview">
+            <div class="spHeader">
+              <span class="spLogo" id="spLogo" hidden></span>
+              <span class="spBrand" id="spBrand">The Good Shelf</span>
+              <span class="spTag" id="spTag"></span>
+            </div>
+            <div class="spFooter">
+              <span id="spFooterLine">© 2026 The Good Shelf</span>
+              <span id="spCredit">Made by COLhq.com</span>
+              <span id="spAdmin">Admin</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="settingsGroup">
+          <h3 data-i18n="settings.storeHeading">Store</h3>
+          <div class="formGrid">
+            <div>
+              <label data-i18n="settings.storeName">Store name</label>
+              <input class="field" id="stName" maxlength="60">
+            </div>
+            <div>
+              <label data-i18n="settings.tagline">Tagline</label>
+              <input class="field" id="stTagline" maxlength="120">
+            </div>
+            <div class="full">
+              <label data-i18n="settings.logo">Logo</label>
+              <input class="field" id="stLogo" maxlength="500" placeholder="https://...  or  /images/logo.png" data-i18n-placeholder="settings.logoPlaceholder">
+              <div class="logoPreview" id="stLogoPreview" hidden></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settingsGroup">
+          <h3 data-i18n="settings.contactHeading">WhatsApp &amp; social</h3>
+          <div class="formGrid">
+            <div>
+              <label data-i18n="settings.whatsapp">WhatsApp number (with country code)</label>
+              <input class="field" id="stWhatsapp" maxlength="20" inputmode="tel" placeholder="573001234567">
+            </div>
+            <div>
+              <label data-i18n="settings.instagram">Instagram</label>
+              <input class="field" id="stInstagram" maxlength="300" placeholder="https://instagram.com/...">
+            </div>
+            <div>
+              <label data-i18n="settings.tiktok">TikTok</label>
+              <input class="field" id="stTiktok" maxlength="300" placeholder="https://tiktok.com/...">
+            </div>
+          </div>
+        </div>
+
+        <div class="settingsGroup">
+          <h3 data-i18n="settings.preferencesHeading">Preferences</h3>
+          <div class="formGrid">
+            <div>
+              <label data-i18n="settings.defaultLang">Default language</label>
+              <select class="field" id="stLang">
+                <option value="en">English</option>
+                <option value="es">Español</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="settingsGroup">
+          <h3 data-i18n="settings.footerHeading">Footer</h3>
+          <div class="formGrid">
+            <div class="full">
+              <label data-i18n="settings.footerCredit">Footer credit text</label>
+              <input class="field" id="stFooterCredit" maxlength="120" placeholder="Made by ...">
+            </div>
+            <div class="checkRow">
+              <label class="checkLabel">
+                <input type="checkbox" id="stShowMadeBy" checked>
+                <span data-i18n="settings.showMadeBy">Show footer credit</span>
+              </label>
+            </div>
+            <div class="checkRow">
+              <label class="checkLabel">
+                <input type="checkbox" id="stShowAdminLink" checked>
+                <span data-i18n="settings.showAdminLink">Show Admin login link in storefront footer</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="settingsGroup">
+          <h3 data-i18n="settings.platformHeading">Platform credit</h3>
+          <div class="formGrid">
+            <div class="full">
+              <label data-i18n="settings.platformCreditText">Platform credit text</label>
+              <input class="field" id="stPlatformText" maxlength="60" placeholder="Powered by MiTienda">
+            </div>
+            <div class="checkRow">
+              <label class="checkLabel">
+                <input type="checkbox" id="stPlatformShow" checked>
+                <span data-i18n="settings.showPlatformCredit">Show platform credit on storefront and receipts</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="settingsActions">
+          <button class="btn btnPrimary" id="saveSettingsBtn" data-i18n="settings.save">Save settings</button>
+          <button class="btn btnGhost" id="resetSettingsBtn" data-i18n="settings.reset">Reset to defaults</button>
+        </div>
+        <div class="errMsg" id="settingsError" style="padding:0 18px 18px"></div>
+      </div>
+    </section>
   </main>
   <footer class="wrap" style="padding:6px 0 30px;text-align:center;color:var(--muted);font-size:.82rem">
     <a href="https://colhq.com" target="_blank" rel="noopener" style="text-decoration:underline;color:inherit" data-i18n="footer.madeBy">Made by COLhq.com</a>
@@ -351,12 +833,14 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
 
   /* ---------- Language (English / Spanish) ---------- */
   var I18N = {
-    "login.subtitle": ["The Good Shelf — store management", "The Good Shelf — gestión de la tienda"],
+    "login.subtitle": ["MiTienda by COLHQ — store management", "MiTienda by COLHQ — gestión de la tienda"],
     "login.passwordPlaceholder": ["Admin password", "Contraseña de administrador"],
     "login.submit": ["Log in", "Iniciar sesión"],
     "tab.dashboard": ["Dashboard", "Panel"],
     "tab.products": ["Products", "Productos"],
     "tab.orders": ["Orders", "Pedidos"],
+    "tab.customers": ["Customers", "Clientes"],
+    "tab.finance": ["Finance", "Finanzas"],
     "logout": ["Log out", "Cerrar sesión"],
     "footer.madeBy": ["Made by COLhq.com", "Hecho por COLhq.com"],
     "dashboard.title": ["Dashboard", "Panel"],
@@ -366,6 +850,30 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     "dashboard.lowStockItems": ["Low stock items", "Productos con poco inventario"],
     "dashboard.lowStockHeading": ["Low stock", "Poco inventario"],
     "dashboard.lowStockEmpty": ["Nothing running low right now.", "No hay productos con poco inventario por ahora."],
+    "dashboard.inventoryValue": ["Inventory value", "Valor del inventario"],
+    "dashboard.salesToday": ["Sales today", "Ventas de hoy"],
+    "dashboard.salesWeek": ["Sales this week", "Ventas esta semana"],
+    "dashboard.salesMonth": ["Sales this month", "Ventas este mes"],
+    "dashboard.orders": ["Orders", "Pedidos"],
+    "dashboard.averageOrder": ["Avg. order value", "Ticket promedio"],
+    "dashboard.grossProfit": ["Est. gross profit", "Ganancia bruta est."],
+    "dashboard.totalCustomers": ["Total customers", "Clientes totales"],
+    "dashboard.newCustomersMonth": ["New this month", "Nuevos este mes"],
+    "dashboard.repeatCustomers": ["Repeat customers", "Clientes recurrentes"],
+    "dashboard.salesHistory": ["Sales history", "Historial de ventas"],
+    "dashboard.salesHistoryHint": ["Latest orders with profit estimated from your product cost prices.", "Pedidos recientes con la ganancia estimada según el precio de costo de tus productos."],
+    "dashboard.salesHistoryEmpty": ["No sales yet.", "Aún no hay ventas."],
+    "dashboard.profitHint": ["Set cost prices on your products for accurate profit estimates.", "Configura el precio de costo de tus productos para estimar la ganancia con precisión."],
+    "sales.itemCount": ["{n} items", "{n} artículos"],
+    "sales.profit": ["Profit", "Ganancia"],
+    "payment.wompi": ["Wompi", "Wompi"],
+    "payment.nequi": ["Nequi", "Nequi"],
+    "payment.bank": ["Bank transfer", "Transferencia"],
+    "payment.cash": ["Cash", "Efectivo"],
+    "payment.other": ["Other", "Otro"],
+    "orders.paymentMethod": ["Payment method", "Método de pago"],
+    "orders.paymentUpdated": ["Payment method updated.", "Método de pago actualizado."],
+    "orders.paymentFailed": ["Could not update payment method.", "No se pudo actualizar el método de pago."],
     "products.title": ["Products", "Productos"],
     "products.add": ["+ Add product", "+ Agregar producto"],
     "products.thName": ["Name", "Nombre"],
@@ -373,6 +881,30 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     "products.thPrice": ["Price", "Precio"],
     "products.thStock": ["Stock", "Inventario"],
     "products.empty": ["No products yet — add your first one above.", "Aún no hay productos — agrega el primero arriba."],
+    "products.sku": ["SKU", "SKU"],
+    "products.supplier": ["Supplier", "Proveedor"],
+    "products.costPrice": ["Cost price (COP)", "Precio de costo (COP)"],
+    "products.minStock": ["Min. stock", "Stock mínimo"],
+    "products.minStockHint": ["Minimum stock before this product shows as low. Leave empty to use the store default.", "Inventario mínimo antes de que este producto aparezca como bajo. Déjalo vacío para usar el valor por defecto."],
+    "products.thMargin": ["Margin", "Margen"],
+    "products.thValue": ["Value", "Valor"],
+    "products.stockReason": ["Stock change reason", "Motivo del cambio de inventario"],
+    "products.stockReasonHint": ["Used when the stock count changes here. Order sales are recorded automatically.", "Se usa cuando cambias la cantidad de inventario aquí. Las ventas de pedidos se registran automáticamente."],
+    "products.reasonAdjustment": ["Adjustment", "Ajuste"],
+    "products.reasonReceived": ["Received stock", "Recibo de mercancía"],
+    "products.reasonDamaged": ["Damaged / lost", "Dañado / pérdida"],
+    "products.reasonCorrection": ["Correction", "Corrección"],
+    "products.inventorySummary": ["{n} products · Inventory {v} · Low {l}", "{n} productos · Inventario {v} · Bajo {l}"],
+    "products.inventoryHistory": ["Inventory history", "Historial de inventario"],
+    "products.historyEmpty": ["No stock changes recorded yet.", "Aún no hay cambios de inventario registrados."],
+    "inventory.reasonInitial": ["Initial stock", "Inventario inicial"],
+    "inventory.reasonOrder": ["Order", "Pedido"],
+    "inventory.reasonRestore": ["Restock", "Reabastecido"],
+    "inventory.reasonAdjustment": ["Adjustment", "Ajuste"],
+    "inventory.reasonReceived": ["Received stock", "Recibo de mercancía"],
+    "inventory.reasonDamaged": ["Damaged / lost", "Dañado / pérdida"],
+    "inventory.reasonCorrection": ["Correction", "Corrección"],
+    "inventory.marginHint": ["Margin", "Margen"],
     "orders.title": ["Orders", "Pedidos"],
     "orders.loadDemo": ["Load demo orders", "Cargar pedidos de muestra"],
     "orders.clearDemo": ["Clear demo orders", "Borrar pedidos de muestra"],
@@ -383,6 +915,66 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     "orders.thShipping": ["Shipping", "Envío"],
     "orders.thDate": ["Date", "Fecha"],
     "orders.empty": ["No orders yet.", "Aún no hay pedidos."],
+    "customers.title": ["Customers", "Clientes"],
+    "customers.export": ["Export CSV", "Exportar CSV"],
+    "customers.exportNote": ["Customers are added automatically when someone checks out. Export a spreadsheet-ready CSV anytime.", "Los clientes se agregan automáticamente cuando alguien hace un pedido. Exporta un CSV listo para hojas de cálculo cuando quieras."],
+    "customers.empty": ["No customers yet. New customers are added automatically when someone checks out.", "Aún no hay clientes. Los clientes nuevos se agregan automáticamente cuando alguien hace un pedido."],
+    "customers.view": ["View", "Ver"],
+    "customers.message": ["Message", "Escribir"],
+    "customers.back": ["← Back to customers", "← Volver a clientes"],
+    "customers.customerInfo": ["Customer information", "Información del cliente"],
+    "customers.totals": ["Totals", "Totales"],
+    "customers.purchaseHistory": ["Purchase history", "Historial de compras"],
+    "customers.thOrder": ["Order", "Pedido"],
+    "customers.thProducts": ["Products", "Productos"],
+    "customers.thDate": ["Date", "Fecha"],
+    "customers.thAmount": ["Amount", "Valor"],
+    "customers.thStatus": ["Status", "Estado"],
+    "customers.ordersEmpty": ["No orders for this customer.", "Este cliente no tiene pedidos."],
+    "customers.noPhone": ["No phone number", "Sin número de teléfono"],
+    "customers.memberSince": ["Customer since", "Cliente desde"],
+    "finance.title": ["Finances", "Finanzas"],
+    "finance.exportExpenses": ["Export expenses", "Exportar gastos"],
+    "finance.exportSummary": ["Export sales summary", "Exportar resumen de ventas"],
+    "finance.exportNote": ["Track your costs and keep the numbers simple. Exports download as spreadsheet-ready CSV files.", "Lleva el control de tus costos y mantén los números simples. Las exportaciones se descargan como archivos CSV listos para hojas de cálculo."],
+    "finance.salesMonth": ["Sales this month", "Ventas este mes"],
+    "finance.productCosts": ["Product costs", "Costos de productos"],
+    "finance.expensesMonth": ["Expenses", "Gastos"],
+    "finance.netProfit": ["Net profit", "Ganancia real"],
+    "finance.margin": ["Margin", "Margen"],
+    "finance.addExpense": ["Add expense", "Registrar gasto"],
+    "finance.category": ["Category", "Categoría"],
+    "finance.amount": ["Amount (COP)", "Valor (COP)"],
+    "finance.date": ["Date", "Fecha"],
+    "finance.paymentMethod": ["Payment method", "Método de pago"],
+    "finance.description": ["Description", "Descripción"],
+    "finance.add": ["Add expense", "Registrar gasto"],
+    "finance.cancel": ["Cancel", "Cancelar"],
+    "finance.expenseList": ["Expenses", "Gastos"],
+    "finance.thDate": ["Date", "Fecha"],
+    "finance.thCategory": ["Category", "Categoría"],
+    "finance.thDescription": ["Description", "Descripción"],
+    "finance.thAmount": ["Amount", "Valor"],
+    "finance.thPaid": ["Paid via", "Pago con"],
+    "finance.empty": ["No expenses yet. Add your first expense above.", "Aún no hay gastos. Registra tu primer gasto arriba."],
+    "finance.edit": ["Edit", "Editar"],
+    "finance.delete": ["Delete", "Eliminar"],
+    "finance.deleteConfirm": ["Delete this expense? This cannot be undone.", "¿Eliminar este gasto? Esta acción no se puede deshacer."],
+    "finance.added": ["Expense added.", "Gasto registrado."],
+    "finance.updated": ["Expense updated.", "Gasto actualizado."],
+    "finance.deleted": ["Expense deleted.", "Gasto eliminado."],
+    "finance.errorSave": ["Could not save expense.", "No se pudo guardar el gasto."],
+    "finance.errorDelete": ["Could not delete expense.", "No se pudo eliminar el gasto."],
+    "finance.amountRequired": ["Enter an amount greater than 0.", "Ingresa un valor mayor que 0."],
+    "finance.dateRequired": ["Choose a date.", "Elige una fecha."],
+    "finance.descriptionRequired": ["Add a short description.", "Agrega una descripción corta."],
+    "expenseCat.delivery": ["Delivery", "Domicilios"],
+    "expenseCat.advertising": ["Advertising", "Publicidad"],
+    "expenseCat.packaging": ["Packaging", "Empaques"],
+    "expenseCat.rent": ["Rent", "Arriendo"],
+    "expenseCat.salaries": ["Salaries", "Salarios"],
+    "expenseCat.supplies": ["Supplies", "Insumos"],
+    "expenseCat.other": ["Other", "Otro"],
     "trash.title": ["Recently Deleted", "Eliminados recientemente"],
     "trash.emptyBtn": ["Empty now", "Vaciar ahora"],
     "trash.description": ["Deleted products and photos land here and can be restored. Each item clears itself automatically 30 days after it's deleted — anything not restored by then is gone for good.", "Los productos y fotos eliminados llegan aquí y se pueden restaurar. Cada elemento se elimina automáticamente 30 días después de ser eliminado — lo que no se restaure antes de eso se pierde para siempre."],
@@ -391,7 +983,41 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     "trash.empty": ["Nothing here.", "No hay nada aquí."],
     "ordersTrash.title": ["Recently Deleted Orders", "Pedidos eliminados recientemente"],
     "ordersTrash.description": ["Deleted orders land here and can be restored, just in case. Each order clears itself automatically 30 days after it's deleted — anything not restored by then is gone for good.", "Los pedidos eliminados llegan aquí y se pueden restaurar, por si acaso. Cada pedido se elimina automáticamente 30 días después de ser eliminado — lo que no se restaure antes de eso se pierde para siempre."],
-    "ordersTrash.thWhat": ["Order", "Pedido"]
+    "ordersTrash.thWhat": ["Order", "Pedido"],
+    "tab.settings": ["Settings", "Configuración"],
+    "settings.title": ["Store settings", "Configuración de la tienda"],
+    "settings.storeHeading": ["Store", "Tienda"],
+    "settings.storeName": ["Store name", "Nombre de la tienda"],
+    "settings.tagline": ["Tagline", "Eslogan"],
+    "settings.logo": ["Logo", "Logo"],
+    "settings.logoPlaceholder": ["https://...  or  /images/logo.png", "https://...  o  /images/logo.png"],
+    "settings.contactHeading": ["WhatsApp & social", "WhatsApp y redes"],
+    "settings.whatsapp": ["WhatsApp number (with country code)", "Número de WhatsApp (con código de país)"],
+    "settings.instagram": ["Instagram", "Instagram"],
+    "settings.tiktok": ["TikTok", "TikTok"],
+    "settings.preferencesHeading": ["Preferences", "Preferencias"],
+    "settings.defaultLang": ["Default language", "Idioma predeterminado"],
+    "settings.footerHeading": ["Footer", "Pie de página"],
+    "settings.footerCredit": ["Footer credit text", "Texto de crédito del pie de página"],
+    "settings.showMadeBy": ["Show footer credit", "Mostrar crédito en el pie de página"],
+    "settings.platformHeading": ["Platform credit", "Crédito de plataforma"],
+    "settings.platformCreditText": ["Platform credit text", "Texto del crédito de plataforma"],
+    "settings.showPlatformCredit": ["Show platform credit on storefront and receipts", "Mostrar crédito de plataforma en la tienda y los recibos"],
+    "settings.showAdminLink": ["Show Admin login link in storefront footer", "Mostrar enlace de acceso al panel en el pie de página de la tienda"],
+    "settings.save": ["Save settings", "Guardar ajustes"],
+    "settings.reset": ["Reset to defaults", "Restablecer valores predeterminados"],
+    "settings.saved": ["Settings saved.", "Ajustes guardados."],
+    "settings.resetted": ["Settings reset to defaults.", "Ajustes restablecidos a los valores predeterminados."],
+    "settings.resetConfirm": ["Reset all settings to defaults? This cannot be undone.", "¿Restablecer todos los ajustes a los valores predeterminados? Esta acción no se puede deshacer."],
+    "settings.errorLoad": ["Could not load settings.", "No se pudieron cargar los ajustes."],
+    "settings.errorSave": ["Could not save settings.", "No se pudieron guardar los ajustes."],
+    "settings.errorReset": ["Could not reset settings.", "No se pudieron restablecer los ajustes."],
+    "settings.required": ["Store name is required.", "El nombre de la tienda es obligatorio."],
+    "settings.logoInvalid": ["Logo must be a local path or an https URL.", "El logo debe ser una ruta local o una URL https."],
+    "settings.whatsappInvalid": ["WhatsApp number must contain only digits (plus an optional leading +).", "El número de WhatsApp solo puede contener dígitos (más un + opcional al inicio)."],
+    "settings.logoPreviewAlt": ["Logo preview", "Vista previa del logo"],
+    "settings.errServer": ["Could not reach the server.", "No se pudo conectar con el servidor."],
+    "settings.previewHeading": ["Live preview", "Vista previa"]
   };
   var lang = localStorage.getItem("tgsAdminLang") === "es" ? "es" : "en";
   function t(key){
@@ -423,9 +1049,12 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       productFormWrap.innerHTML = "";
       expandedRef = null;
       loadHome();
+      loadSales();
       loadProducts();
       loadOrders();
+      loadCustomers();
       loadTrash();
+      loadInventoryHistory();
     });
   });
 
@@ -499,8 +1128,11 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("dashboard").style.display = "block";
     loadHome();
+    loadSales();
     loadProducts();
     loadOrders();
+    loadCustomers();
+    loadFinance();
     loadTrash();
   }
 
@@ -525,7 +1157,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
           return;
         }
         loginPassword.value = "";
-        showDashboard();
+        routeAfterLogin();
       })
       .catch(function(){
         loginBtn.disabled = false;
@@ -539,15 +1171,226 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     api("/api/admin/logout", {method:"POST"}).then(function(){ showLogin(); });
   });
 
+  /* ---------- First-run setup wizard ---------- */
+  var setupScreen = document.getElementById("setupScreen");
+  var suName = document.getElementById("suName");
+  var suWhatsapp = document.getElementById("suWhatsapp");
+  var suInstagram = document.getElementById("suInstagram");
+  var suType = document.getElementById("suType");
+  var suTheme = document.getElementById("suTheme");
+  var suPayment = document.getElementById("suPayment");
+  var suError = document.getElementById("suError");
+  var suBack = document.getElementById("suBack");
+  var suNext = document.getElementById("suNext");
+  var suFinish = document.getElementById("suFinish");
+  var suLogout = document.getElementById("suLogout");
+  var suStep = 1;
+
+  var BUSINESS_TYPES = [
+    { value: "fashion", label: "Moda", desc: "Ropa y accesorios" },
+    { value: "beauty", label: "Belleza", desc: "Cosméticos y cuidado" },
+    { value: "technology", label: "Tecnología", desc: "Electrónicos y gadgets" },
+    { value: "food", label: "Comida", desc: "Alimentos y bebidas" },
+    { value: "home", label: "Hogar", desc: "Casa y decoración" },
+    { value: "other", label: "Otro", desc: "Otro tipo de negocio" },
+  ];
+  var PAYMENT_OPTIONS = [
+    { value: "wompi", label: "Wompi", desc: "Pagos con tarjeta y PSE" },
+    { value: "whatsapp", label: "WhatsApp", desc: "Pedidos por WhatsApp" },
+    { value: "nequi", label: "Nequi", desc: "Transferencias Nequi" },
+    { value: "bank", label: "Transferencia", desc: "Transferencia bancaria" },
+  ];
+  var WIZARD_THEMES = [
+    { value: "luxury", label: "Luxury", desc: "Oscuro y elegante",
+      theme: { preset: "luxury",
+        palette: { bg:"#0f0f0f", panel:"#1a1a1a", text:"#f5f1e8", muted:"#a89f8d", line:"#2e2b26", accent:"#c9a227", accentDark:"#a8871d", success:"#7fb069" },
+        fontHeading: "Playfair Display", fontBody: "Inter",
+        fontsUrl: "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap",
+        radius: "8px" } },
+    { value: "minimal", label: "Minimal", desc: "Blanco y limpio",
+      theme: { preset: "minimal",
+        palette: { bg:"#ffffff", panel:"#fafafa", text:"#111111", muted:"#6b6b6b", line:"#e5e5e5", accent:"#111111", accentDark:"#000000", success:"#2e7d32" },
+        fontHeading: "Inter", fontBody: "Inter",
+        fontsUrl: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+        radius: "0px" } },
+    { value: "instagram", label: "Instagram", desc: "Vibrante y moderno",
+      theme: { preset: "instagram",
+        palette: { bg:"#fff7f7", panel:"#ffffff", text:"#1f1f1f", muted:"#7a7a7a", line:"#ffe1e6", accent:"#e1306c", accentDark:"#c2265c", success:"#3f7a52" },
+        fontHeading: "Poppins", fontBody: "Poppins",
+        fontsUrl: "https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap",
+        radius: "18px" } },
+    { value: "boutique", label: "Boutique", desc: "Cálido y acogedor",
+      theme: { preset: "boutique",
+        palette: { bg:"#fbf3ec", panel:"#fffaf6", text:"#3a2f28", muted:"#9a8878", line:"#f0e2d4", accent:"#b76e79", accentDark:"#9c5a64", success:"#6b9e6b" },
+        fontHeading: "Cormorant Garamond", fontBody: "Inter",
+        fontsUrl: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap",
+        radius: "20px" } },
+  ];
+
+  function buildSetupOptions(container, list){
+    list.forEach(function(opt){
+      var el = document.createElement("div");
+      el.className = "suOpt";
+      el.dataset.value = opt.value;
+      var name = '<div class="suOptName">'+esc(opt.label)+'</div>' +
+        (opt.desc ? '<div class="suOptDesc">'+esc(opt.desc)+'</div>' : '');
+      if(opt.theme){
+        var sw = '<div class="suSwatch">';
+        ["bg","panel","accent","text"].forEach(function(k){
+          sw += '<i style="background:'+esc(opt.theme.palette[k])+'"></i>';
+        });
+        sw += '</div>';
+        el.innerHTML = sw + name;
+      }else{
+        el.innerHTML = name;
+      }
+      el.addEventListener("click", function(){
+        container.querySelectorAll(".suOpt").forEach(function(c){ c.classList.remove("selected"); });
+        el.classList.add("selected");
+      });
+      container.appendChild(el);
+    });
+  }
+  buildSetupOptions(suType, BUSINESS_TYPES);
+  buildSetupOptions(suTheme, WIZARD_THEMES);
+  buildSetupOptions(suPayment, PAYMENT_OPTIONS);
+
+  function suSelected(container){
+    var sel = container.querySelector(".suOpt.selected");
+    return sel ? sel.dataset.value : null;
+  }
+  function suSelectByValue(container, value){
+    if(!value) return;
+    container.querySelectorAll(".suOpt").forEach(function(el){
+      el.classList.toggle("selected", el.dataset.value === value);
+    });
+  }
+  function suRenderDots(active, isDone){
+    var dots = document.querySelectorAll(".setupDot");
+    dots.forEach(function(d, i){
+      var num = i + 1;
+      if(isDone || num < active){ d.className = "setupDot done"; }
+      else if(num === active){ d.className = "setupDot active"; }
+      else{ d.className = "setupDot"; }
+    });
+  }
+  function suShowStep(n){
+    suStep = n;
+    var ids = { 1:"suStep1", 2:"suStep2", 3:"suStep3", 4:"suStep4", 5:"suStep5", done:"suDone" };
+    document.querySelectorAll(".setupStep").forEach(function(el){ el.classList.remove("active"); });
+    document.getElementById(ids[n]).classList.add("active");
+    suError.textContent = "";
+    var isDone = n === "done";
+    suBack.style.visibility = isDone ? "hidden" : "visible";
+    suNext.style.display = isDone ? "none" : "";
+    suFinish.hidden = !isDone;
+    suRenderDots(typeof n === "number" ? n : 5, isDone);
+  }
+  function suValidateStep(n){
+    if(n === 1){
+      if(!suName.value.trim()){ suError.textContent = "Escribe el nombre de tu tienda."; suName.focus(); return false; }
+    }else if(n === 2){
+      if(!suSelected(suType)){ suError.textContent = "Selecciona qué vendes."; return false; }
+    }else if(n === 3){
+      if(!suSelected(suTheme)){ suError.textContent = "Selecciona un diseño."; return false; }
+    }else if(n === 4){
+      var wa = suWhatsapp.value.trim();
+      if(wa && !/^[0-9+][0-9 ]*$/.test(wa)){ suError.textContent = "El número de WhatsApp solo puede contener dígitos (más un + opcional)."; return false; }
+    }else if(n === 5){
+      if(!suSelected(suPayment)){ suError.textContent = "Selecciona una forma de pago."; return false; }
+    }
+    return true;
+  }
+  suNext.addEventListener("click", function(){
+    if(!suValidateStep(suStep)) return;
+    if(suStep === 5){ suShowStep("done"); }
+    else{ suShowStep(suStep + 1); }
+  });
+  suBack.addEventListener("click", function(){
+    if(typeof suStep === "number" && suStep > 1){ suShowStep(suStep - 1); }
+  });
+
+  // Called right after a successful login/session check: sends the admin to
+  // the first-run wizard when the store hasn't finished setup yet, otherwise
+  // straight to the panel. A setup-status failure falls back to the panel so
+  // the admin is never locked out.
+  function routeAfterLogin(){
+    api("/api/admin/setup-status").then(function(res){
+      if(res.data && res.data.completed){ showDashboard(); }
+      else{ showSetup(); }
+    }).catch(function(){ showDashboard(); });
+  }
+  function showSetup(){
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("dashboard").style.display = "none";
+    setupScreen.style.display = "grid";
+    api("/api/admin/settings").then(function(res){
+      if(res.data && typeof res.data === "object"){
+        if(res.data.storeName) suName.value = res.data.storeName;
+        if(res.data.whatsapp && res.data.whatsapp.number) suWhatsapp.value = res.data.whatsapp.number;
+        if(res.data.socialLinks && res.data.socialLinks.instagram) suInstagram.value = res.data.socialLinks.instagram;
+        suSelectByValue(suType, res.data.businessType);
+        suSelectByValue(suPayment, res.data.paymentPreference);
+        suSelectByValue(suTheme, res.data.theme && res.data.theme.preset);
+      }
+    });
+    suStep = 1;
+    suShowStep(1);
+  }
+
+  suFinish.addEventListener("click", function(){
+    var themeSel = suSelected(suTheme);
+    var themeObj = null;
+    for(var i = 0; i < WIZARD_THEMES.length; i++){
+      if(WIZARD_THEMES[i].value === themeSel){ themeObj = WIZARD_THEMES[i].theme; break; }
+    }
+    suFinish.disabled = true;
+    api("/api/admin/setup", {
+      method: "POST",
+      body: JSON.stringify({
+        storeName: suName.value.trim(),
+        businessType: suSelected(suType),
+        theme: themeObj,
+        whatsapp: suWhatsapp.value.trim(),
+        instagram: suInstagram.value.trim(),
+        paymentPreference: suSelected(suPayment),
+        defaultLang: "es",
+      })
+    }).then(function(res){
+      suFinish.disabled = false;
+      if(handle401(res)) return;
+      if(!res.ok){
+        suError.textContent = res.data.error || "No se pudo completar la configuración.";
+        suShowStep(5);
+        return;
+      }
+      setupScreen.style.display = "none";
+      showDashboard();
+    }).catch(function(){
+      suFinish.disabled = false;
+      suError.textContent = "No se pudo conectar con el servidor.";
+    });
+  });
+  suLogout.addEventListener("click", function(e){
+    e.preventDefault();
+    api("/api/admin/logout", {method:"POST"}).then(function(){ showLogin(); });
+  });
+
   /* ---------- Tabs ---------- */
   var tabHome = document.getElementById("tabHome");
   var tabProducts = document.getElementById("tabProducts");
   var tabOrders = document.getElementById("tabOrders");
+  var tabCustomers = document.getElementById("tabCustomers");
+  var tabFinance = document.getElementById("tabFinance");
+  var tabSettings = document.getElementById("tabSettings");
   var homePanel = document.getElementById("homePanel");
   var productsPanel = document.getElementById("productsPanel");
   var ordersPanel = document.getElementById("ordersPanel");
-  var allTabs = [tabHome, tabProducts, tabOrders];
-  var allPanels = [homePanel, productsPanel, ordersPanel];
+  var customersPanel = document.getElementById("customersPanel");
+  var financePanel = document.getElementById("financePanel");
+  var settingsPanel = document.getElementById("settingsPanel");
+  var allTabs = [tabHome, tabProducts, tabOrders, tabCustomers, tabFinance, tabSettings];
+  var allPanels = [homePanel, productsPanel, ordersPanel, customersPanel, financePanel, settingsPanel];
   function activateTab(tab, panel){
     allTabs.forEach(function(t){ t.classList.remove("active"); });
     allPanels.forEach(function(p){ p.classList.remove("active"); });
@@ -557,16 +1400,30 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
   tabHome.addEventListener("click", function(){
     activateTab(tabHome, homePanel);
     loadHome();
+    loadSales();
   });
   tabProducts.addEventListener("click", function(){
     activateTab(tabProducts, productsPanel);
     loadProducts();
     loadTrash();
+    loadInventoryHistory();
   });
   tabOrders.addEventListener("click", function(){
     activateTab(tabOrders, ordersPanel);
     loadOrders();
     loadTrash();
+  });
+  tabCustomers.addEventListener("click", function(){
+    activateTab(tabCustomers, customersPanel);
+    loadCustomers();
+  });
+  tabFinance.addEventListener("click", function(){
+    activateTab(tabFinance, financePanel);
+    loadFinance();
+  });
+  tabSettings.addEventListener("click", function(){
+    activateTab(tabSettings, settingsPanel);
+    loadSettings();
   });
 
   /* ---------- Home / Dashboard ---------- */
@@ -583,6 +1440,18 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     document.getElementById("statOrdersToday").textContent = d.ordersToday;
     document.getElementById("statAwaiting").textContent = d.awaitingShipment;
     document.getElementById("statLowStockCount").textContent = d.lowStock.length;
+    document.getElementById("statInventory").textContent = money(d.inventoryValueCOP);
+    document.getElementById("statSalesToday").textContent = money(d.salesTodayCOP);
+    document.getElementById("statSalesWeek").textContent = money(d.salesWeekCOP);
+    document.getElementById("statSalesMonth").textContent = money(d.salesMonthCOP);
+    document.getElementById("statOrderCount").textContent = d.orderCount;
+    document.getElementById("statAvgOrder").textContent = money(d.averageOrderValueCOP);
+    document.getElementById("statGrossProfit").textContent = money(d.estimatedProfitCOP);
+    document.getElementById("statCustomers").textContent = d.totalCustomers;
+    document.getElementById("statNewCustomers").textContent = d.newCustomersThisMonth;
+    document.getElementById("statRepeatCustomers").textContent = d.repeatCustomers;
+    var profitCard = document.getElementById("statProfitCard");
+    if(profitCard) profitCard.classList.toggle("warn", !d.profitEstimateComplete);
 
     var awaitingCard = document.getElementById("statAwaitingCard");
     awaitingCard.classList.toggle("warn", d.awaitingShipment > 0);
@@ -597,10 +1466,337 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     }else{
       empty.style.display = "none";
       list.innerHTML = d.lowStock.map(function(p){
-        return '<div class="lowStockRow"><span>'+esc(p.name)+'</span><span style="font-weight:700;color:'+(p.stock<=0?"var(--danger)":"var(--accent)")+'">'+(p.stock<=0 ? L("Sold out","Agotado") : L(p.stock+" left", "Quedan "+p.stock))+'</span></div>';
+        var minTxt = Number.isInteger(p.minStock) ? L(" (min "+p.minStock+")", " (mín "+p.minStock+")") : "";
+        return '<div class="lowStockRow"><span>'+esc(p.name)+minTxt+'</span><span style="font-weight:700;color:'+(p.stock<=0?"var(--danger)":"var(--accent)")+'">'+(p.stock<=0 ? L("Sold out","Agotado") : L(p.stock+" left", "Quedan "+p.stock))+'</span></div>';
       }).join("");
     }
   }
+
+  /* ---------- Sales history (business overview) ---------- */
+
+  function paymentMethodLabel(m){
+    var map = {
+      wompi: L("Wompi","Wompi"),
+      nequi: L("Nequi","Nequi"),
+      bank: L("Bank transfer","Transferencia"),
+      cash: L("Cash","Efectivo"),
+      other: L("Other","Otro")
+    };
+    return map[m] || "—";
+  }
+
+  function loadSales(){
+    api("/api/admin/sales").then(function(res){
+      if(handle401(res)) return;
+      var orders = (res.data && res.data.orders) || [];
+      var list = document.getElementById("salesHistoryList");
+      var empty = document.getElementById("salesHistoryEmpty");
+      if(!list || !empty) return;
+      if(!orders.length){
+        list.innerHTML = "";
+        empty.style.display = "block";
+        return;
+      }
+      empty.style.display = "none";
+      list.innerHTML = orders.map(function(o){
+        var itemTxt = o.itemCount + " " + (o.itemCount === 1 ? L("item","artículo") : L("items","artículos"));
+        return '<div class="salesRow">'+
+          '<div class="salesMain">'+
+            '<span class="salesRef">'+esc(o.reference)+' <span class="statusChip st-'+esc(o.status)+'" style="margin-left:2px">'+orderStatusLabel(o.status)+'</span>'+(o.isDemo ? ' <span class="statusChip st-PENDING">DEMO</span>' : '')+'</span>'+
+            '<span class="salesCust">'+esc(o.customerName || "—")+'</span>'+
+            '<span class="salesItems">'+esc(o.itemNames)+'</span>'+
+            '<span class="salesDate">'+fmtDate(o.createdAt)+'</span>'+
+          '</div>'+
+          '<div class="salesRight">'+
+            '<span class="salesTotal">'+money(o.totalCOP)+'</span>'+
+            '<span class="salesProfit">'+L("Profit: ","Ganancia: ")+(o.profitComplete ? money(o.estimatedProfitCOP) : "~"+money(o.estimatedProfitCOP))+'</span>'+
+            (o.paymentMethod ? '<span class="payChip">'+paymentMethodLabel(o.paymentMethod)+'</span>' : '')+
+          '</div>'+
+        '</div>';
+      }).join("");
+      var profitHint = document.getElementById("profitHint");
+      if(profitHint) profitHint.style.display = orders.some(function(o){ return !o.profitComplete; }) ? "block" : "none";
+    });
+  }
+
+  /* ---------- Customers (CRM) ---------- */
+  var customersList = document.getElementById("customersList");
+  var customersEmpty = document.getElementById("customersEmpty");
+  var customersListWrap = document.getElementById("customersListWrap");
+  var customerDetail = document.getElementById("customerDetail");
+  var custOrdersBody = document.getElementById("custOrdersBody");
+  var custOrdersEmpty = document.getElementById("custOrdersEmpty");
+  var custDetailTitle = document.getElementById("custDetailTitle");
+  var custDetailInfo = document.getElementById("custDetailInfo");
+  var custDetailTotals = document.getElementById("custDetailTotals");
+  var custDetailWa = document.getElementById("custDetailWa");
+  var WA_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.2h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2Zm5.8 14.03c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.12.11-1.8-.11a15.5 15.5 0 0 1-1.65-.6c-2.9-1.25-4.79-4.17-4.94-4.36-.15-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.01-2.41.27-.28.58-.35.78-.35h.55c.18 0 .42-.07.65.5.24.58.81 2 .88 2.15.07.15.12.32.02.52-.1.2-.15.32-.3.5-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.3.76 1.25 1.63 2.02 1.12 1 2.06 1.31 2.36 1.46.3.15.47.13.65-.08.17-.2.73-.85.93-1.14.2-.28.4-.24.66-.14.28.1 1.77.83 2.07.99.3.15.5.22.57.35.08.13.08.75-.16 1.42Z"/></svg>';
+
+  function waHref(phone){
+    return "https://wa.me/" + toWhatsAppNumber(phone);
+  }
+
+  function loadCustomers(){
+    api("/api/admin/customers").then(function(res){
+      if(handle401(res)) return;
+      if(!res.ok) return;
+      renderCustomers(res.data || []);
+    });
+  }
+
+  function renderCustomers(customers){
+    customersEmpty.style.display = customers.length ? "none" : "block";
+    customersList.innerHTML = customers.map(function(c){
+      var ordersTxt = c.totalOrders + " " + (c.totalOrders === 1 ? L("order","pedido") : L("orders","pedidos"));
+      var waLink = c.phone
+        ? '<a class="smallBtn wa" href="'+waHref(c.phone)+'" target="_blank" rel="noopener">WhatsApp</a>'
+        : '';
+      return '<div class="custRow">'+
+          '<div class="custMain">'+
+            '<span class="custName">'+esc(c.name || "—")+'</span>'+
+            '<span class="custPhone">'+esc(c.phone || L("No phone number","Sin número de teléfono"))+'</span>'+
+            '<span class="custMeta"><b>'+ordersTxt+'</b> · '+L("Spent: ","Gastó: ")+money(c.totalSpentCOP)+(c.lastOrderAt ? ' · '+L("Last purchase: ","Última compra: ")+fmtDate(c.lastOrderAt) : '')+'</span>'+
+          '</div>'+
+          '<div class="custActions">'+
+            '<button class="smallBtn" data-view-cust="'+esc(c.id)+'">'+t("customers.view")+'</button>'+
+            waLink+
+          '</div>'+
+        '</div>';
+    }).join("");
+
+    customersList.querySelectorAll("[data-view-cust]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        loadCustomerDetail(btn.getAttribute("data-view-cust"));
+      });
+    });
+  }
+
+  function loadCustomerDetail(id){
+    api("/api/admin/customers/" + encodeURIComponent(id)).then(function(res){
+      if(handle401(res)) return;
+      if(!res.ok){ showToast(res.data.error || L("Could not load customer.","No se pudo cargar el cliente.")); return; }
+      renderCustomerDetail(res.data);
+    });
+  }
+
+  function renderCustomerDetail(d){
+    var c = d.customer;
+    var t2 = d.totals;
+    customersListWrap.style.display = "none";
+    customerDetail.style.display = "block";
+    custDetailTitle.textContent = c.name || "—";
+
+    var infoLines = [];
+    if(c.phone) infoLines.push(esc(c.phone));
+    if(c.email) infoLines.push(esc(c.email));
+    if(c.city) infoLines.push(esc(c.city));
+    custDetailInfo.innerHTML = infoLines.join("<br>") || "—";
+
+    custDetailTotals.innerHTML =
+      L("Orders: ","Pedidos: ")+t2.totalOrders+"<br>"+
+      L("Total spent: ","Total gastado: ")+money(t2.totalSpentCOP)+"<br>"+
+      L("Avg. order: ","Ticket promedio: ")+money(t2.avgOrderValueCOP)+"<br>"+
+      L("Last purchase: ","Última compra: ")+(t2.lastOrderAt ? fmtDate(t2.lastOrderAt) : "—")+"<br>"+
+      L("Customer since: ","Cliente desde: ")+fmtDate(c.createdAt);
+
+    custDetailWa.innerHTML = c.phone
+      ? '<a class="btn btnPrimary waBtn" href="'+waHref(c.phone)+'" target="_blank" rel="noopener" style="margin-top:10px;display:inline-flex;align-items:center;gap:8px">'+WA_SVG+L(" WhatsApp"," WhatsApp")+'</a>'
+      : '';
+
+    var orders = d.orders || [];
+    custOrdersEmpty.style.display = orders.length ? "none" : "block";
+    custOrdersBody.innerHTML = orders.map(function(o){
+      var items = (o.items || []).map(function(it){
+        return esc(it.name) + (it.qty > 1 ? " ×"+it.qty : "");
+      }).join(", ");
+      return '<tr>'+
+        '<td data-label="'+t("customers.thOrder")+'">'+esc(o.reference)+(o.isDemo ? ' <span class="statusChip st-PENDING">DEMO</span>' : '')+'</td>'+
+        '<td data-label="'+t("customers.thProducts")+'" style="font-size:.84rem">'+items+'</td>'+
+        '<td data-label="'+t("customers.thDate")+'" style="font-size:.82rem;color:var(--muted)">'+fmtDate(o.createdAt)+'</td>'+
+        '<td data-label="'+t("customers.thAmount")+'">'+money((o.amountInCents||0)/100)+'</td>'+
+        '<td data-label="'+t("customers.thStatus")+'"><span class="statusChip st-'+esc(o.status)+'">'+orderStatusLabel(o.status)+'</span></td>'+
+      '</tr>';
+    }).join("");
+  }
+
+  document.getElementById("custBack").addEventListener("click", function(){
+    customerDetail.style.display = "none";
+    customersListWrap.style.display = "";
+    loadCustomers();
+  });
+
+  /* ---------- Finance (bookkeeping) ---------- */
+  var financeList = document.getElementById("financeList");
+  var financeEmpty = document.getElementById("financeEmpty");
+  var finSalesMonth = document.getElementById("finSalesMonth");
+  var finCosts = document.getElementById("finCosts");
+  var finExpenses = document.getElementById("finExpenses");
+  var finNet = document.getElementById("finNet");
+  var finNetCard = document.getElementById("finNetCard");
+  var finMargin = document.getElementById("finMargin");
+  var efCategory = document.getElementById("efCategory");
+  var efDesc = document.getElementById("efDesc");
+  var efAmount = document.getElementById("efAmount");
+  var efDate = document.getElementById("efDate");
+  var efPayment = document.getElementById("efPayment");
+  var efSubmit = document.getElementById("efSubmit");
+  var efCancel = document.getElementById("efCancel");
+  var efErr = document.getElementById("efErr");
+  var editingExpenseId = null;
+
+  function expenseCategoryLabel(cat){
+    var key = "expenseCat." + cat;
+    return I18N[key] ? t(key) : esc(cat);
+  }
+  function fmtDateOnly(iso){
+    if(!iso) return "—";
+    var d = new Date(String(iso).slice(0, 10) + "T00:00:00");
+    if(isNaN(d.getTime())) return esc(iso);
+    var pad = function(n){ return n < 10 ? "0"+n : String(n); };
+    return pad(d.getDate())+"/"+pad(d.getMonth()+1)+"/"+d.getFullYear();
+  }
+  function todayISODate(){
+    var d = new Date();
+    var pad = function(n){ return n < 10 ? "0"+n : String(n); };
+    return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+  }
+
+  function loadFinance(){
+    api("/api/admin/dashboard").then(function(res){
+      if(handle401(res)) return;
+      if(!res.ok) return;
+      renderFinanceSummary(res.data);
+    });
+    api("/api/admin/expenses").then(function(res){
+      if(handle401(res)) return;
+      if(!res.ok) return;
+      renderFinanceList(res.data || []);
+    });
+  }
+
+  function renderFinanceSummary(d){
+    finSalesMonth.textContent = money(d.salesMonthCOP);
+    finCosts.textContent = money(d.productCostsMonthCOP);
+    finExpenses.textContent = money(d.expensesMonthCOP);
+    finNet.textContent = money(d.netProfitCOP);
+    if(finNetCard) finNetCard.classList.toggle("warn", d.netProfitCOP < 0);
+    finMargin.textContent = d.profitMarginPercent + " %";
+  }
+
+  function renderFinanceList(expenses){
+    financeEmpty.style.display = expenses.length ? "none" : "block";
+    financeList.innerHTML = expenses.map(function(e){
+      var actions = '<div class="rowActions">'+
+        '<button class="smallBtn" data-edit-exp="'+esc(e.id)+'">'+t("finance.edit")+'</button>'+
+        '<button class="smallBtn danger" data-del-exp="'+esc(e.id)+'">'+t("finance.delete")+'</button>'+
+      '</div>';
+      return '<tr>'+
+        '<td data-label="'+t("finance.thDate")+'">'+fmtDateOnly(e.date)+'</td>'+
+        '<td data-label="'+t("finance.thCategory")+'"><span class="expCatChip">'+expenseCategoryLabel(e.category)+'</span></td>'+
+        '<td data-label="'+t("finance.thDescription")+'" style="font-size:.84rem">'+esc(e.description || "—")+'</td>'+
+        '<td data-label="'+t("finance.thAmount")+'">'+money(e.amountCOP)+'</td>'+
+        '<td data-label="'+t("finance.thPaid")+'" style="font-size:.82rem;color:var(--muted)">'+paymentMethodLabel(e.paymentMethod)+'</td>'+
+        '<td class="cardActions">'+actions+'</td>'+
+      '</tr>';
+    }).join("");
+
+    financeList.querySelectorAll("[data-edit-exp]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var e = expenses.find(function(x){ return x.id === btn.getAttribute("data-edit-exp"); });
+        if(!e) return;
+        startEditExpense(e);
+      });
+    });
+    financeList.querySelectorAll("[data-del-exp]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var e = expenses.find(function(x){ return x.id === btn.getAttribute("data-del-exp"); });
+        if(!e) return;
+        if(!confirm(t("finance.deleteConfirm"))) return;
+        deleteExpense(e.id);
+      });
+    });
+  }
+
+  function resetExpenseForm(){
+    editingExpenseId = null;
+    efCategory.value = "delivery";
+    efDesc.value = "";
+    efAmount.value = "";
+    efDate.value = todayISODate();
+    efPayment.value = "cash";
+    efErr.style.display = "none";
+    efCancel.style.display = "none";
+    efSubmit.textContent = t("finance.add");
+  }
+
+  function startEditExpense(e){
+    editingExpenseId = e.id;
+    efCategory.value = e.category || "delivery";
+    efDesc.value = e.description || "";
+    efAmount.value = e.amountCOP;
+    efDate.value = String(e.date || todayISODate()).slice(0, 10);
+    efPayment.value = e.paymentMethod || "cash";
+    efErr.style.display = "none";
+    efCancel.style.display = "";
+    efSubmit.textContent = L("Save changes","Guardar cambios");
+    efDate.scrollIntoView({ block: "center", behavior: "smooth" });
+  }
+
+  function saveExpense(){
+    var amount = parseInt(efAmount.value, 10);
+    if(!Number.isInteger(amount) || amount <= 0){
+      efErr.textContent = t("finance.amountRequired");
+      efErr.style.display = "block";
+      return;
+    }
+    if(!efDate.value){
+      efErr.textContent = t("finance.dateRequired");
+      efErr.style.display = "block";
+      return;
+    }
+    if(!efDesc.value.trim()){
+      efErr.textContent = t("finance.descriptionRequired");
+      efErr.style.display = "block";
+      return;
+    }
+    efErr.style.display = "none";
+    var payload = {
+      category: efCategory.value,
+      description: efDesc.value.trim(),
+      amountCOP: amount,
+      date: efDate.value,
+      paymentMethod: efPayment.value
+    };
+    var isEdit = !!editingExpenseId;
+    api("/api/admin/expenses" + (isEdit ? "/" + encodeURIComponent(editingExpenseId) : ""), {
+      method: isEdit ? "PUT" : "POST",
+      body: JSON.stringify(payload)
+    }).then(function(res){
+      if(handle401(res)) return;
+      if(!res.ok){
+        efErr.textContent = res.data.error || t("finance.errorSave");
+        efErr.style.display = "block";
+        return;
+      }
+      showToast(isEdit ? t("finance.updated") : t("finance.added"));
+      resetExpenseForm();
+      loadFinance();
+    });
+  }
+
+  function deleteExpense(id){
+    api("/api/admin/expenses/" + encodeURIComponent(id), { method: "DELETE" }).then(function(res){
+      if(handle401(res)) return;
+      if(!res.ok){ showToast(res.data.error || t("finance.errorDelete")); return; }
+      showToast(t("finance.deleted"));
+      if(editingExpenseId === id) resetExpenseForm();
+      loadFinance();
+    });
+  }
+
+  efSubmit.addEventListener("click", saveExpense);
+  efCancel.addEventListener("click", resetExpenseForm);
+  resetExpenseForm();
 
   /* ---------- Products ---------- */
   var productsBody = document.getElementById("productsBody");
@@ -617,23 +1813,51 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
   }
 
   var LOW_STOCK_THRESHOLD = 3;
-  function stockCellHTML(stock){
-    stock = Number.isInteger(stock) ? stock : 0;
+  function lowStockOf(p){
+    return Number.isInteger(p.minStock) ? p.minStock : LOW_STOCK_THRESHOLD;
+  }
+  function stockCellHTML(p){
+    var stock = Number.isInteger(p.stock) ? p.stock : 0;
     if(stock <= 0) return '<span class="statusChip st-DECLINED">'+L("Sold out","Agotado")+'</span>';
-    if(stock <= LOW_STOCK_THRESHOLD) return '<span class="statusChip st-PENDING">'+L(stock+" left","Quedan "+stock)+'</span>';
+    if(stock <= lowStockOf(p)){
+      if(Number.isInteger(p.minStock)) return '<span class="statusChip st-PENDING">'+L("Low · min "+p.minStock,"Bajo · mín "+p.minStock)+'</span>';
+      return '<span class="statusChip st-PENDING">'+L(stock+" left","Quedan "+stock)+'</span>';
+    }
     return String(stock);
+  }
+  function marginOf(p){
+    if(!Number.isInteger(p.costPrice) || p.costPrice === null || p.costPrice < 0) return null;
+    return p.price - p.costPrice;
+  }
+  function marginHTML(p){
+    var m = marginOf(p);
+    if(m === null) return '<span style="color:var(--muted)">—</span>';
+    var pct = Math.round((m / p.price) * 100);
+    var cls = m > 0 ? "var(--success)" : "var(--danger)";
+    return '<span style="color:'+cls+'" title="'+money(m)+'">'+(pct >= 0 ? "+" : "")+pct+'%</span>';
+  }
+  function valueHTML(p){
+    var stock = Number.isInteger(p.stock) ? p.stock : 0;
+    return money(stock * p.price);
   }
 
   function renderProducts(products){
     productsEmpty.style.display = products.length ? "none" : "block";
+    renderInventorySummary(products);
     productsBody.innerHTML = products.map(function(p){
       return (
         '<tr>'+
           '<td class="cardThumb"><button type="button" class="thumbBtn" data-view="'+p.id+'" title="'+L("Click to view all photos","Haz clic para ver todas las fotos")+'"><img src="'+((p.images && p.images[0]) || '')+'" alt=""></button></td>'+
-          '<td class="cardPrimary">'+esc(p.name)+(p.desc ? '<br><span style="color:var(--muted);font-size:.8rem;font-weight:400">'+esc(p.desc)+'</span>' : '')+'</td>'+
+          '<td class="cardPrimary">'+esc(p.name)+
+            (p.sku || p.supplier
+              ? '<br><span style="color:var(--muted);font-size:.8rem;font-weight:400">'+(p.sku ? '<span style="text-transform:uppercase">'+esc(p.sku)+'</span>' : '')+(p.sku && p.supplier ? ' · ' : '')+(p.supplier ? esc(p.supplier) : '')+'</span>'
+              : (p.desc ? '<br><span style="color:var(--muted);font-size:.8rem;font-weight:400">'+esc(p.desc)+'</span>' : ''))+
+          '</td>'+
           '<td data-label="'+t("products.thCategory")+'">'+esc(p.tag)+'</td>'+
           '<td data-label="'+t("products.thPrice")+'">'+money(p.price)+'</td>'+
-          '<td data-label="'+t("products.thStock")+'">'+stockCellHTML(p.stock)+'</td>'+
+          '<td data-label="'+t("products.thStock")+'">'+stockCellHTML(p)+'</td>'+
+          '<td data-label="'+t("products.thMargin")+'">'+marginHTML(p)+'</td>'+
+          '<td data-label="'+t("products.thValue")+'">'+valueHTML(p)+'</td>'+
           '<td class="cardActions"><div class="rowActions">'+
             '<button class="smallBtn" data-edit="'+p.id+'">'+L("Edit","Editar")+'</button>'+
             '<button class="smallBtn danger" data-delete="'+p.id+'">'+L("Delete","Eliminar")+'</button>'+
@@ -664,8 +1888,64 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
           showToast(L("Moved to Recently Deleted.","Movido a Eliminados recientemente."));
           loadProducts();
           loadTrash();
+          loadInventoryHistory();
         });
       });
+    });
+  }
+
+  function renderInventorySummary(products){
+    var el = document.getElementById("inventorySummary");
+    if(!el) return;
+    var n = products.length;
+    var invValue = products.reduce(function(s,p){ return s + ((Number.isInteger(p.stock) ? p.stock : 0) * (Number.isInteger(p.price) ? p.price : 0)); }, 0);
+    var low = products.filter(function(p){ return Number.isInteger(p.stock) && p.stock <= lowStockOf(p); }).length;
+    el.innerHTML =
+      '<span>'+n+' '+(n === 1 ? L("product","producto") : L("products","productos"))+'</span><span class="sep">·</span>'+
+      '<span>'+L("Inventory","Inventario")+' <b>'+money(invValue)+'</b></span><span class="sep">·</span>'+
+      '<span>'+L("Low","Bajo")+' <b>'+low+'</b></span>';
+  }
+
+  var REASON_LABELS = {
+    initial: L("Initial stock","Inventario inicial"),
+    order: L("Order","Pedido"),
+    restore: L("Restock","Reabastecido"),
+    adjustment: L("Adjustment","Ajuste"),
+    received: L("Received stock","Recibo de mercancía"),
+    damaged: L("Damaged / lost","Dañado / pérdida"),
+    correction: L("Correction","Corrección")
+  };
+  function reasonLabel(reason){
+    return REASON_LABELS[reason] || esc(reason);
+  }
+  function fmtDate(iso){
+    var d = new Date(iso);
+    var pad = function(n){ return n < 10 ? "0"+n : String(n); };
+    return pad(d.getDate())+"/"+pad(d.getMonth()+1)+" "+pad(d.getHours())+":"+pad(d.getMinutes());
+  }
+
+  function loadInventoryHistory(){
+    api("/api/admin/inventory/history").then(function(res){
+      if(handle401(res)) return;
+      var items = res.data || [];
+      var list = document.getElementById("inventoryHistoryList");
+      var empty = document.getElementById("inventoryHistoryEmpty");
+      if(!list || !empty) return;
+      if(!items.length){
+        list.innerHTML = "";
+        empty.style.display = "block";
+        return;
+      }
+      empty.style.display = "none";
+      list.innerHTML = items.map(function(e){
+        var delta = typeof e.delta === "number" ? e.delta : 0;
+        return '<div class="invRow">'+
+          '<div><b>'+esc(e.productName || "—")+'</b>'+
+            '<div style="font-size:.78rem;color:var(--muted)">'+reasonLabel(e.reason)+(e.reference ? " · "+esc(e.reference) : "")+' · '+fmtDate(e.createdAt)+'</div>'+
+          '</div>'+
+          '<div class="invDelta '+(delta > 0 ? "up" : delta < 0 ? "down" : "")+'">'+(delta > 0 ? "+" : "")+delta+(delta !== 0 ? " · "+money(e.newStock) : "")+'</div>'+
+        '</div>';
+      }).join("");
     });
   }
 
@@ -701,9 +1981,24 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
           '</datalist>'+
         '</div>'+
         '<div><label>'+L("Price (COP)","Precio (COP)")+'</label><input class="field" id="pfPrice" type="number" min="1" step="1" value="'+(isEdit ? product.price : '')+'"></div>'+
-        '<div style="display:flex;gap:10px">'+
-          '<div style="width:100px;flex-shrink:0"><label>'+L("Stock","Inventario")+'</label><input class="field" id="pfStock" type="number" min="0" step="1" value="'+(isEdit ? product.stock : '0')+'"></div>'+
-          '<div style="flex:1"><label>'+L("Size (optional)","Talla (opcional)")+'</label><input class="field" id="pfSize" placeholder="'+L("e.g. M, US 8, EU 40, 500ml","ej. M, US 8, EU 40, 500ml")+'" value="'+(isEdit && product.size ? esc(product.size) : '')+'"></div>'+
+        '<div><label>'+L("Cost price (COP)","Precio de costo (COP)")+'</label><input class="field" id="pfCost" type="number" min="0" step="1" value="'+(isEdit && Number.isInteger(product.costPrice) ? product.costPrice : '')+'">'+
+          '<span style="font-size:.78rem;color:var(--muted)" id="pfMargin"></span></div>'+
+        '<div><label>'+L("SKU","SKU")+'</label><input class="field" id="pfSku" maxlength="60" autocomplete="off" value="'+(isEdit && product.sku ? esc(product.sku) : '')+'"></div>'+
+        '<div><label>'+L("Supplier","Proveedor")+'</label><input class="field" id="pfSupplier" maxlength="100" value="'+(isEdit && product.supplier ? esc(product.supplier) : '')+'"></div>'+
+        '<div style="display:flex;gap:10px;flex-wrap:wrap">'+
+          '<div style="width:110px;flex-shrink:0"><label>'+L("Stock","Inventario")+'</label><input class="field" id="pfStock" type="number" min="0" step="1" value="'+(isEdit ? product.stock : '0')+'"></div>'+
+          '<div style="flex:1"><label>'+L("Min. stock","Stock mínimo")+'</label><input class="field" id="pfMinStock" type="number" min="0" step="1" placeholder="'+L("3","3")+'" value="'+(isEdit && Number.isInteger(product.minStock) ? product.minStock : '')+'">'+
+            '<span style="font-size:.78rem;color:var(--muted)">'+L("Low-stock alert level. Empty = store default.","Nivel de alerta de stock bajo. Vacío = valor por defecto.")+'</span></div>'+
+        '</div>'+
+        '<div style="display:flex;gap:10px;flex-wrap:wrap">'+
+          '<div style="flex:1;min-width:140px"><label>'+L("Size (optional)","Talla (opcional)")+'</label><input class="field" id="pfSize" placeholder="'+L("e.g. M, US 8, EU 40, 500ml","ej. M, US 8, EU 40, 500ml")+'" value="'+(isEdit && product.size ? esc(product.size) : '')+'"></div>'+
+          '<div style="width:180px;flex-shrink:0"><label>'+L("Stock change reason","Motivo del cambio de inventario")+'</label><select class="field" id="pfStockReason">'+
+            '<option value="adjustment">'+L("Adjustment","Ajuste")+'</option>'+
+            '<option value="received">'+L("Received stock","Recibo de mercancía")+'</option>'+
+            '<option value="damaged">'+L("Damaged / lost","Dañado / pérdida")+'</option>'+
+            '<option value="correction">'+L("Correction","Corrección")+'</option>'+
+          '</select>'+
+            '<span style="font-size:.78rem;color:var(--muted)">'+L("Used when stock changes here. Sales are recorded automatically.","Se usa cuando cambias el stock aquí. Las ventas se registran solas.")+'</span></div>'+
         '</div>'+
         '<div class="full"><label>'+L("Description","Descripción")+'</label><input class="field" id="pfDesc" value="'+(isEdit ? esc(product.desc) : '')+'"></div>'+
         '<div class="full">'+
@@ -858,6 +2153,27 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       });
     });
 
+    function updateMarginHint(){
+      var el = document.getElementById("pfMargin");
+      var priceEl = document.getElementById("pfPrice");
+      var costEl = document.getElementById("pfCost");
+      if(!el || !priceEl || !costEl) return;
+      var price = Number(priceEl.value);
+      if(!price || price <= 0 || costEl.value === ""){
+        el.textContent = "";
+        return;
+      }
+      var cost = Number(costEl.value);
+      if(!Number.isFinite(cost)) return;
+      var margin = price - cost;
+      var pct = Math.round((margin / price) * 100);
+      el.textContent = L("Margin: ","Margen: ")+money(margin)+" ("+(pct >= 0 ? "+" : "")+pct+"%)";
+      el.style.color = margin >= 0 ? "var(--success)" : "var(--danger)";
+    }
+    document.getElementById("pfPrice").addEventListener("input", updateMarginHint);
+    document.getElementById("pfCost").addEventListener("input", updateMarginHint);
+    updateMarginHint();
+
     document.getElementById("pfCancel").addEventListener("click", function(){ productFormWrap.innerHTML = ""; });
     document.getElementById("pfSave").addEventListener("click", function(){
       if(!pfImages.length){
@@ -870,6 +2186,11 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
         price: Number(document.getElementById("pfPrice").value),
         stock: Number(document.getElementById("pfStock").value),
         size: document.getElementById("pfSize").value.trim(),
+        sku: document.getElementById("pfSku").value.trim(),
+        supplier: document.getElementById("pfSupplier").value.trim(),
+        costPrice: document.getElementById("pfCost").value === "" ? null : Number(document.getElementById("pfCost").value),
+        minStock: document.getElementById("pfMinStock").value === "" ? null : Number(document.getElementById("pfMinStock").value),
+        stockChangeReason: document.getElementById("pfStockReason").value,
         images: pfImages,
         desc: document.getElementById("pfDesc").value.trim()
       };
@@ -885,6 +2206,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
         showToast(isEdit ? L("Product updated.","Producto actualizado.") : L("Product added.","Producto agregado."));
         loadProducts();
         loadTrash();
+        loadInventoryHistory();
       });
     });
   }
@@ -909,6 +2231,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       showToast(L("Loaded " + res.data.count + " demo orders.","Se cargaron " + res.data.count + " pedidos de muestra."));
       loadOrders();
       loadHome();
+      loadSales();
     });
   });
   document.getElementById("clearDemoOrdersBtn").addEventListener("click", function(){
@@ -919,6 +2242,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       showToast(L("Cleared " + res.data.count + " demo orders.","Se borraron " + res.data.count + " pedidos de muestra."));
       loadOrders();
       loadHome();
+      loadSales();
     });
   });
 
@@ -985,6 +2309,12 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       );
     }).join("");
     var addr = o.shippingAddress || {};
+    var PM_VALUES = [["wompi","Wompi","Wompi"],["nequi","Nequi","Nequi"],["bank","Bank transfer","Transferencia"],["cash","Cash","Efectivo"],["other","Other","Otro"]];
+    var pmKnown = ["wompi","nequi","bank","cash","other"].indexOf(o.paymentMethod) > -1;
+    var currentPm = pmKnown ? o.paymentMethod : "wompi";
+    var pmOptions = PM_VALUES.map(function(pm){
+      return '<option value="'+pm[0]+'"'+(currentPm===pm[0]?' selected':'')+'>'+L(pm[1],pm[2])+'</option>';
+    }).join("");
     return (
       '<div class="detailGrid">'+
         '<div>'+
@@ -1009,6 +2339,12 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
             '<button class="btn btnPrimary" id="shEditSave">'+(shipEditMode ? L("Save","Guardar") : L("Edit","Editar"))+'</button>'+
           '</div>'+
           '<div class="errMsg" id="shError"></div>'+
+          '<h4 style="margin-top:16px">'+L("Payment method","Método de pago")+'</h4>'+
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'+
+            '<select class="field" id="pmSelect" style="flex:1;min-width:140px;margin-bottom:0">'+pmOptions+'</select>'+
+            '<button class="btn btnGhost" id="pmSave">'+L("Save","Guardar")+'</button>'+
+          '</div>'+
+          '<div class="errMsg" id="pmError"></div>'+
         '</div>'+
       '</div>'+
       '<div class="msgSection">'+
@@ -1081,6 +2417,27 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
           shipEditMode = false;
           showToast(L("Shipping updated.","Envío actualizado."));
           loadOrders();
+        });
+      });
+    }
+
+    var pmSave = document.getElementById("pmSave");
+    if(pmSave){
+      pmSave.addEventListener("click", function(){
+        pmSave.disabled = true;
+        api("/api/admin/orders/"+order.reference+"/payment", {
+          method:"PATCH",
+          body: JSON.stringify({ paymentMethod: document.getElementById("pmSelect").value })
+        }).then(function(res){
+          pmSave.disabled = false;
+          if(handle401(res)) return;
+          if(!res.ok){
+            document.getElementById("pmError").textContent = res.data.error || L("Could not update payment method.","No se pudo actualizar el método de pago.");
+            return;
+          }
+          showToast(L("Payment method updated.","Método de pago actualizado."));
+          loadOrders();
+          loadSales();
         });
       });
     }
@@ -1269,11 +2626,191 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     });
   });
 
+  /* ---------- Store settings ---------- */
+  var stName = document.getElementById("stName");
+  var stTagline = document.getElementById("stTagline");
+  var stLogo = document.getElementById("stLogo");
+  var stLogoPreview = document.getElementById("stLogoPreview");
+  var stWhatsapp = document.getElementById("stWhatsapp");
+  var stInstagram = document.getElementById("stInstagram");
+  var stTiktok = document.getElementById("stTiktok");
+  var stLang = document.getElementById("stLang");
+  var stFooterCredit = document.getElementById("stFooterCredit");
+  var stShowMadeBy = document.getElementById("stShowMadeBy");
+  var stShowAdminLink = document.getElementById("stShowAdminLink");
+  var stPlatformText = document.getElementById("stPlatformText");
+  var stPlatformShow = document.getElementById("stPlatformShow");
+  var settingsError = document.getElementById("settingsError");
+  var saveSettingsBtn = document.getElementById("saveSettingsBtn");
+  var resetSettingsBtn = document.getElementById("resetSettingsBtn");
+
+  function settingsLogoHint(){
+    stLogoPreview.className = "logoPreview";
+    stLogoPreview.innerHTML = "";
+    stLogoPreview.hidden = true;
+    var v = stLogo.value.trim();
+    if(!v) return;
+    if(/^\/[a-zA-Z0-9_.\-/]+$/.test(v) || /^https:\/\//.test(v)){
+      stLogoPreview.hidden = false;
+      stLogoPreview.innerHTML = '<img src="'+esc(v)+'" alt="'+L("Logo preview","Vista previa del logo")+'">';
+    }else{
+      stLogoPreview.className = "logoPreview err";
+      stLogoPreview.hidden = false;
+      stLogoPreview.textContent = L("Logo must be a local path or an https URL.","El logo debe ser una ruta local o una URL https.");
+    }
+  }
+  stLogo.addEventListener("input", settingsLogoHint);
+
+  var spLogo = document.getElementById("spLogo");
+  var spBrand = document.getElementById("spBrand");
+  var spTag = document.getElementById("spTag");
+  var spFooterLine = document.getElementById("spFooterLine");
+  var spCredit = document.getElementById("spCredit");
+  var spAdmin = document.getElementById("spAdmin");
+
+  function updatePreview(){
+    var name = stName.value.trim() || "The Good Shelf";
+    var tag = stTagline.value.trim();
+    var logo = stLogo.value.trim();
+    spBrand.textContent = name;
+    spTag.textContent = tag;
+    spTag.style.display = tag ? "" : "none";
+    spFooterLine.textContent = "© 2026 " + name;
+    if(logo && (/^\/[a-zA-Z0-9_.\-/]+$/.test(logo) || /^https:\/\//.test(logo))){
+      spLogo.hidden = false;
+      spLogo.innerHTML = '<img src="'+esc(logo)+'" alt="'+L("Logo preview","Vista previa del logo")+'">';
+    }else{
+      spLogo.hidden = true;
+      spLogo.innerHTML = "";
+    }
+    spCredit.textContent = stFooterCredit.value.trim() || t("footer.madeBy");
+    spCredit.hidden = !stShowMadeBy.checked;
+    spAdmin.hidden = !stShowAdminLink.checked;
+  }
+  [stName, stTagline, stLogo, stFooterCredit].forEach(function(el){
+    el.addEventListener("input", updatePreview);
+  });
+  [stShowMadeBy, stShowAdminLink].forEach(function(el){
+    el.addEventListener("change", updatePreview);
+  });
+
+  function loadSettings(){
+    settingsError.textContent = "";
+    api("/api/admin/settings").then(function(res){
+      if(handle401(res)) return;
+      if(!res.ok){
+        settingsError.textContent = res.data.error || L("Could not load settings.","No se pudieron cargar los ajustes.");
+        return;
+      }
+      var s = res.data || {};
+      stName.value = s.storeName || "";
+      stTagline.value = s.tagline || "";
+      stLogo.value = s.logo || "";
+      stWhatsapp.value = (s.whatsapp && s.whatsapp.number) || "";
+      stInstagram.value = (s.socialLinks && s.socialLinks.instagram) || "";
+      stTiktok.value = (s.socialLinks && s.socialLinks.tiktok) || "";
+      stLang.value = s.defaultLang || "en";
+      stFooterCredit.value = (s.footer && s.footer.credit) || "";
+      stShowMadeBy.checked = !(s.footer && s.footer.showMadeBy === false);
+      stShowAdminLink.checked = !(s.footer && s.footer.showAdminLink === false);
+      stPlatformText.value = (s.platformCredit && s.platformCredit.text) || "";
+      stPlatformShow.checked = !(s.platformCredit && s.platformCredit.show === false);
+      settingsLogoHint();
+      updatePreview();
+    });
+  }
+
+  function saveSettings(){
+    settingsError.textContent = "";
+    if(!stName.value.trim()){
+      settingsError.textContent = L("Store name is required.","El nombre de la tienda es obligatorio.");
+      stName.focus();
+      return;
+    }
+    var logo = stLogo.value.trim();
+    if(logo && !(/^\/[a-zA-Z0-9_.\-/]+$/.test(logo) || /^https:\/\//.test(logo))){
+      settingsError.textContent = L("Logo must be a local path or an https URL.","El logo debe ser una ruta local o una URL https.");
+      return;
+    }
+    var wa = stWhatsapp.value.trim();
+    if(wa && !/^[0-9+][0-9 ]*$/.test(wa)){
+      settingsError.textContent = L("WhatsApp number must contain only digits (plus an optional leading +).","El número de WhatsApp solo puede contener dígitos (más un + opcional al inicio).");
+      return;
+    }
+    saveSettingsBtn.disabled = true;
+    api("/api/admin/settings", {
+      method: "PUT",
+      body: JSON.stringify({
+        storeName: stName.value.trim(),
+        tagline: stTagline.value.trim(),
+        logo: logo || null,
+        whatsapp: { number: wa || null },
+        defaultLang: stLang.value === "es" ? "es" : "en",
+        socialLinks: {
+          instagram: stInstagram.value.trim() || null,
+          tiktok: stTiktok.value.trim() || null
+        },
+        footer: {
+          credit: stFooterCredit.value.trim(),
+          showMadeBy: stShowMadeBy.checked,
+          showAdminLink: stShowAdminLink.checked
+        },
+        platformCredit: {
+          text: stPlatformText.value.trim(),
+          show: stPlatformShow.checked
+        }
+      })
+    }).then(function(res){
+      saveSettingsBtn.disabled = false;
+      if(handle401(res)) return;
+      if(!res.ok){
+        settingsError.textContent = res.data.error || L("Could not save settings.","No se pudieron guardar los ajustes.");
+        return;
+      }
+      showToast(L("Settings saved.","Ajustes guardados."));
+      loadSettings();
+    }).catch(function(){
+      saveSettingsBtn.disabled = false;
+      settingsError.textContent = L("Could not reach the server.","No se pudo conectar con el servidor.");
+    });
+  }
+  saveSettingsBtn.addEventListener("click", saveSettings);
+
+  resetSettingsBtn.addEventListener("click", function(){
+    if(!confirm(L("Reset all settings to defaults? This cannot be undone.","¿Restablecer todos los ajustes a los valores predeterminados? Esta acción no se puede deshacer."))) return;
+    resetSettingsBtn.disabled = true;
+    api("/api/admin/settings/reset", {method:"POST"}).then(function(res){
+      resetSettingsBtn.disabled = false;
+      if(handle401(res)) return;
+      if(!res.ok){
+        settingsError.textContent = res.data.error || L("Could not reset settings.","No se pudieron restablecer los ajustes.");
+        return;
+      }
+      showToast(L("Settings reset to defaults.","Ajustes restablecidos a los valores predeterminados."));
+      loadSettings();
+    }).catch(function(){
+      resetSettingsBtn.disabled = false;
+      settingsError.textContent = L("Could not reach the server.","No se pudo conectar con el servidor.");
+    });
+  });
+
   /* ---------- Init ---------- */
   api("/api/admin/session").then(function(res){
-    if(res.data && res.data.loggedIn){ showDashboard(); }
+    if(res.data && res.data.loggedIn){ routeAfterLogin(); }
     else{ showLogin(); }
   }).catch(function(){ showLogin(); });
+
+  /* ---------- Platform identity (from /api/platform) ---------- */
+  fetch("/api/platform").then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }).then(function(p){
+    if(p && p.showPlatformBrand !== false){
+      var dn = (typeof p.displayName === "string" && p.displayName.trim()) ? p.displayName.trim() : "MiTienda by COLHQ";
+      document.title = "Admin — " + dn;
+      var brandEl = document.querySelector(".brand");
+      if(brandEl) brandEl.textContent = dn + " — Admin";
+      I18N["login.subtitle"] = [dn + " — store management", dn + " — gestión de la tienda"];
+      applyI18n();
+    }
+  });
 })();
 </script>
 </body>

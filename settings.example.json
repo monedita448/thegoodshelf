@@ -1,0 +1,94 @@
+{
+  "storeId": "the-good-shelf",
+  "storeName": "The Good Shelf",
+  "businessType": null,
+  "setupCompleted": false,
+  "paymentPreference": "wompi",
+  "tagline": "Where convenience meets good taste.",
+  "description": "The Good Shelf is a curated everyday store in Medellín with premium pantry staples, thoughtful essentials, and a refined shopping experience.",
+  "logo": null,
+  "defaultLang": "en",
+  "theme": {
+    "preset": "brown",
+    "palette": {
+      "bg": "#f7f3ec",
+      "panel": "#fffdf8",
+      "text": "#171717",
+      "muted": "#66625a",
+      "line": "#e7e0d5",
+      "accent": "#8a6f4d",
+      "accentDark": "#6f5a3c",
+      "success": "#3f7a52"
+    },
+    "fontHeading": "Cormorant Garamond",
+    "fontBody": "Inter",
+    "fontsUrl": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap",
+    "radius": "20px"
+  },
+  "content": {
+    "heroEyebrow": {
+      "en": "Medellín • Curated everyday living",
+      "es": "Medellín • Vida cotidiana curada"
+    },
+    "heroSub": {
+      "en": "Where convenience meets good taste.<br>Everyday essentials, beautifully curated.",
+      "es": "Donde la comodidad se encuentra con el buen gusto.<br>Esenciales del día a día, cuidadosamente elegidos."
+    },
+    "shopHeading": {
+      "en": "Curated essentials for everyday living.",
+      "es": "Esenciales curados para el día a día."
+    },
+    "shopSub": {
+      "en": "Thoughtful pantry staples, refined basics, and products that feel simple, useful, and elevated.",
+      "es": "Productos de despensa bien pensados, básicos refinados, artículos simples, útiles y de calidad."
+    },
+    "aboutP1": {
+      "en": "The Good Shelf is designed as a modern everyday store with a refined point of view. It is meant to feel familiar, curated, and worth browsing.",
+      "es": "The Good Shelf está diseñada como una tienda moderna del día a día con un enfoque refinado. Busca sentirse familiar, curada y agradable de explorar."
+    },
+    "aboutP2": {
+      "en": "Built for Medellín, made to feel good for expats and locals alike.",
+      "es": "Pensada para Medellín, hecha para sentirse bien tanto para extranjeros como para locales."
+    },
+    "facts": [
+      {
+        "title": { "en": "Fast", "es": "Rápido" },
+        "desc": { "en": "We provide a fast and reliable service.", "es": "Ofrecemos un servicio rápido y confiable." }
+      },
+      {
+        "title": { "en": "Simple", "es": "Simple" },
+        "desc": { "en": "Our mission is to keep things simple.", "es": "Nuestra misión es mantener las cosas simples." }
+      },
+      {
+        "title": { "en": "Exclusivity", "es": "Exclusividad" },
+        "desc": { "en": "Every product in the store is selectively sourced.", "es": "Cada producto de la tienda es seleccionado cuidadosamente." }
+      }
+    ],
+    "aboutPaymentHeading": { "en": "Payment & Shipping", "es": "Pago y envío" },
+    "aboutCheckoutIntro": { "en": "Checkout is processed securely through Wompi:", "es": "El pago se procesa de forma segura a través de Wompi:" },
+    "aboutShipping": {
+      "en": "Orders ship across Colombia. You'll get your tracking number once your order is on its way.",
+      "es": "Los pedidos se envían a toda Colombia. Recibirás tu número de guía cuando tu pedido esté en camino."
+    },
+    "footerTagline": { "en": "Where convenience meets good taste.", "es": "Donde la comodidad se encuentra con el buen gusto." }
+  },
+  "whatsapp": {
+    "number": null,
+    "checkoutMode": "wompi",
+    "showButton": false
+  },
+  "socialLinks": {
+    "instagram": null,
+    "tiktok": null,
+    "facebook": null
+  },
+  "footer": {
+    "credit": "Made by COLhq.com",
+    "showMadeBy": true,
+    "showAdminLink": true
+  },
+  "platformCredit": {
+    "show": true,
+    "text": "Powered by MiTienda"
+  }
+}

@@ -1,4 +1,4 @@
-# Handoff notes — The Good Shelf
+# Handoff notes — MiTienda by COLHQ (demo store: The Good Shelf)
 
 This file is for whichever LLM/agent picks up work on this project next (a fresh Claude conversation, ChatGPT, OpenCode, whatever). It is **not** end-user documentation — that's `README.md`, which is customer/reseller-facing and describes what the product does. This file is developer/agent-facing and describes how to keep building it correctly, especially the parts that aren't obvious from the code alone.
 
@@ -8,13 +8,13 @@ Read this fully before making changes. It will save you from repeating mistakes 
 
 ## 1. What this project is
 
-"The Good Shelf" is a resellable, standalone e-commerce template for Colombian online stores. Three files, no framework, no build step:
+**MiTienda by COLHQ** is a resellable ecommerce platform for Colombian online stores. **The Good Shelf is the demo store** this template ships with — a working example, not the product. The platform identity lives in `platform.json` (git-tracked: `platformName`, `companyName`, `displayName`, `showPlatformBrand`); each store's identity (name, branding, copy) lives in `settings.json` instead. Keep those two layers separate — never write platform values into store settings, and never let store settings drive the platform's name. The admin panel brands itself from `platform.json` (via `GET /api/platform`); the storefront brands itself from `settings.json` (via `GET /api/settings`). Three files, no framework, no build step:
 
 - `index.html` — the public storefront (single file: HTML + CSS + vanilla JS in one `<script>` tag, ES5-ish style).
 - `admin.html` — the password-protected admin panel (same single-file pattern).
 - `server.js` — Node/Express backend: checkout via Wompi (PSE/Nequi/card), admin auth, product/order/trash APIs, receipt emailing.
 
-Data lives in flat JSON files (`products.json`, `orders.json`, `admin_audit.json`, `trash.json`) written directly by `server.js` — there is no database. `products.json` is the only one of these that's git-tracked (it's the actual catalog); the rest are git-ignored and auto-created at runtime.
+Data lives in flat JSON files (`products.json`, `orders.json`, `customers.json`, `expenses.json`, `admin_audit.json`, `trash.json`) written directly by `server.js` — there is no database. `products.json` is the only one of these that's git-tracked (it's the actual catalog); the rest are git-ignored and auto-created at runtime (the load functions return `[]` when the file doesn't exist yet, and each has a serialized write queue).
 
 Full product/feature documentation, setup steps, and deployment instructions are in `README.md` — read that too, it's kept accurate and up to date.
 
@@ -78,6 +78,7 @@ There's no headless browser available (no network route to download Chromium, no
 - **Recoverable deletes ("Recently Deleted" / trash system)**: products, product photos, and orders all soft-delete into `trash.json` (`type: 'product' | 'image' | 'order'`) rather than being hard-deleted. Each entry auto-expires **30 days** after its own `deletedAt` timestamp (checked hourly server-side, not on a fixed daily clock — see `purgeExpiredTrash()` in `server.js`). The Products bin lives at the bottom of the Products page in `admin.html`; the Orders bin lives at the bottom of the Orders page. They're independent — "Empty now" on one must never touch the other (see `purgeTrash(types)` — it takes an optional array of types to scope the purge). If you add a new deletable entity, follow this same soft-delete pattern rather than hard-deleting.
 - **CSRF / admin API auth**: every `/api/admin/*` request from the frontend goes through the shared `api()` wrapper in each HTML file, which attaches an `X-Requested-With` header (checked server-side by `requireAjaxHeader`) alongside the signed session cookie. Any new admin route needs this same header sent from the frontend, or it'll be rejected.
 - **Backend-requiring features are opt-in and degrade gracefully**: Wompi (checkout) and SMTP (email receipts) are the only two features that need real external accounts. Both fail with a clear, specific error message if unconfigured rather than crashing or silently no-oping (see the `SMTP_CONFIGURED` check and its warning in `server.js`). Keep this pattern for any future integration — the whole point of this template is that a reseller can hand it to a new client and 90% of it just works with zero setup.
+- **Finance / expenses (E4)**: the "Finance" tab in the admin tracks expenses in `expenses.json` (fields: `id, date, category, description, amountCOP, paymentMethod, createdAt`; categories `delivery|advertising|packaging|rent|salaries|supplies|other`, payment methods `cash|bank|nequi|other`). Routes: `GET/POST /api/admin/expenses`, `PUT/DELETE /api/admin/expenses/:id`, `GET /api/admin/expenses/export` and `GET /api/admin/sales/export` (both CSV with UTF-8 BOM, export route registered before `/:id`). The dashboard adds `expensesToday/Week/MonthCOP`, `productCostsMonthCOP`, `netProfitCOP` and `profitMarginPercent`; net profit = this month's sales − product costs − expenses, and product costs are revenue − estimated profit per order, so it inherits the existing `profitEstimateComplete` estimation caveat. **Date gotcha**: expense `date` is a plain calendar `YYYY-MM-DD`, not a timestamp — never feed it through `new Date()` + local getters (it shifts a day in UTC-offset timezones). Use `dateKey()` in `server.js`, which treats a bare `YYYY-MM-DD` string literally.
 
 ## 6. Known, deliberate gaps (not bugs — don't "fix" without asking)
 

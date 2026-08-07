@@ -2,7 +2,7 @@
   "name": "thegoodshelf-store",
   "version": "1.0.0",
   "private": true,
-  "description": "The Good Shelf — storefront with Wompi (PSE / Nequi / Card) checkout.",
+  "description": "MiTienda by COLHQ — ecommerce platform with Wompi (PSE / Nequi / Card) checkout. Ships with The Good Shelf demo store.",
   "engines": {
     "node": ">=18"
   },

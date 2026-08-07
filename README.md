@@ -1,6 +1,6 @@
-# The Good Shelf
+# MiTienda by COLHQ
 
-A standalone, turnkey template for Colombian online stores — no Shopify, no third-party store platform. A static front end (`index.html`), a password-protected admin panel (`admin.html`), and a small Node/Express backend (`server.js`) that you fully control. Real checkout via [Wompi](https://wompi.co): PSE (bank transfer), Nequi, and cards, all in COP. Built to be resold: the only thing that should need to change per client is cosmetics (branding, colors, copy, product catalog) — everything else, including the admin panel, works out of the box.
+A resellable ecommerce platform for Colombian online stores — no Shopify, no third-party store platform. **The Good Shelf is the demo store** this template ships with: a working example store you can keep or replace entirely. The platform itself is a static front end (`index.html`), a password-protected admin panel (`admin.html`), and a small Node/Express backend (`server.js`) that you fully control. Real checkout via [Wompi](https://wompi.co): PSE (bank transfer), Nequi, and cards, all in COP. Built to be resold: the only thing that should need to change per client is cosmetics (branding, colors, copy, product catalog) — everything else, including the admin panel, works out of the box.
 
 ## What's included
 
