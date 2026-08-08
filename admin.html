@@ -117,6 +117,92 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
 .st-DECLINED,.st-VOIDED,.st-ERROR{background:#f6e2e2;color:var(--danger)}
 .st-PROCESSING,.st-SHIPPED{background:#e3ebf5;color:#3a5a8a}
 
+/* F2: notifications bell + seller inbox */
+.bellWrap{position:relative}
+.bellBtn{position:relative;width:42px;height:42px;border-radius:999px;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.bellBtn:hover{color:var(--text)}
+.bellBadge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:var(--danger);color:#fff;font-size:.68rem;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px var(--bg)}
+.notifPanel{position:absolute;right:0;top:calc(100% + 8px);width:min(360px,calc(100vw - 32px));background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 40px rgba(0,0,0,.14);overflow:hidden;z-index:50;display:none}
+.notifPanel.open{display:block}
+.notifHead{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.notifHead strong{font-size:.95rem}
+.notifList{max-height:340px;overflow-y:auto}
+.notifItem{display:flex;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line);font-size:.86rem;cursor:pointer}
+.notifItem:last-child{border-bottom:none}
+.notifItem:hover{background:#faf6ef}
+.notifItem.unread{background:#f6efe3}
+.notifItem .notifDot{width:8px;height:8px;border-radius:999px;background:var(--accent);margin-top:6px;flex-shrink:0}
+.notifItem.read .notifDot{background:transparent}
+.notifEmpty{padding:32px;text-align:center;color:var(--muted);font-size:.86rem}
+
+/* F2: dashboard quick actions + health cards */
+.quickActions{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:22px}
+.qaBtn{display:flex;flex-direction:column;gap:6px;align-items:flex-start;padding:14px 16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);text-align:left;font-weight:700;font-size:.88rem;transition:border-color .15s ease,transform .15s ease}
+.qaBtn:hover{border-color:var(--accent);transform:translateY(-1px)}
+.qaBtn .qaIcon{font-size:1.25rem;line-height:1}
+.qaBtn .qaSub{font-weight:500;color:var(--muted);font-size:.76rem}
+.healthGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:22px}
+.healthCard{display:flex;gap:12px;align-items:center;padding:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel)}
+.healthCard .healthIcon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0}
+.healthCard.good .healthIcon{background:#e1efe4;color:var(--success)}
+.healthCard.warn .healthIcon{background:#f6e2e2;color:var(--danger)}
+.healthCard .healthLabel{font-size:.76rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.healthCard .healthValue{font-weight:700;font-size:1.05rem}
+.pendingOrders{padding:0 16px 8px}
+.pendingOrderRow{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.pendingOrderRow:last-child{border-bottom:none}
+.pendingOrderMain{flex:1;min-width:200px}
+.pendingOrderRef{font-weight:700;font-size:.88rem}
+.pendingOrderCust{color:var(--muted);font-size:.8rem}
+.pendingOrderMeta{display:flex;gap:8px;align-items:center;font-size:.8rem;color:var(--muted)}
+.lowStockRestock{margin-left:auto}
+@media (max-width:600px){.lowStockRestock{margin-left:0;width:100%}.lowStockRestock .smallBtn{width:100%;justify-content:center}}
+
+/* F2: order workflow */
+.workflowBar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:12px 0 6px}
+.workflowStep{display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:var(--muted)}
+.workflowStep .wfDot{width:9px;height:9px;border-radius:999px;background:var(--line);border:1.5px solid #cfc7b8;flex-shrink:0}
+.workflowStep.done .wfDot{background:var(--success);border-color:var(--success)}
+.workflowStep.current .wfDot{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 3px rgba(138,111,77,.18)}
+.workflowStep .wfArrow{color:#d8cfc0;font-size:.7rem}
+.advanceBtn{background:var(--text);color:#fff;border:none;padding:9px 14px;border-radius:10px;font-weight:700;font-size:.84rem;display:inline-flex;align-items:center;gap:8px}
+.advanceBtn:hover{opacity:.9}
+.advanceBtn:disabled{opacity:.45;cursor:not-allowed}
+.timeline{margin-top:14px}
+.timeline h4{margin:0 0 10px;font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.timelineStep{display:flex;gap:10px;position:relative;padding-bottom:14px}
+.timelineStep:last-child{padding-bottom:0}
+.timelineStep::before{content:"";position:absolute;left:5px;top:14px;bottom:0;width:2px;background:var(--line)}
+.timelineStep:last-child::before{display:none}
+.timelineDot{width:12px;height:12px;border-radius:999px;background:var(--line);border:2px solid #cfc7b8;flex-shrink:0;margin-top:2px;z-index:1}
+.timelineStep.done .timelineDot{background:var(--success);border-color:var(--success)}
+.timelineStep.current .timelineDot{background:var(--accent);border-color:var(--accent)}
+.timelineBody{font-size:.84rem}
+.timelineLabel{font-weight:700}
+.timelineWhen{color:var(--muted);font-size:.76rem}
+.timelineNote{color:var(--accent);font-size:.78rem}
+.waTemplateBtns{display:flex;gap:8px;flex-wrap:wrap}
+.waTplBtn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:.8rem;font-weight:700;color:var(--text)}
+.waTplBtn:hover{border-color:#25d366;color:#128c4a}
+
+/* F2: restock modal */
+.modalOverlay{position:fixed;inset:0;background:rgba(23,23,23,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}
+.modalOverlay.open{display:flex}
+.modalCard{width:min(420px,100%);background:var(--panel);border-radius:16px;border:1px solid var(--line);padding:24px;box-shadow:0 20px 50px rgba(0,0,0,.18)}
+.modalCard h3{font-family:Inter,sans-serif;font-size:1.05rem;margin:0 0 4px}
+.modalCard .modalSub{color:var(--muted);font-size:.85rem;margin:0 0 16px}
+.modalActions{display:flex;gap:10px;margin-top:18px;justify-content:flex-end}
+
+/* F2: reports */
+.reportCard{padding:18px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:16px}
+.reportCard h3{margin:0 0 4px;font-family:Inter,sans-serif;font-size:1rem}
+.reportCard .reportDesc{color:var(--muted);font-size:.84rem;margin:0 0 14px}
+.reportRangeRow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
+.reportRangeRow label{display:flex;flex-direction:column;gap:4px;font-size:.78rem;color:var(--muted);font-weight:700}
+.reportRangeRow input{padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.reportButtons{display:flex;gap:8px;flex-wrap:wrap}
+.reportButtons .smallBtn{font-size:.8rem}
+
 .formGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:18px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:16px}
 .formGrid .full{grid-column:1 / -1}
 .formGrid label{display:block;font-size:.8rem;color:var(--muted);font-weight:700;margin-bottom:5px}
@@ -380,6 +466,20 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
           <button type="button" class="langBtn" data-lang="en" title="English">🇺🇸</button>
           <button type="button" class="langBtn" data-lang="es" title="Español">🇨🇴</button>
         </div>
+        <div class="bellWrap" id="bellWrap">
+          <button type="button" class="bellBtn" id="bellBtn" title="Notifications / Notificaciones" aria-label="Notifications">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="bellBadge" id="bellBadge" style="display:none">0</span>
+          </button>
+          <div class="notifPanel" id="notifPanel">
+            <div class="notifHead">
+              <strong id="notifTitle">Notifications</strong>
+              <button type="button" class="smallBtn" id="notifMarkAll">Mark all read</button>
+            </div>
+            <div class="notifList" id="notifList"></div>
+            <div class="notifEmpty" id="notifEmpty" style="display:none">Nothing here.</div>
+          </div>
+        </div>
         <button class="btn btnGhost" id="logoutBtn" data-i18n="logout">Log out</button>
       </div>
     </div>
@@ -389,6 +489,65 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     <section class="panel active" id="homePanel">
       <div class="panelHead">
         <h2 data-i18n="dashboard.title">Dashboard</h2>
+      </div>
+      <div class="quickActions">
+        <button type="button" class="qaBtn" id="qaNewProduct">
+          <span class="qaIcon">＋</span>
+          <span data-i18n="qa.newProduct">New product</span>
+          <span class="qaSub" data-i18n="qa.newProductSub">Add an item to the catalog</span>
+        </button>
+        <button type="button" class="qaBtn" id="qaExpense">
+          <span class="qaIcon">₽</span>
+          <span data-i18n="qa.expense">Add expense</span>
+          <span class="qaSub" data-i18n="qa.expenseSub">Record a business cost</span>
+        </button>
+        <button type="button" class="qaBtn" id="qaOrders">
+          <span class="qaIcon">☰</span>
+          <span data-i18n="qa.orders">Orders to ship</span>
+          <span class="qaSub" id="qaOrdersSub">—</span>
+        </button>
+        <button type="button" class="qaBtn" id="qaReports">
+          <span class="qaIcon">▤</span>
+          <span data-i18n="qa.reports">Business reports</span>
+          <span class="qaSub" data-i18n="qa.reportsSub">Sales, profit, inventory…</span>
+        </button>
+      </div>
+      <div class="healthGrid" id="healthGrid">
+        <div class="healthCard good" id="healthSales">
+          <span class="healthIcon">₿</span>
+          <div>
+            <div class="healthLabel" data-i18n="health.sales">Sales this month</div>
+            <div class="healthValue" id="healthSalesVal">—</div>
+          </div>
+        </div>
+        <div class="healthCard" id="healthShip">
+          <span class="healthIcon">➤</span>
+          <div>
+            <div class="healthLabel" data-i18n="health.awaiting">Awaiting shipment</div>
+            <div class="healthValue" id="healthShipVal">—</div>
+          </div>
+        </div>
+        <div class="healthCard" id="healthStock">
+          <span class="healthIcon">▥</span>
+          <div>
+            <div class="healthLabel" data-i18n="health.lowStock">Low stock items</div>
+            <div class="healthValue" id="healthStockVal">—</div>
+          </div>
+        </div>
+        <div class="healthCard" id="healthNotif">
+          <span class="healthIcon">◉</span>
+          <div>
+            <div class="healthLabel" data-i18n="health.notifications">Notifications</div>
+            <div class="healthValue" id="healthNotifVal">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:24px">
+        <div class="panelHead" style="padding:16px 16px 0">
+          <h3 style="font-family:Inter,sans-serif;font-size:.95rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em" data-i18n="qa.pendingOrders">Pending orders</h3>
+        </div>
+        <div class="pendingOrders" id="pendingOrdersList"></div>
+        <div class="emptyMsg" id="pendingOrdersEmpty" style="display:none" data-i18n="qa.pendingOrdersEmpty">No pending orders. When a customer checks out, it shows up here.</div>
       </div>
       <div class="statGrid">
         <div class="statCard">
@@ -683,6 +842,29 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
         </div>
         <div class="emptyMsg" id="financeEmpty" style="display:none" data-i18n="finance.empty">No expenses yet. Add your first expense above.</div>
       </div>
+
+      <div class="panelHead" style="margin-top:36px">
+        <h2 data-i18n="reports.title">Business reports</h2>
+      </div>
+      <p style="color:var(--muted);font-size:.86rem;margin:-8px 0 16px" data-i18n="reports.note">Generate PDF reports with your store branding, ready to print or share. Choose a period, then download any report — each one also offers a CSV export.</p>
+      <div class="reportCard">
+        <div class="reportRangeRow">
+          <label data-i18n="reports.from">From<input type="date" id="repFrom"></label>
+          <label data-i18n="reports.to">To<input type="date" id="repTo"></label>
+          <button class="btn btnGhost" id="repReset" style="margin-left:auto" data-i18n="reports.reset">Reset to this month</button>
+        </div>
+        <div class="reportButtons">
+          <a class="smallBtn" id="repSales" href="#" download data-i18n="reports.sales">Sales report (PDF)</a>
+          <a class="smallBtn" id="repExpenses" href="#" download data-i18n="reports.expenses">Expense report (PDF)</a>
+          <a class="smallBtn" id="repProfit" href="#" download data-i18n="reports.profit">Profit report (PDF)</a>
+          <a class="smallBtn" id="repInventory" href="#" download data-i18n="reports.inventory">Inventory report (PDF)</a>
+          <a class="smallBtn" id="repCustomers" href="#" download data-i18n="reports.customers">Customer report (PDF)</a>
+          <a class="smallBtn" id="repSalesCsv" href="#" download data-i18n="reports.salesCsv">Sales CSV</a>
+          <a class="smallBtn" id="repExpensesCsv" href="#" download data-i18n="reports.expensesCsv">Expenses CSV</a>
+          <a class="smallBtn" id="repInventoryCsv" href="#" download data-i18n="reports.inventoryCsv">Inventory CSV</a>
+          <a class="smallBtn" id="repCustomersCsv" href="#" download data-i18n="reports.customersCsv">Customers CSV</a>
+        </div>
+      </div>
     </section>
 
     <section class="panel" id="settingsPanel">
@@ -807,6 +989,20 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
   <footer class="wrap" style="padding:6px 0 30px;text-align:center;color:var(--muted);font-size:.82rem">
     <a href="https://colhq.com" target="_blank" rel="noopener" style="text-decoration:underline;color:inherit" data-i18n="footer.madeBy">Made by COLhq.com</a>
   </footer>
+</div>
+
+<div class="modalOverlay" id="restockModal">
+  <div class="modalCard">
+    <h3 data-i18n="restock.title">Restock product</h3>
+    <p class="modalSub" id="restockSub">—</p>
+    <label style="display:block;font-size:.8rem;color:var(--muted);font-weight:700;margin-bottom:6px" data-i18n="restock.qtyLabel">Quantity to add</label>
+    <input type="number" min="1" step="1" class="field" id="restockQty" value="10" style="margin-bottom:0">
+    <div class="modalActions">
+      <button type="button" class="btn btnGhost" id="restockCancel" data-i18n="restock.cancel">Cancel</button>
+      <button type="button" class="btn btnPrimary" id="restockConfirm" data-i18n="restock.confirm">Add stock</button>
+    </div>
+    <div class="errMsg" id="restockError"></div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1017,7 +1213,85 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     "settings.whatsappInvalid": ["WhatsApp number must contain only digits (plus an optional leading +).", "El número de WhatsApp solo puede contener dígitos (más un + opcional al inicio)."],
     "settings.logoPreviewAlt": ["Logo preview", "Vista previa del logo"],
     "settings.errServer": ["Could not reach the server.", "No se pudo conectar con el servidor."],
-    "settings.previewHeading": ["Live preview", "Vista previa"]
+    "settings.previewHeading": ["Live preview", "Vista previa"],
+
+    /* F2: quick actions + health + pending orders */
+    "qa.newProduct": ["New product", "Nuevo producto"],
+    "qa.newProductSub": ["Add an item to the catalog", "Agrega un artículo al catálogo"],
+    "qa.expense": ["Add expense", "Registrar gasto"],
+    "qa.expenseSub": ["Record a business cost", "Registra un costo del negocio"],
+    "qa.orders": ["Orders to ship", "Pedidos por enviar"],
+    "qa.reports": ["Business reports", "Reportes del negocio"],
+    "qa.reportsSub": ["Sales, profit, inventory…", "Ventas, ganancias, inventario…"],
+    "qa.pendingOrders": ["Pending orders", "Pedidos pendientes"],
+    "qa.pendingOrdersEmpty": ["No pending orders. When a customer checks out, it shows up here.", "No hay pedidos pendientes. Cuando un cliente haga una compra, aparecerá aquí."],
+    "qa.viewAll": ["View all orders", "Ver todos los pedidos"],
+    "qa.advance": ["Advance", "Avanzar"],
+    "qa.advanceTo": ["Advance to {status}", "Avanzar a {status}"],
+    "qa.advanceHint": ["New order → Confirmed → Shipped → Delivered", "Pedido nuevo → Confirmado → Enviado → Entregado"],
+    "qa.noPhone": ["No phone", "Sin teléfono"],
+    "health.sales": ["Sales this month", "Ventas del mes"],
+    "health.awaiting": ["Awaiting shipment", "Por enviar"],
+    "health.lowStock": ["Low stock items", "Poco inventario"],
+    "health.notifications": ["Notifications", "Notificaciones"],
+    "health.ok": ["On track", "En marcha"],
+    "health.attention": ["Needs attention", "Requiere atención"],
+    "health.great": ["Doing great", "Muy bien"],
+    "health.none": ["All clear", "Todo en orden"],
+    "health.ready": ["All caught up", "Todo al día"],
+
+    /* F2: notifications */
+    "notif.title": ["Notifications", "Notificaciones"],
+    "notif.empty": ["Nothing here.", "No hay nada aquí."],
+    "notif.markAll": ["Mark all read", "Marcar todo como leído"],
+    "notif.unread": ["{n} unread", "{n} sin leer"],
+    "notif.markedAll": ["All notifications marked as read.", "Todas las notificaciones marcadas como leídas."],
+    "notif.openOrder": ["Open order", "Abrir pedido"],
+    "notif.readError": ["Could not load notifications.", "No se pudieron cargar las notificaciones."],
+
+    /* F2: order workflow */
+    "workflow.title": ["Order workflow", "Flujo del pedido"],
+    "workflow.advance": ["Advance step", "Avanzar paso"],
+    "workflow.advanceTo": ["Advance to {status}", "Avanzar a {status}"],
+    "workflow.delivered": ["Delivered", "Entregado"],
+    "workflow.confirmShip": ["Add tracking info", "Agregar datos de guía"],
+    "workflow.trackingPlaceholder": ["Tracking # (optional)", "N° de guía (opcional)"],
+    "workflow.carrierPlaceholder": ["Carrier (optional)", "Transportadora (opcional)"],
+    "workflow.advanced": ["Order moved to {status}.", "Pedido avanzado a {status}."],
+    "workflow.timeline": ["Order timeline", "Historial del pedido"],
+    "workflow.created": ["Order created", "Pedido creado"],
+    "workflow.advancedErr": ["Could not advance the order.", "No se pudo avanzar el pedido."],
+    "workflow.shippedWithTracking": ["Shipped — tracking: {t}", "Enviado — guía: {t}"],
+    "wa.confirmMsg": ["Confirm order", "Confirmar pedido"],
+    "wa.shippedMsg": ["Order shipped", "Pedido enviado"],
+    "wa.deliveredMsg": ["Order delivered", "Pedido entregado"],
+
+    /* F2: restock */
+    "restock.title": ["Restock product", "Reabastecer producto"],
+    "restock.sub": ["{name} — currently {stock} in stock", "{name} — actualmente hay {stock} en stock"],
+    "restock.qtyLabel": ["Quantity to add", "Cantidad a agregar"],
+    "restock.cancel": ["Cancel", "Cancelar"],
+    "restock.confirm": ["Add stock", "Agregar stock"],
+    "restock.added": ["Added {qty} units. {stock} in stock now.", "Se agregaron {qty} unidades. Ahora hay {stock} en stock."],
+    "restock.error": ["Could not restock.", "No se pudo reabastecer."],
+    "restock.qtyInvalid": ["Enter a whole number greater than 0.", "Ingresa un número entero mayor que 0."],
+    "restock.invalidQty": ["Quantity must be a positive whole number.", "La cantidad debe ser un número entero positivo."],
+
+    /* F2: reports */
+    "reports.title": ["Business reports", "Reportes del negocio"],
+    "reports.note": ["Generate PDF reports with your store branding, ready to print or share. Choose a period, then download any report — each one also offers a CSV export.", "Genera reportes en PDF con la marca de tu tienda, listos para imprimir o compartir. Elige un periodo y descarga cualquier reporte — cada uno también ofrece exportación CSV."],
+    "reports.from": ["From", "Desde"],
+    "reports.to": ["To", "Hasta"],
+    "reports.reset": ["Reset to this month", "Restablecer a este mes"],
+    "reports.sales": ["Sales report (PDF)", "Reporte de ventas (PDF)"],
+    "reports.expenses": ["Expense report (PDF)", "Reporte de gastos (PDF)"],
+    "reports.profit": ["Profit report (PDF)", "Reporte de ganancias (PDF)"],
+    "reports.inventory": ["Inventory report (PDF)", "Reporte de inventario (PDF)"],
+    "reports.customers": ["Customer report (PDF)", "Reporte de clientes (PDF)"],
+    "reports.salesCsv": ["Sales CSV", "Ventas CSV"],
+    "reports.expensesCsv": ["Expenses CSV", "Gastos CSV"],
+    "reports.inventoryCsv": ["Inventory CSV", "Inventario CSV"],
+    "reports.customersCsv": ["Customers CSV", "Clientes CSV"]
   };
   var lang = localStorage.getItem("tgsAdminLang") === "es" ? "es" : "en";
   function t(key){
@@ -1134,6 +1408,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     loadCustomers();
     loadFinance();
     loadTrash();
+    loadNotifications();
   }
 
   function handle401(res){
@@ -1170,6 +1445,88 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
   document.getElementById("logoutBtn").addEventListener("click", function(){
     api("/api/admin/logout", {method:"POST"}).then(function(){ showLogin(); });
   });
+
+  /* ---------- F2: Seller notifications inbox ---------- */
+  var bellBtn = document.getElementById("bellBtn");
+  var notifPanel = document.getElementById("notifPanel");
+  var notifList = document.getElementById("notifList");
+  var notifEmpty = document.getElementById("notifEmpty");
+  var notifMarkAllBtn = document.getElementById("notifMarkAll");
+  var bellBadge = document.getElementById("bellBadge");
+  // Set by the notification click handler so the Orders tab can auto-expand
+  // the order the seller clicked through to.
+  var focusOrderRef = null;
+
+  function setNotifBadge(n){
+    if(n > 0){
+      bellBadge.textContent = n > 99 ? "99+" : n;
+      bellBadge.style.display = "flex";
+    }else{
+      bellBadge.style.display = "none";
+    }
+  }
+
+  function loadNotifications(){
+    api("/api/admin/notifications").then(function(res){
+      if(handle401(res)) return;
+      if(!res.ok) return;
+      var data = res.data || {};
+      setNotifBadge(data.unread || 0);
+      var items = data.notifications || [];
+      notifEmpty.style.display = items.length ? "none" : "block";
+      notifList.innerHTML = items.map(function(n){
+        var canOpen = n.orderReference || n.reference;
+        var action = canOpen
+          ? '<span class="smallBtn" style="pointer-events:none">'+L("Open order","Abrir pedido")+'</span>'
+          : '';
+        return '<div class="notifItem '+(n.read ? "read" : "unread")+'" data-notif-id="'+esc(n.id)+'" data-notif-ref="'+esc(canOpen || "")+'">'+
+          '<span class="notifDot"></span>'+
+          '<div style="flex:1;min-width:0">'+
+            '<div>'+esc(n.message)+'</div>'+
+            '<div style="color:var(--muted);font-size:.76rem;margin-top:3px">'+fmtDate(n.createdAt)+'</div>'+
+          '</div>'+
+          action+
+        '</div>';
+      }).join("");
+      notifList.querySelectorAll(".notifItem").forEach(function(el){
+        el.addEventListener("click", function(){
+          var id = el.getAttribute("data-notif-id");
+          var ref = el.getAttribute("data-notif-ref");
+          if(id) api("/api/admin/notifications/"+encodeURIComponent(id)+"/read", {method:"PATCH", body: "{}"}).then(function(res){
+            if(handle401(res)) return;
+            if(res.ok) loadNotifications();
+          });
+          if(ref){
+            notifPanel.classList.remove("open");
+            focusOrderRef = ref;
+            activateTab(tabOrders, ordersPanel);
+            loadOrders();
+            loadTrash();
+          }
+        });
+      });
+    });
+  }
+
+  bellBtn.addEventListener("click", function(e){
+    e.stopPropagation();
+    notifPanel.classList.toggle("open");
+    if(notifPanel.classList.contains("open")) loadNotifications();
+  });
+  document.addEventListener("click", function(e){
+    var w = document.getElementById("bellWrap");
+    if(!w || !w.contains(e.target)) notifPanel.classList.remove("open");
+  });
+  notifMarkAllBtn.addEventListener("click", function(){
+    api("/api/admin/notifications/read-all", {method:"POST", body: "{}"}).then(function(res){
+      if(handle401(res)) return;
+      if(!res.ok){ showToast(L("Could not mark notifications as read.","No se pudieron marcar las notificaciones como leídas.")); return; }
+      setNotifBadge(0);
+      loadNotifications();
+      showToast(L("All notifications marked as read.","Todas las notificaciones marcadas como leídas."));
+    });
+  });
+
 
   /* ---------- First-run setup wizard ---------- */
   var setupScreen = document.getElementById("setupScreen");
@@ -1426,6 +1783,29 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     loadSettings();
   });
 
+  /* ---------- F2A: dashboard quick actions ---------- */
+  document.getElementById("qaNewProduct").addEventListener("click", function(){
+    activateTab(tabProducts, productsPanel);
+    document.getElementById("newProductBtn").click();
+  });
+  document.getElementById("qaExpense").addEventListener("click", function(){
+    activateTab(tabFinance, financePanel);
+    loadFinance();
+    var form = document.getElementById("financeForm");
+    if(form) form.scrollIntoView({behavior:"smooth", block:"center"});
+  });
+  document.getElementById("qaOrders").addEventListener("click", function(){
+    activateTab(tabOrders, ordersPanel);
+    loadOrders();
+    loadTrash();
+  });
+  document.getElementById("qaReports").addEventListener("click", function(){
+    activateTab(tabFinance, financePanel);
+    loadFinance();
+    var rep = document.getElementById("repSales");
+    if(rep) rep.scrollIntoView({behavior:"smooth", block:"center"});
+  });
+
   /* ---------- Home / Dashboard ---------- */
   function loadHome(){
     api("/api/admin/dashboard").then(function(res){
@@ -1467,10 +1847,168 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       empty.style.display = "none";
       list.innerHTML = d.lowStock.map(function(p){
         var minTxt = Number.isInteger(p.minStock) ? L(" (min "+p.minStock+")", " (mín "+p.minStock+")") : "";
-        return '<div class="lowStockRow"><span>'+esc(p.name)+minTxt+'</span><span style="font-weight:700;color:'+(p.stock<=0?"var(--danger)":"var(--accent)")+'">'+(p.stock<=0 ? L("Sold out","Agotado") : L(p.stock+" left", "Quedan "+p.stock))+'</span></div>';
+        return '<div class="lowStockRow">'+
+          '<span>'+esc(p.name)+minTxt+'</span>'+
+          '<span style="font-weight:700;color:'+(p.stock<=0?"var(--danger)":"var(--accent)")+'">'+(p.stock<=0 ? L("Sold out","Agotado") : L(p.stock+" left", "Quedan "+p.stock))+'</span>'+
+          '<button type="button" class="smallBtn lowStockRestock" data-restock-id="'+esc(p.id)+'" data-restock-name="'+esc(p.name)+'" data-restock-stock="'+p.stock+'">'+L("Restock","Reabastecer")+'</button>'+
+        '</div>';
       }).join("");
     }
+    list.querySelectorAll("[data-restock-id]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        openRestockModal(btn.getAttribute("data-restock-id"), btn.getAttribute("data-restock-name"), Number(btn.getAttribute("data-restock-stock")));
+      });
+    });
+
+    // F2A: quick action subtitles + business health cards + pending orders.
+    var qaOrdersSub = document.getElementById("qaOrdersSub");
+    if(qaOrdersSub) qaOrdersSub.textContent = d.awaitingShipment + " " + L("to ship","por enviar");
+
+    renderHealthCards(d);
+    renderPendingOrders(d);
   }
+
+  function renderHealthCards(d){
+    var salesCard = document.getElementById("healthSales");
+    document.getElementById("healthSalesVal").textContent = money(d.salesMonthCOP);
+    salesCard.classList.remove("good","warn");
+    salesCard.classList.add(d.salesMonthCOP > 0 ? "good" : "warn");
+
+    var shipCard = document.getElementById("healthShip");
+    document.getElementById("healthShipVal").textContent = d.awaitingShipment;
+    shipCard.classList.remove("good","warn");
+    shipCard.classList.add(d.awaitingShipment > 0 ? "warn" : "good");
+
+    var stockCard = document.getElementById("healthStock");
+    document.getElementById("healthStockVal").textContent = d.lowStock.length;
+    stockCard.classList.remove("good","warn");
+    stockCard.classList.add(d.lowStock.length > 0 ? "warn" : "good");
+
+    var notifCard = document.getElementById("healthNotif");
+    document.getElementById("healthNotifVal").textContent = d.unreadNotifications || 0;
+    notifCard.classList.remove("good","warn");
+    notifCard.classList.add(d.unreadNotifications > 0 ? "warn" : "good");
+  }
+
+  // F2A/F2B: the dashboard's pending-orders card lists recent orders with a
+  // one-click "Advance" step each, so the seller can run the workflow without
+  // leaving the dashboard.
+  function renderPendingOrders(d){
+    var wrap = document.getElementById("pendingOrdersList");
+    var empty = document.getElementById("pendingOrdersEmpty");
+    var orders = (d.recentOrders || []).filter(function(o){ return o.shippingStatus !== "DELIVERED"; });
+    empty.style.display = orders.length ? "none" : "block";
+    wrap.innerHTML = orders.map(function(o){
+      var cust = esc(o.customerName || "—");
+      var next = nextShippingStatus(o.shippingStatus);
+      var btn = next
+        ? '<button type="button" class="smallBtn" data-advance-ref="'+esc(o.reference)+'" data-advance-status="'+next+'">'+L("Advance","Avanzar")+' → <span class="statusChip st-'+next+'">'+shippingStatusLabel(next)+'</span></button>'
+        : '<span class="statusChip st-DELIVERED">'+shippingStatusLabel("DELIVERED")+'</span>';
+      return '<div class="pendingOrderRow">'+
+        '<div class="pendingOrderMain">'+
+          '<div class="pendingOrderRef">'+esc(o.reference)+'</div>'+
+          '<div class="pendingOrderCust">'+cust+'</div>'+
+        '</div>'+
+        '<div class="pendingOrderMeta">'+
+          money(o.amountInCents/100)+
+          ' · <span class="statusChip st-'+esc(o.shippingStatus)+'">'+shippingStatusLabel(o.shippingStatus)+'</span>'+
+        '</div>'+
+        btn+
+      '</div>';
+    }).join("");
+    wrap.querySelectorAll("[data-advance-ref]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        advanceOrder(btn.getAttribute("data-advance-ref"), btn.getAttribute("data-advance-status"));
+      });
+    });
+  }
+
+  // F2B: seller workflow step mapping — New order → Confirmed → Shipped →
+  // Delivered (NOT_SHIPPED → PROCESSING → SHIPPED → DELIVERED).
+  var SHIPPING_WORKFLOW = ["NOT_SHIPPED","PROCESSING","SHIPPED","DELIVERED"];
+  function nextShippingStatus(s){
+    var i = SHIPPING_WORKFLOW.indexOf(s);
+    if(i === -1 || i === SHIPPING_WORKFLOW.length - 1) return null;
+    return SHIPPING_WORKFLOW[i + 1];
+  }
+
+  // Advances an order one step. Moving into SHIPPED asks for optional
+  // tracking info first (carrier + tracking number), which is sent to the
+  // customer via the WhatsApp template when provided.
+  function advanceOrder(reference, nextStatus){
+    var doAdvance = function(extra){
+      api("/api/admin/orders/"+encodeURIComponent(reference)+"/advance", {
+        method:"POST",
+        body: JSON.stringify(extra || {})
+      }).then(function(res){
+        if(handle401(res)) return;
+        if(!res.ok){ showToast(res.data.error || L("Could not advance the order.","No se pudo avanzar el pedido.")); return; }
+        showToast(L("Order moved to "+shippingStatusLabel(nextStatus)+".","Pedido avanzado a "+shippingStatusLabel(nextStatus)+"."));
+        loadHome();
+        loadSales();
+        loadOrders();
+      });
+    };
+    if(nextStatus === "SHIPPED"){
+      var tracking = prompt(L("Tracking # (optional):","N° de guía (opcional):"), "");
+      if(tracking === null) return;
+      var carrier = prompt(L("Carrier (optional):","Transportadora (opcional):"), "");
+      if(carrier === null) return;
+      doAdvance({ trackingNumber: tracking.trim(), carrier: carrier.trim() });
+    }else{
+      doAdvance({});
+    }
+  }
+
+  /* ---------- F2E: quick restock modal ---------- */
+  var restockModal = document.getElementById("restockModal");
+  var restockSub = document.getElementById("restockSub");
+  var restockQty = document.getElementById("restockQty");
+  var restockError = document.getElementById("restockError");
+  var restockConfirm = document.getElementById("restockConfirm");
+  var restockCancel = document.getElementById("restockCancel");
+  var restockProduct = null;
+
+  function openRestockModal(id, name, stock){
+    restockProduct = { id: id, name: name, stock: stock };
+    restockSub.textContent = L(name + " — currently " + stock + " in stock", name + " — actualmente hay " + stock + " en stock");
+    restockQty.value = 10;
+    restockError.textContent = "";
+    restockModal.classList.add("open");
+    restockQty.focus();
+  }
+  function closeRestockModal(){
+    restockModal.classList.remove("open");
+    restockProduct = null;
+  }
+  restockCancel.addEventListener("click", closeRestockModal);
+  restockModal.addEventListener("click", function(e){ if(e.target === restockModal) closeRestockModal(); });
+  restockQty.addEventListener("keydown", function(e){ if(e.key === "Enter") restockConfirm.click(); });
+  restockConfirm.addEventListener("click", function(){
+    if(!restockProduct) return;
+    var qty = Number(restockQty.value);
+    if(!Number.isInteger(qty) || qty <= 0){
+      restockError.textContent = L("Quantity must be a positive whole number.","La cantidad debe ser un número entero positivo.");
+      return;
+    }
+    restockConfirm.disabled = true;
+    api("/api/admin/products/"+encodeURIComponent(restockProduct.id)+"/restock", {
+      method:"POST",
+      body: JSON.stringify({ qty: qty })
+    }).then(function(res){
+      restockConfirm.disabled = false;
+      if(handle401(res)) return;
+      if(!res.ok){
+        restockError.textContent = res.data.error || L("Could not restock.","No se pudo reabastecer.");
+        return;
+      }
+      showToast(L("Added "+qty+" units. "+res.data.stock+" in stock now.","Se agregaron "+qty+" unidades. Ahora hay "+res.data.stock+" en stock."));
+      closeRestockModal();
+      loadHome();
+      loadProducts();
+      loadInventoryHistory();
+    });
+  });
 
   /* ---------- Sales history (business overview) ---------- */
 
@@ -1716,6 +2254,48 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       });
     });
   }
+
+  /* ---------- F2F: business reports (PDF + CSV) ---------- */
+  function repDefaultRange(){
+    var now = new Date();
+    var pad = function(n){ return String(n).padStart(2, "0"); };
+    var from = now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-01";
+    var to = now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate());
+    document.getElementById("repFrom").value = from;
+    document.getElementById("repTo").value = to;
+  }
+  function repRangeQuery(){
+    var from = document.getElementById("repFrom").value;
+    var to = document.getElementById("repTo").value;
+    var q = [];
+    if(from) q.push("from=" + encodeURIComponent(from));
+    if(to) q.push("to=" + encodeURIComponent(to));
+    return q.length ? "?" + q.join("&") : "";
+  }
+  function wireReport(id, path, csv){
+    var a = document.getElementById(id);
+    var parts = [];
+    var range = repRangeQuery().replace("?", "");
+    if(range) parts.push(range);
+    if(csv) parts.push("format=csv");
+    a.href = path + (parts.length ? "?" + parts.join("&") : "");
+  }
+  function wireReports(){
+    wireReport("repSales", "/api/admin/reports/sales", false);
+    wireReport("repExpenses", "/api/admin/reports/expenses", false);
+    wireReport("repProfit", "/api/admin/reports/profit", false);
+    wireReport("repInventory", "/api/admin/reports/inventory", false);
+    wireReport("repCustomers", "/api/admin/reports/customers", false);
+    wireReport("repSalesCsv", "/api/admin/reports/sales", true);
+    wireReport("repExpensesCsv", "/api/admin/reports/expenses", true);
+    wireReport("repInventoryCsv", "/api/admin/reports/inventory", true);
+    wireReport("repCustomersCsv", "/api/admin/reports/customers", true);
+  }
+  document.getElementById("repReset").addEventListener("click", repDefaultRange);
+  document.getElementById("repFrom").addEventListener("change", wireReports);
+  document.getElementById("repTo").addEventListener("change", wireReports);
+  repDefaultRange();
+  wireReports();
 
   function resetExpenseForm(){
     editingExpenseId = null;
@@ -2220,7 +2800,14 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
   function loadOrders(){
     api("/api/admin/orders").then(function(res){
       if(handle401(res)) return;
-      renderOrders(res.data || []);
+      var orders = res.data || [];
+      if(focusOrderRef){
+        expandedRef = focusOrderRef;
+        focusOrderRef = null;
+      }
+      shipEditMode = false;
+      renderOrders(orders);
+      if(expandedRef) wireDetail(orders.find(function(o){ return o.reference === expandedRef; }));
     });
   }
 
@@ -2253,9 +2840,12 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     VOIDED: ["Voided","Anulado"],
     ERROR: ["Error","Error"]
   };
+  // F2B: seller-facing workflow labels. Stored values stay untouched
+  // (NOT_SHIPPED/PROCESSING/SHIPPED/DELIVERED) — only what the seller sees
+  // reads as New order → Confirmed → Shipped → Delivered.
   var SHIPPING_STATUS_LABELS = {
-    NOT_SHIPPED: ["Not shipped","No enviado"],
-    PROCESSING: ["Processing","Procesando"],
+    NOT_SHIPPED: ["New order","Pedido nuevo"],
+    PROCESSING: ["Confirmed","Confirmado"],
     SHIPPED: ["Shipped","Enviado"],
     DELIVERED: ["Delivered","Entregado"]
   };
@@ -2297,6 +2887,60 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
     });
   }
 
+  // F2B: visual workflow steps + one-click advance for the order detail.
+  function workflowHTML(o){
+    var current = o.shippingStatus;
+    var pos = SHIPPING_WORKFLOW.indexOf(current);
+    var steps = SHIPPING_WORKFLOW.map(function(s, i){
+      var cls = i < pos ? "done" : (s === current ? "current" : "");
+      return '<span class="workflowStep '+cls+'"><span class="wfDot"></span>'+esc(shippingStatusLabel(s))+(i < SHIPPING_WORKFLOW.length - 1 ? '<span class="wfArrow">→</span>' : '')+'</span>';
+    }).join("");
+    var next = nextShippingStatus(current);
+    var btn = next
+      ? '<button type="button" class="advanceBtn" id="advanceOrderBtn">'+L("Advance","Avanzar")+' → '+esc(shippingStatusLabel(next))+'</button>'
+      : '<span class="statusChip st-DELIVERED">'+esc(shippingStatusLabel("DELIVERED"))+'</span>';
+    return '<div class="workflowBar">'+steps+'</div>'+
+      '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">'+btn+
+      '<span style="color:var(--muted);font-size:.76rem">'+L("New order → Confirmed → Shipped → Delivered","Pedido nuevo → Confirmado → Enviado → Entregado")+'</span></div>';
+  }
+
+  // F2B: the order's recorded status history (set at checkout and on every
+  // advance / shipping update).
+  function timelineHTML(o){
+    var tl = (Array.isArray(o.timeline) && o.timeline.length) ? o.timeline : [];
+    if(!tl.length) return "";
+    var current = o.shippingStatus;
+    var steps = tl.map(function(t){
+      var cls = t.status === current ? "current" : "done";
+      var note = t.note ? '<div class="timelineNote">'+esc(t.note)+'</div>' : '';
+      return '<div class="timelineStep '+cls+'">'+
+        '<span class="timelineDot"></span>'+
+        '<div class="timelineBody">'+
+          '<span class="timelineLabel">'+esc(shippingStatusLabel(t.status))+'</span>'+
+          ' <span class="timelineWhen">'+fmtDate(t.at)+'</span>'+note+
+        '</div>'+
+      '</div>';
+    }).join("");
+    return '<div class="timeline"><h4>'+L("Order timeline","Historial del pedido")+'</h4>'+steps+'</div>';
+  }
+
+  // F2C: pre-filled WhatsApp messages per workflow step. Deep links open a
+  // chat in the seller's own WhatsApp app, already drafted and ready to send.
+  function waTplLabel(s){
+    if(s === "PROCESSING") return L("Confirm order","Confirmar pedido");
+    if(s === "SHIPPED") return L("Order shipped","Pedido enviado");
+    if(s === "DELIVERED") return L("Order delivered","Pedido entregado");
+    return s;
+  }
+  function waTplText(o, s){
+    var first = String(o.customer.fullName || "").split(" ")[0];
+    var ref = o.reference;
+    if(s === "PROCESSING") return "Hola " + first + ", confirmamos tu pedido " + ref + ". Estamos preparando tu envio. ¡Gracias por tu compra!";
+    if(s === "SHIPPED") return "Hola " + first + ", tu pedido " + ref + " ya fue despachado." + (o.trackingNumber ? " Tu guia es " + o.trackingNumber + "." : "") + " ¡Gracias por tu compra!";
+    if(s === "DELIVERED") return "Hola " + first + ", tu pedido " + ref + " fue entregado. ¡Esperamos que lo disfrutes!";
+    return "";
+  }
+
   function detailHTML(o){
     var itemsHtml = o.items.map(function(it, idx){
       var product = latestProducts.find(function(p){ return p.id === it.id; });
@@ -2326,6 +2970,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
         '</div>'+
         '<div>'+
           '<h4>'+L("Update shipping","Actualizar envío")+'</h4>'+
+          workflowHTML(o)+
           '<div class="shipForm">'+
             '<div><label>'+L("Status","Estado")+'</label>'+
               '<select class="field" id="shStatus"'+(shipEditMode ? '' : ' disabled')+'>'+
@@ -2339,6 +2984,7 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
             '<button class="btn btnPrimary" id="shEditSave">'+(shipEditMode ? L("Save","Guardar") : L("Edit","Editar"))+'</button>'+
           '</div>'+
           '<div class="errMsg" id="shError"></div>'+
+          timelineHTML(o)+
           '<h4 style="margin-top:16px">'+L("Payment method","Método de pago")+'</h4>'+
           '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'+
             '<select class="field" id="pmSelect" style="flex:1;min-width:140px;margin-bottom:0">'+pmOptions+'</select>'+
@@ -2350,11 +2996,16 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       '<div class="msgSection">'+
         '<h4>'+L("Message the customer","Escribir al cliente")+'</h4>'+
         (o.customer.phone
-          ? '<a class="waBtn" id="waLink" href="#" target="_blank" rel="noopener">'+
+          ? '<div class="waTemplateBtns" style="margin-bottom:10px">'+
+              ['PROCESSING','SHIPPED','DELIVERED'].map(function(s){
+                return '<a class="waTplBtn" id="waTpl-'+s+'" href="#" target="_blank" rel="noopener">'+waTplLabel(s)+'</a>';
+              }).join("")+
+            '</div>'+
+            '<a class="waBtn" id="waLink" href="#" target="_blank" rel="noopener">'+
               '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.2h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2Zm5.8 14.03c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.12.11-1.8-.11a15.5 15.5 0 0 1-1.65-.6c-2.9-1.25-4.79-4.17-4.94-4.36-.15-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.01-2.41.27-.28.58-.35.78-.35h.55c.18 0 .42-.07.65.5.24.58.81 2 .88 2.15.07.15.12.32.02.52-.1.2-.15.32-.3.5-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.3.76 1.25 1.63 2.02 1.12 1 2.06 1.31 2.36 1.46.3.15.47.13.65-.08.17-.2.73-.85.93-1.14.2-.28.4-.24.66-.14.28.1 1.77.83 2.07.99.3.15.5.22.57.35.08.13.08.75-.16 1.42Z"/></svg>'+
               L("Message on WhatsApp","Mensaje por WhatsApp")+
             '</a>'+
-            '<p style="color:var(--muted);font-size:.82rem;margin:8px 0 0">'+L("Opens a chat in your own WhatsApp, pre-filled and ready to send.","Abre un chat en tu propio WhatsApp, ya redactado y listo para enviar.")+'</p>'
+            '<p style="color:var(--muted);font-size:.82rem;margin:8px 0 0">'+L("Template buttons draft a message for that step. Opens a chat in your own WhatsApp, ready to send.","Los botones de plantilla redactan un mensaje para ese paso. Abren un chat en tu propio WhatsApp, listo para enviar.")+'</p>'
           : '<p style="color:var(--muted);font-size:.86rem">'+L("Add a phone number to this order to message the customer on WhatsApp.","Agrega un número de teléfono a este pedido para escribirle al cliente por WhatsApp.")+'</p>')+
       '</div>'+
       '<div class="msgSection">'+
@@ -2467,6 +3118,23 @@ td img{width:40px;height:40px;border-radius:8px;object-fit:cover}
       var number = toWhatsAppNumber(order.customer.phone);
       var greeting = "Hola " + order.customer.fullName.split(" ")[0] + ", te escribimos sobre tu pedido " + order.reference + ".";
       waLink.href = "https://wa.me/" + number + "?text=" + encodeURIComponent(greeting);
+    }
+
+    // F2C: pre-filled WhatsApp template links for each workflow step.
+    if(order.customer.phone){
+      var waNumber = toWhatsAppNumber(order.customer.phone);
+      ["PROCESSING","SHIPPED","DELIVERED"].forEach(function(s){
+        var el = document.getElementById("waTpl-" + s);
+        if(el) el.href = "https://wa.me/" + waNumber + "?text=" + encodeURIComponent(waTplText(order, s));
+      });
+    }
+
+    // F2B: one-click advance from the detail panel.
+    var advanceBtn = document.getElementById("advanceOrderBtn");
+    if(advanceBtn){
+      advanceBtn.addEventListener("click", function(){
+        advanceOrder(order.reference, nextShippingStatus(order.shippingStatus));
+      });
     }
 
     var sendReceiptBtn = document.getElementById("sendReceiptBtn");

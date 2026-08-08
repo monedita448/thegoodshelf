@@ -5,7 +5,7 @@ A resellable ecommerce platform for Colombian online stores — no Shopify, no t
 ## What's included
 
 - **Storefront** — product grid with search/filter/sort, cart, sold-out/low-stock badges, a full product detail view (click any product for a bigger photo gallery, description, quantity picker, and Add to Cart), Wompi checkout that collects a shipping address, and an English/Spanish toggle (flag icons) in the top nav.
-- **Admin panel** (`/admin`) — password login, a dashboard (sales, orders today, low stock), full product management (multiple photos per product with drag-to-reorder and a click-to-expand viewer, inventory/stock tracking, an optional size field, add/edit/delete, category suggestions as you type), order management (shipping status, tracking, carrier, a one-click "Message on WhatsApp" button, and a printable receipt you can also email to the customer in one click), Recently Deleted lists for both products and orders so deletes are recoverable for 30 days, and an English/Spanish toggle (flag icons, top right). No coding required to run day to day.
+- **Admin panel** (`/admin`) — password login, a dashboard (sales, orders today, low stock, plus business-health cards and a pending-orders card with one-click workflow steps), full product management (multiple photos per product with drag-to-reorder and a click-to-expand viewer, inventory/stock tracking, an optional size field, add/edit/delete, category suggestions as you type, and quick restock buttons on the dashboard's low-stock list), order management (a New order → Confirmed → Shipped → Delivered workflow with one-click advance and a status timeline, shipping status, tracking, carrier, per-step WhatsApp template buttons, a "Message on WhatsApp" button, and a printable receipt you can also email to the customer in one click), a notification bell that flags new orders, business reports (sales / expenses / profit / inventory value / customers) viewable as PDF or CSV, Recently Deleted lists for both products and orders so deletes are recoverable for 30 days, and an English/Spanish toggle (flag icons, top right). No coding required to run day to day.
 - **Security** — session-based login (not a token in a URL), rate-limited login attempts, CSRF protection, security headers, an audit log of every admin action, and sensitive files (`.env`, `orders.json`, `server.js`, etc.) are never servable over HTTP. See "Security" below for the full list.
 
 ## How it works
@@ -13,12 +13,14 @@ A resellable ecommerce platform for Colombian online stores — no Shopify, no t
 - `products.json` is the catalog. The storefront fetches it to render the shop; the backend re-reads it on every order so a customer can never pay less than the real price. Edit it through `/admin` — you should never need to hand-edit the file.
 - Checkout collects contact info and a shipping address, creates a `PENDING` order, cryptographically signs it, and redirects the customer to Wompi's own hosted payment page — your server never touches card numbers or bank credentials.
 - Wompi calls `/api/webhook/wompi` when a payment finishes. That webhook is signature-verified, so it's the authoritative record of whether an order was actually paid.
-- Once an order is paid, you (or your client) update its shipping status through `/admin` — `NOT_SHIPPED` → `PROCESSING` → `SHIPPED` → `DELIVERED`, plus a tracking number and carrier name. There's no courier API integration — you look up tracking on the carrier's own site and relay status manually.
+- Once an order is paid, you (or your client) update its shipping status through `/admin` — `NOT_SHIPPED` → `PROCESSING` → `SHIPPED` → `DELIVERED` (shown to the seller as New order → Confirmed → Shipped → Delivered), plus a tracking number and carrier name. The dashboard and order detail both offer a **one-click Advance** button that moves an order forward one step (and asks for tracking/carrier when shipping), and every order keeps a status **timeline** so you can see its history at a glance. There's no courier API integration — you look up tracking on the carrier's own site and relay status manually.
 - Every product has a `stock` count. Checkout blocks anyone from buying more than what's on hand, reserves stock the moment an order is placed, and automatically puts it back if the payment later gets declined or voided.
 - Deleting a product, removing one of its photos, or deleting an order doesn't destroy it right away — it moves to a **Recently Deleted** list (products/photos at the bottom of the Products page, orders at the bottom of the Orders page), recoverable for 30 days after deletion, after which it clears itself automatically (or empty either list manually at any time).
-- Each order has a **Message on WhatsApp** button. It opens a chat in the admin's own WhatsApp (app or Web) with the customer's number and a short greeting already filled in — no API keys, no setup, nothing that can break. The admin sends photos, tracking info, whatever, from inside their normal WhatsApp exactly like they would with any other contact.
+- Each order has a **Message on WhatsApp** button. It opens a chat in the admin's own WhatsApp (app or Web) with the customer's number and a short greeting already filled in — no API keys, no setup, nothing that can break. The admin sends photos, tracking info, whatever, from inside their normal WhatsApp exactly like they would with any other contact. Each workflow step also has a **template button** (Confirm order / Order shipped / Order delivered) that drafts the matching Spanish message — the shipped one includes the tracking number when present.
 - Every order also has a **receipt** — viewable/printable in a new tab (save as PDF with the browser's own print dialog) and, if `SMTP_*` is set in `.env`, a one-click **Email receipt to customer** button that sends the same receipt straight to their inbox.
-- `orders.json`, `admin_audit.json`, and `trash.json` are flat files. All are git-ignored so real customer data and admin activity logs never end up in your repo.
+- `orders.json`, `admin_audit.json`, `trash.json`, and `notifications.json` are flat files. All are git-ignored so real customer data and admin activity logs never end up in your repo.
+- A **notification** is created whenever a new order is paid — it appears on the admin's bell badge and opens straight to that order. Notifications are capped at the 500 most recent.
+- **Business reports** (`/admin` → Finance → Business reports) cover sales, expenses, profit, inventory value, and customers, over any date range you pick (default: current month). Each downloads as a **PDF** (generated in the browser-ready server, no external service) or **CSV**.
 
 ## 1. Get Wompi sandbox keys (free, ~5 minutes)
 
@@ -155,6 +157,9 @@ Everything below works out of the box with zero configuration, except the two ma
 | Language toggle (EN/ES) | No |
 | Category suggestions | No |
 | WhatsApp messaging | No — opens the admin's own WhatsApp, no API |
+| WhatsApp step templates | No — same deep-link mechanism, no API |
+| Notification bell / new-order alerts | No |
+| Business reports (PDF/CSV) | No — generated by the server itself |
 | View/print a receipt | No |
 | **Checkout / accepting payments** | **Yes — Wompi merchant account** (free to get sandbox keys; real payouts require merchant verification with a Colombian bank account, see "Going live") |
 | **Emailing receipts to customers** | **Yes — SMTP credentials** (optional; a free Gmail app password works, see "Emailing receipts" above) |
@@ -164,12 +169,13 @@ So per new client, the only things that ever need setting up are: their own `ADM
 ## Files
 
 - `index.html` — the storefront
-- `admin.html` — the store owner's admin panel (dashboard, products, orders + shipping + WhatsApp, trash)
+- `admin.html` — the store owner's admin panel (dashboard + notifications, products + restock, orders + shipping workflow + WhatsApp, finance + reports, trash)
 - `platform-admin.html` — the platform owner dashboard (COLHQ staff only, separate login)
 - `products.json` — product catalog: photos, prices in COP, stock
-- `server.js` — backend: checkout, Wompi signing + webhook verification, admin auth, product/order APIs, trash
+- `server.js` — backend: checkout, Wompi signing + webhook verification, admin auth, product/order APIs, notifications, PDF/CSV reports, trash
 - `orders.json` — order log (auto-created, git-ignored)
 - `admin_audit.json` — admin action log (auto-created, git-ignored)
+- `notifications.json` — new-order notifications (auto-created, git-ignored)
 - `trash.json` / `trash/` — recoverable deletes (auto-created, git-ignored)
 - `platform_stores.json` — platform store registry (auto-created, git-ignored)
 - `.env` — your secrets (git-ignored, never commit this)

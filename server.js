@@ -37,6 +37,10 @@ const PLATFORM_PATH = path.join(ROOT, 'platform.json');
 // the platform, NOT the store owner's data — it stays git-ignored and is
 // never served to the storefront or the store admin panel.
 const PLATFORM_STORES_PATH = path.join(ROOT, 'platform_stores.json');
+// Seller notifications (F2): an inbox for the store owner — e.g. "new order"
+// alerts created when a checkout goes through. Flat-file + write queue like
+// everything else, git-ignored, never served publicly.
+const NOTIFICATIONS_PATH = path.join(ROOT, 'notifications.json');
 fs.mkdirSync(TRASH_IMAGES_DIR, { recursive: true });
 
 // Platform identity (MiTienda by COLHQ) lives in platform.json — git-tracked,
@@ -124,6 +128,13 @@ function getMailTransport() {
 }
 
 const SHIPPING_STATUSES = ['NOT_SHIPPED', 'PROCESSING', 'SHIPPED', 'DELIVERED'];
+// The seller workflow these statuses map to (F2). NOT_SHIPPED shows as
+// "New order", PROCESSING as "Confirmed", then Shipped → Delivered. One-click
+// advancement moves forward through this exact order and never skips a step.
+const SHIPPING_WORKFLOW = ['NOT_SHIPPED', 'PROCESSING', 'SHIPPED', 'DELIVERED'];
+// Notification types the seller inbox can hold (F2). Only new-order alerts
+// are created today; future phases (low stock, payments) add more.
+const NOTIFICATION_TYPES = ['new_order'];
 const LOW_STOCK_THRESHOLD = 3;
 const FAILED_PAYMENT_STATUSES = ['DECLINED', 'VOIDED', 'ERROR'];
 // How the seller records that a sale was paid. Checkout orders start as
@@ -293,6 +304,46 @@ function savePlatformStores(stores) {
     fsp.writeFile(PLATFORM_STORES_PATH, JSON.stringify(stores, null, 2))
   );
   return platformStoresWriteQueue;
+}
+
+// ---------- seller notifications (F2) ----------
+
+function loadNotifications() {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(NOTIFICATIONS_PATH, 'utf8'));
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+let notificationsWriteQueue = Promise.resolve();
+function saveNotifications(items) {
+  notificationsWriteQueue = notificationsWriteQueue.then(() =>
+    fsp.writeFile(NOTIFICATIONS_PATH, JSON.stringify(items, null, 2))
+  );
+  return notificationsWriteQueue;
+}
+
+// Appends a notification through the serialized write queue (same pattern as
+// the audit log / inventory history), capped so the inbox can't grow forever.
+// `read` always starts false — the seller inbox marks items read on view.
+function createNotification(entry) {
+  notificationsWriteQueue = notificationsWriteQueue.then(async () => {
+    let items = loadNotifications();
+    items.push(Object.assign({
+      id: crypto.randomBytes(8).toString('hex'),
+      type: entry.type,
+      reference: entry.reference || null,
+      message: entry.message || '',
+      createdAt: new Date().toISOString(),
+      read: false,
+      orderReference: entry.orderReference || entry.reference || null,
+    }, entry));
+    if (items.length > 500) items = items.slice(-500);
+    await fsp.writeFile(NOTIFICATIONS_PATH, JSON.stringify(items, null, 2));
+  }).catch((err) => console.error('notification write failed:', err));
+  return notificationsWriteQueue;
 }
 
 // ---------- trash (recoverable delete for products + photos) ----------
@@ -1258,6 +1309,10 @@ app.post('/api/checkout', async (req, res) => {
       wompiTransactionId: null,
       paymentMethod: 'wompi',
       stockRestored: false,
+      // F2: order timeline — one entry per shipping-status change, so the
+      // seller sees the whole life of an order (New → Confirmed → Shipped →
+      // Delivered) without digging through the audit log.
+      timeline: [{ status: 'NOT_SHIPPED', at: new Date().toISOString(), note: 'Order created' }],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -1265,6 +1320,14 @@ app.post('/api/checkout', async (req, res) => {
     const orders = loadOrders();
     orders.push(order);
     await saveOrders(orders);
+
+    // F2: a new order alert in the seller inbox (badge + dashboard alert).
+    await createNotification({
+      type: 'new_order',
+      reference,
+      orderReference: reference,
+      message: `New order ${reference} — ${order.customer.fullName}`,
+    });
 
     // Keep the customer file in sync with every order, so the CRM always
     // reflects what was actually ordered.
@@ -1517,6 +1580,23 @@ app.get('/api/admin/dashboard', requireAdmin, (req, res) => {
   const profitMarginPercent =
     salesMonthCOP > 0 ? Math.round((netProfitCOP / salesMonthCOP) * 1000) / 10 : 0;
 
+  // F2A: the most recent orders drive the seller dashboard's "pending orders"
+  // quick action list, and the unread notification count feeds the bell badge.
+  const recentOrders = approvedOrders
+    .slice()
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 6)
+    .map((o) => ({
+      reference: o.reference,
+      customerName: o.customer && o.customer.fullName ? o.customer.fullName : '',
+      phone: o.customer && o.customer.phone ? o.customer.phone : '',
+      shippingStatus: o.shippingStatus,
+      amountInCents: o.amountInCents || 0,
+      createdAt: o.createdAt,
+    }));
+
+  const unreadNotifications = loadNotifications().filter((n) => !n.read).length;
+
   res.json({
     totalSalesCOP,
     ordersToday,
@@ -1526,6 +1606,7 @@ app.get('/api/admin/dashboard', requireAdmin, (req, res) => {
     awaitingShipment,
     totalProducts: products.length,
     lowStockThreshold: LOW_STOCK_THRESHOLD,
+    lowStockCount: lowStock.length,
     inventoryValueCOP,
     salesTodayCOP,
     salesWeekCOP,
@@ -1543,6 +1624,8 @@ app.get('/api/admin/dashboard', requireAdmin, (req, res) => {
     netProfitCOP,
     profitMarginPercent,
     lowStock,
+    recentOrders,
+    unreadNotifications,
   });
 });
 
@@ -1553,6 +1636,39 @@ app.get('/api/admin/inventory/history', requireAdmin, (req, res) => {
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 200);
   res.json(history);
+});
+
+// F2E: quick restock — raises a product's stock in one shot. Reuses the same
+// inventory-history pipeline as the product editor (reason: "received"), so
+// the seller gets a "Received stock" line in inventory history, the low-stock
+// list, and the inventory report without leaving the dashboard.
+app.post('/api/admin/products/:id/restock', requireAdmin, async (req, res) => {
+  const qty = Number(req.body && req.body.qty);
+  if (!Number.isInteger(qty) || qty <= 0) {
+    return res.status(400).json({ error: 'qty must be a positive whole number.' });
+  }
+  if (qty > 100000) return res.status(400).json({ error: 'qty is too large.' });
+
+  const products = loadProducts();
+  const idx = products.findIndex((p) => p.id === Number(req.params.id));
+  if (idx === -1) return res.status(404).json({ error: 'Product not found.' });
+
+  const prevStock = Number.isInteger(products[idx].stock) ? products[idx].stock : 0;
+  products[idx].stock = prevStock + qty;
+  products[idx].updatedAt = new Date().toISOString();
+
+  await logInventoryChange({
+    productId: products[idx].id,
+    productName: products[idx].name,
+    delta: qty,
+    newStock: products[idx].stock,
+    reason: 'received',
+    note: `Restock +${qty}`,
+    ip: req.ip,
+  });
+  await saveProducts(products);
+  await auditLog({ action: 'product_restock', productId: products[idx].id, qty, ip: req.ip });
+  res.json({ ok: true, id: products[idx].id, stock: products[idx].stock });
 });
 
 // ---------- admin: sales history (business overview) ----------
@@ -1637,6 +1753,22 @@ app.get('/api/admin/orders', requireAdmin, (req, res) => {
 // Realistic sample orders so a demo/sales copy of this store shows a
 // populated Dashboard + Orders tab without needing a real Wompi payment to
 // go through. Flagged isDemo:true so they're easy to tell apart and clear.
+// Plausible status history for a demo order that matches its current
+// shippingStatus — New → Confirmed → Shipped → Delivered, spaced out over
+// the days since it was placed. Real orders record their own timeline.
+function demoTimeline(shippingStatus, createdAt) {
+  const HOUR = 3600 * 1000;
+  const start = new Date(createdAt).getTime();
+  const steps = [];
+  let at = start;
+  for (const status of SHIPPING_WORKFLOW) {
+    steps.push({ status, at: new Date(at).toISOString(), note: null });
+    at += 3 * HOUR;
+    if (status === shippingStatus) break;
+  }
+  return steps;
+}
+
 function buildDemoOrders(products) {
   const DAY = 24 * 60 * 60 * 1000;
   const now = Date.now();
@@ -1682,6 +1814,7 @@ function buildDemoOrders(products) {
       paymentMethod: plan.pay,
       stockRestored: true, // demo orders never touch real inventory
       isDemo: true,
+      timeline: demoTimeline(plan.shippingStatus, createdAt),
       createdAt,
       updatedAt: createdAt,
     };
@@ -1718,14 +1851,87 @@ app.patch('/api/admin/orders/:reference/shipping', requireAdmin, async (req, res
   const idx = orders.findIndex((o) => o.reference === req.params.reference);
   if (idx === -1) return res.status(404).json({ error: 'Order not found.' });
 
+  const before = orders[idx].shippingStatus;
   if (shippingStatus) orders[idx].shippingStatus = shippingStatus;
   if (trackingNumber !== undefined) orders[idx].trackingNumber = trackingNumber ? String(trackingNumber).slice(0, 80) : null;
   if (carrier !== undefined) orders[idx].carrier = carrier ? String(carrier).slice(0, 80) : null;
   orders[idx].updatedAt = new Date().toISOString();
 
+  // F2: record every status change on the order's own timeline so the seller
+  // can see the order's full history in one place.
+  if (shippingStatus && shippingStatus !== before) {
+    const note = shippingStatus === 'SHIPPED' && orders[idx].trackingNumber
+      ? `Guía: ${orders[idx].trackingNumber}`
+      : null;
+    orders[idx].timeline = Array.isArray(orders[idx].timeline) ? orders[idx].timeline : [];
+    orders[idx].timeline.push({ status: shippingStatus, at: orders[idx].updatedAt, note });
+  }
+
   await saveOrders(orders);
   await auditLog({ action: 'shipping_update', reference: req.params.reference, ip: req.ip, shippingStatus, trackingNumber, carrier });
   res.json(orders[idx]);
+});
+
+// F2: one-click seller workflow — advances an order exactly one step forward
+// (New order → Confirmed → Shipped → Delivered) and never skips. The
+// optional tracking/carrier fields are applied when moving into SHIPPED.
+app.post('/api/admin/orders/:reference/advance', requireAdmin, async (req, res) => {
+  const { trackingNumber, carrier } = req.body || {};
+
+  const orders = loadOrders();
+  const idx = orders.findIndex((o) => o.reference === req.params.reference);
+  if (idx === -1) return res.status(404).json({ error: 'Order not found.' });
+
+  const current = orders[idx].shippingStatus;
+  const pos = SHIPPING_WORKFLOW.indexOf(current);
+  if (pos === -1) return res.status(400).json({ error: 'Unknown shipping status.' });
+  const next = SHIPPING_WORKFLOW[pos + 1];
+  if (!next) return res.status(400).json({ error: 'Order already delivered.' });
+
+  if (trackingNumber !== undefined) orders[idx].trackingNumber = trackingNumber ? String(trackingNumber).slice(0, 80) : null;
+  if (carrier !== undefined) orders[idx].carrier = carrier ? String(carrier).slice(0, 80) : null;
+  orders[idx].shippingStatus = next;
+  orders[idx].updatedAt = new Date().toISOString();
+  orders[idx].timeline = Array.isArray(orders[idx].timeline) ? orders[idx].timeline : [];
+  orders[idx].timeline.push({
+    status: next,
+    at: orders[idx].updatedAt,
+    note: next === 'SHIPPED' && orders[idx].trackingNumber ? `Guía: ${orders[idx].trackingNumber}` : null,
+  });
+
+  await saveOrders(orders);
+  await auditLog({ action: 'order_status_change', reference: req.params.reference, from: current, to: next, ip: req.ip, trackingNumber, carrier });
+  res.json(orders[idx]);
+});
+
+// ---------- seller notifications inbox (F2) ----------
+
+app.get('/api/admin/notifications', requireAdmin, async (req, res) => {
+  const items = loadNotifications().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const unread = items.filter((n) => !n.read).length;
+  res.json({ notifications: items.slice(0, 100), unread });
+});
+
+app.patch('/api/admin/notifications/:id/read', requireAdmin, async (req, res) => {
+  const items = loadNotifications();
+  const idx = items.findIndex((n) => n.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Notification not found.' });
+  if (items[idx].read) return res.json({ ok: true, id: items[idx].id });
+  items[idx].read = true;
+  await saveNotifications(items);
+  await auditLog({ action: 'notification_read', notificationId: req.params.id, ip: req.ip });
+  res.json({ ok: true, id: items[idx].id });
+});
+
+app.post('/api/admin/notifications/read-all', requireAdmin, async (req, res) => {
+  const items = loadNotifications();
+  const changed = items.filter((n) => !n.read).length;
+  if (changed) {
+    for (const n of items) n.read = true;
+    await saveNotifications(items);
+    await auditLog({ action: 'notifications_read_all', count: changed, ip: req.ip });
+  }
+  res.json({ ok: true, changed });
 });
 
 // Records how the sale was actually paid (Wompi, Nequi, bank transfer,
@@ -2645,6 +2851,481 @@ app.patch('/api/platform/admin/stores/:id/status', requirePlatformAdmin, async (
     ip: req.ip, scope: 'platform',
   });
   res.json(stores[idx]);
+});
+
+// ---------- PDF business reports (F2) ----------
+// Minimal dependency-free PDF writer. Builds A4 documents using the standard
+// Helvetica family that every PDF viewer ships, so no fonts or libraries are
+// needed. All text is transliterated to ASCII (Spanish accents map to their
+// plain forms) and escaped for PDF string literals. Reports are generated
+// server-side, store-branded (settings.json), currency-formatted in COP, and
+// printable/exportable — never shown to the public storefront.
+
+const PDF_PAGE_W = 595.28;
+const PDF_PAGE_H = 841.89;
+const PDF_MARGIN = 48;
+
+function pdfAscii(str) {
+  return String(str == null ? '' : str)
+    .replace(/[áàäâã]/g, 'a').replace(/[ÁÀÄÂÃ]/g, 'A')
+    .replace(/[éèëê]/g, 'e').replace(/[ÉÈËÊ]/g, 'E')
+    .replace(/[íìïî]/g, 'i').replace(/[ÍÌÏÎ]/g, 'I')
+    .replace(/[óòöôõ]/g, 'o').replace(/[ÓÒÖÔÕ]/g, 'O')
+    .replace(/[úùüû]/g, 'u').replace(/[ÚÙÜÛ]/g, 'U')
+    .replace(/ñ/g, 'n').replace(/Ñ/g, 'N')
+    .replace(/ç/g, 'c').replace(/Ç/g, 'C')
+    .replace(/[¿¡]/g, '')
+    .replace(/[\u2013\u2014]/g, '-').replace(/•/g, '-').replace(/…/g, '...')
+    .replace(/[\u0080-\uFFFF]/g, '?');
+}
+
+function pdfEsc(s) {
+  return pdfAscii(s).replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+}
+
+// Approximate Helvetica advance widths (em) — exact enough to right-align
+// currency columns and truncate overflowing cells.
+function pdfTextWidth(s, size) {
+  let w = 0;
+  for (const ch of pdfAscii(s)) {
+    const c = ch.charCodeAt(0);
+    if (c >= 48 && c <= 57) w += 0.556; // digits are uniform in Helvetica
+    else if (c === 44 || c === 46 || c === 32) w += 0.278;
+    else if (c >= 65 && c <= 90) w += 0.667;
+    else if (c >= 97 && c <= 122) w += 0.556;
+    else w += 0.5;
+  }
+  return w * size;
+}
+
+function newPdfDoc(settings) {
+  const storeName = (settings.storeName || 'Mi Tienda').trim() || 'Mi Tienda';
+  const pages = [];
+  let current = [];
+  let pageNo = 0;
+  let y = 0;
+
+  function newPage() {
+    pageNo += 1;
+    current = [];
+    const ruleY = PDF_PAGE_H - PDF_MARGIN - 18;
+    current.push(`0.2 0.2 0.2 RG 0.8 w ${PDF_MARGIN} ${ruleY} m ${PDF_PAGE_W - PDF_MARGIN} ${ruleY} l S`);
+    current.push(`BT /F2 12 Tf ${PDF_MARGIN} ${ruleY + 4} Td (${pdfEsc(storeName)}) Tj ET`);
+    current.push(`BT /F1 8 Tf ${PDF_PAGE_W - PDF_MARGIN - 90} ${ruleY + 4} Td (${pdfEsc(new Date().toLocaleDateString('es-CO'))}) Tj ET`);
+    y = PDF_PAGE_H - PDF_MARGIN - 40;
+    pages.push(current);
+  }
+  newPage();
+
+  function ensureSpace(needed) {
+    if (y - needed < PDF_MARGIN + 40) newPage();
+  }
+
+  const doc = {
+    title(text) {
+      ensureSpace(26);
+      current.push(`BT /F2 16 Tf ${PDF_MARGIN} ${y} Td (${pdfEsc(text)}) Tj ET`);
+      y -= 22;
+    },
+    subtitle(text) {
+      current.push(`BT /F1 9 Tf ${PDF_MARGIN} ${y} Td (${pdfEsc(text)}) Tj ET`);
+      y -= 14;
+    },
+    h2(text) {
+      ensureSpace(18);
+      current.push(`BT /F2 11 Tf ${PDF_MARGIN} ${y} Td (${pdfEsc(text)}) Tj ET`);
+      y -= 18;
+    },
+    space(h) {
+      y -= (h || 8);
+    },
+    hr() {
+      current.push(`0.85 0.85 0.85 RG 0.5 w ${PDF_MARGIN} ${y} m ${PDF_PAGE_W - PDF_MARGIN} ${y} l S`);
+      y -= 8;
+    },
+    valueRow(label, value, bold) {
+      ensureSpace(16);
+      const v = pdfEsc(String(value));
+      const vw = pdfTextWidth(String(value), bold ? 10 : 9.5);
+      current.push(`BT ${bold ? '/F2' : '/F1'} 9.5 Tf ${PDF_MARGIN} ${y} Td (${pdfEsc(label)}) Tj ET`);
+      current.push(`BT ${bold ? '/F2' : '/F1'} ${bold ? 10 : 9.5} Tf ${PDF_PAGE_W - PDF_MARGIN - vw} ${y} Td (${v}) Tj ET`);
+      y -= 16;
+    },
+    // KPI boxes across the width of the page (Sales / Orders / AOV …).
+    metricRow(items) {
+      ensureSpace(44);
+      const usable = PDF_PAGE_W - 2 * PDF_MARGIN;
+      const gap = 10;
+      const boxW = (usable - gap * (items.length - 1)) / items.length;
+      let x = PDF_MARGIN;
+      for (const it of items) {
+        current.push(`0.95 0.95 0.95 rg ${x} ${y - 34} ${boxW} 34 re f`);
+        current.push(`0.85 0.85 0.85 RG 0.5 w ${x} ${y - 34} ${boxW} 34 re S`);
+        current.push(`BT /F1 7 Tf ${x + 6} ${y - 12} Td (${pdfEsc(it.label)}) Tj ET`);
+        const vw = pdfTextWidth(String(it.value), 12);
+        current.push(`BT /F2 12 Tf ${x + 6} ${y - 26} Td (${pdfEsc(String(it.value))}) Tj ET`);
+        x += boxW + gap;
+      }
+      y -= 42;
+    },
+    // One table row (header rows get a shaded background + bold). Cells are
+    // truncated with an ellipsis so a long name never overflows the column.
+    row(cells, opts) {
+      opts = opts || {};
+      const n = cells.length;
+      const widths = opts.widths || new Array(n).fill((PDF_PAGE_W - 2 * PDF_MARGIN) / n);
+      const textSize = opts.textSize || 9;
+      const lineH = textSize + 6;
+      ensureSpace(lineH + 1);
+      const rowBottom = y - lineH;
+      current.push(`0.9 0.9 0.9 rg ${PDF_MARGIN} ${rowBottom} ${PDF_PAGE_W - 2 * PDF_MARGIN} ${lineH} re f`);
+      let x = PDF_MARGIN;
+      for (let i = 0; i < n; i++) {
+        let text = String(cells[i] == null ? '' : cells[i]);
+        const budget = widths[i] - 8;
+        if (pdfTextWidth(text, textSize) > budget) {
+          let t = '';
+          for (const ch of text) {
+            if (pdfTextWidth(t + ch, textSize) > budget - 6) break;
+            t += ch;
+          }
+          text = t + '\u2026';
+        }
+        const tx = opts.right && opts.right[i] ? (x + widths[i] - 6 - pdfTextWidth(text, textSize)) : x + 4;
+        const font = opts.header ? '/F2' : '/F1';
+        current.push(`BT ${font} ${textSize} Tf ${tx} ${y - lineH + 2} Td (${pdfEsc(text)}) Tj ET`);
+        x += widths[i];
+      }
+      current.push(`0.8 0.8 0.8 RG 0.5 w ${PDF_MARGIN} ${rowBottom} m ${PDF_PAGE_W - PDF_MARGIN} ${rowBottom} l S`);
+      y = rowBottom - 2;
+    },
+    render() {
+      // Footer on every page (store name + MiTienda + page numbers).
+      pages.forEach((ops, i) => {
+        const footerY = PDF_MARGIN - 10;
+        ops.push(`0.75 0.75 0.75 RG 0.5 w ${PDF_MARGIN} ${footerY} m ${PDF_PAGE_W - PDF_MARGIN} ${footerY} l S`);
+        ops.push(`BT /F1 7.5 Tf ${PDF_MARGIN} ${footerY - 12} Td (${pdfEsc(storeName)} | MiTienda) Tj ET`);
+        ops.push(`BT /F1 7.5 Tf ${PDF_PAGE_W - PDF_MARGIN - 44} ${footerY - 12} Td (${i + 1} / ${pages.length}) Tj ET`);
+      });
+      return assemblePdf(pages);
+    },
+  };
+  return doc;
+}
+
+// Serializes pages into a valid PDF-1.4 file with an exact xref table.
+function assemblePdf(pages) {
+  const numObjs = 5 + 2 * pages.length;
+  const chunks = [];
+  const offsets = [];
+  let total = 0;
+  const put = (s) => {
+    offsets.push(total);
+    const bytes = Buffer.from(s, 'latin1');
+    chunks.push(bytes);
+    total += bytes.length;
+  };
+  const obj = (n, body) => `${n} 0 obj\n${body}\nendobj\n`;
+
+  put('%PDF-1.4\n');
+  put(obj(1, '<< /Type /Catalog /Pages 2 0 R >>'));
+  put(obj(2, `<< /Type /Pages /Kids [ ${pages.map((_, i) => `${6 + 2 * i} 0 R`).join(' ')} ] /Count ${pages.length} >>`));
+  put(obj(3, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'));
+  put(obj(4, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>'));
+  put(obj(5, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique >>'));
+  pages.forEach((ops, i) => {
+    const pageN = 6 + 2 * i;
+    const contentN = 7 + 2 * i;
+    put(obj(pageN, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PDF_PAGE_W} ${PDF_PAGE_H}] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents ${contentN} 0 R >>`));
+    const streamBody = ops.join('\n') + '\n';
+    put(obj(contentN, `<< /Length ${Buffer.byteLength(streamBody, 'latin1')} >>\nstream\n${streamBody}endstream\n`));
+  });
+
+  const xrefStart = total;
+  const xref = [`xref\n0 ${numObjs + 1}\n`, '0000000000 65535 f \n'];
+  // offsets[0] is the %PDF header; object i starts at offsets[i].
+  for (let i = 1; i <= numObjs; i++) xref.push(`${String(offsets[i]).padStart(10, '0')} 00000 n \n`);
+  const trailer = `trailer\n<< /Size ${numObjs + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF\n`;
+
+  chunks.push(Buffer.from(xref.join(''), 'latin1'));
+  chunks.push(Buffer.from(trailer, 'latin1'));
+  return Buffer.concat(chunks);
+}
+
+// Range helpers for every report. `from`/`to` are YYYY-MM-DD; defaults are
+// the current calendar month, which is what the admin dashboard shows.
+function reportRange(query) {
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const defaultFrom = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-01`;
+  const defaultTo = localDateKey(now);
+  let from = typeof query.from === 'string' ? query.from : defaultFrom;
+  let to = typeof query.to === 'string' ? query.to : defaultTo;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to) || from > to) {
+    return { error: 'from/to must be YYYY-MM-DD and from must not be after to.' };
+  }
+  return { from, to };
+}
+
+function reportDateLabel(from, to) {
+  return `Periodo: ${from} a ${to}`;
+}
+
+function csvValue(v) {
+  const s = String(v == null ? '' : v);
+  return /[";\n,]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+function csvResponse(res, filename, header, rows) {
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.send('\uFEFF' + [header.map(csvValue).join(','), ...rows.map((r) => r.map(csvValue).join(','))].join('\n'));
+}
+
+// Shared guard + response for the five report routes. CSV is requested with
+// ?format=csv and streams straight from the same row builders.
+app.get('/api/admin/reports/sales', requireAdmin, (req, res) => {
+  const range = reportRange(req.query);
+  if (range.error) return res.status(400).json({ error: range.error });
+
+  const orders = loadOrders()
+    .filter((o) => o.status === 'APPROVED' && dateKey(o.createdAt) >= range.from && dateKey(o.createdAt) <= range.to)
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+  const totals = { units: 0, salesCOP: 0 };
+  const rows = orders.map((o) => {
+    const totalCOP = Math.round((o.amountInCents || 0) / 100);
+    const units = (o.items || []).reduce((s, it) => s + (Number.isInteger(it.qty) ? it.qty : 0), 0);
+    totals.units += units;
+    totals.salesCOP += totalCOP;
+    return [
+      dateKey(o.createdAt),
+      o.reference,
+      o.customer && o.customer.fullName ? o.customer.fullName : '-',
+      units,
+      moneyCOP(o.amountInCents || 0),
+    ];
+  });
+
+  if (req.query.format === 'csv') {
+    return csvResponse(res, 'ventas.csv', ['fecha', 'referencia', 'cliente', 'unidades', 'total'], rows);
+  }
+
+  const settings = loadSettings();
+  const d = newPdfDoc(settings);
+  d.title('Reporte de Ventas');
+  d.subtitle(reportDateLabel(range.from, range.to) + ' | Cop: ' + orders.length + ' pedidos aprobados');
+  d.metricRow([
+    { label: 'Ventas del periodo', value: moneyCOP(totals.salesCOP * 100) },
+    { label: 'Pedidos', value: orders.length },
+    { label: 'Unidades', value: totals.units },
+    { label: 'Promedio', value: moneyCOP(orders.length ? Math.round((totals.salesCOP / orders.length) * 100) : 0) },
+  ]);
+  d.space(6);
+  d.h2('Detalle');
+  d.row(['Fecha', 'Referencia', 'Cliente', 'Unid.', 'Total'], { header: true, right: { 3: true, 4: true } });
+  for (const r of rows) d.row(r, { right: { 3: true, 4: true } });
+  d.row(['', '', '', 'Total', moneyCOP(totals.salesCOP * 100)], { header: true, right: { 3: true, 4: true } });
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename="ventas.pdf"');
+  res.send(d.render());
+});
+
+app.get('/api/admin/reports/expenses', requireAdmin, (req, res) => {
+  const range = reportRange(req.query);
+  if (range.error) return res.status(400).json({ error: range.error });
+
+  const expenses = loadExpenses()
+    .filter((e) => dateKey(e.date) >= range.from && dateKey(e.date) <= range.to)
+    .sort((a, b) => (a.date < b.date ? -1 : 1));
+
+  let totalCOP = 0;
+  const rows = expenses.map((e) => {
+    const amountCOP = Math.round(Number(e.amountCOP) || 0);
+    totalCOP += amountCOP;
+    return [e.date, e.category || '-', e.description || '-', moneyCOP(amountCOP * 100)];
+  });
+
+  if (req.query.format === 'csv') {
+    return csvResponse(res, 'gastos.csv', ['fecha', 'categoria', 'concepto', 'monto'], rows);
+  }
+
+  const settings = loadSettings();
+  const d = newPdfDoc(settings);
+  d.title('Reporte de Gastos');
+  d.subtitle(reportDateLabel(range.from, range.to) + ' | ' + expenses.length + ' gastos');
+  d.metricRow([
+    { label: 'Total gastos', value: moneyCOP(totalCOP * 100) },
+    { label: 'N° de gastos', value: expenses.length },
+  ]);
+  d.space(6);
+  d.h2('Detalle');
+  d.row(['Fecha', 'Categoria', 'Concepto', 'Monto'], { header: true, right: { 3: true } });
+  for (const r of rows) d.row(r, { right: { 3: true } });
+  d.row(['', '', 'Total', moneyCOP(totalCOP * 100)], { header: true, right: { 3: true } });
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename="gastos.pdf"');
+  res.send(d.render());
+});
+
+app.get('/api/admin/reports/profit', requireAdmin, (req, res) => {
+  const range = reportRange(req.query);
+  if (range.error) return res.status(400).json({ error: range.error });
+
+  // Monthly breakdown across the range (defaults to the current month, so a
+  // single month → one row). Reconciles exactly like the dashboard:
+  // utilidad = ventas − costo productos − gastos.
+  const productsById = productCostById(loadProducts());
+  const expenses = loadExpenses();
+  const orders = loadOrders().filter((o) => o.status === 'APPROVED');
+
+  const months = [];
+  let cursor = new Date(range.from + 'T00:00:00');
+  const end = new Date(range.to + 'T00:00:00');
+  const pad = (n) => String(n).padStart(2, '0');
+  while (cursor <= end) {
+    const key = `${cursor.getFullYear()}-${pad(cursor.getMonth() + 1)}`;
+    const monthStart = `${key}-01`;
+    const next = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+    const monthEndKey = localDateKey(new Date(next.getTime() - 1));
+    let sales = 0;
+    let costs = 0;
+    for (const o of orders) {
+      const k = dateKey(o.createdAt);
+      if (k < monthStart || k > monthEndKey) continue;
+      const revenue = Math.round((o.amountInCents || 0) / 100);
+      sales += revenue;
+      const { profit } = orderProfit(o, productsById);
+      costs += revenue - profit;
+    }
+    let exp = 0;
+    for (const e of expenses) {
+      const k = dateKey(e.date);
+      if (k >= monthStart && k <= monthEndKey) exp += Math.round(Number(e.amountCOP) || 0);
+    }
+    months.push({ key, sales, costs, expenses: exp, net: sales - costs - exp });
+    cursor = next;
+  }
+
+  const totals = months.reduce((t, m) => ({
+    sales: t.sales + m.sales,
+    costs: t.costs + m.costs,
+    expenses: t.expenses + m.expenses,
+    net: t.net + m.net,
+  }), { sales: 0, costs: 0, expenses: 0, net: 0 });
+
+  const rows = months.map((m) => [
+    m.key,
+    moneyCOP(m.sales * 100),
+    moneyCOP(m.costs * 100),
+    moneyCOP(m.expenses * 100),
+    moneyCOP(m.net * 100),
+  ]);
+
+  if (req.query.format === 'csv') {
+    return csvResponse(res, 'ganancias.csv', ['mes', 'ventas', 'costo_productos', 'gastos', 'utilidad_neta'], rows);
+  }
+
+  const settings = loadSettings();
+  const d = newPdfDoc(settings);
+  d.title('Reporte de Ganancias');
+  d.subtitle(reportDateLabel(range.from, range.to) + ' | Ventas aprobadas menos costos y gastos');
+  d.metricRow([
+    { label: 'Ventas', value: moneyCOP(totals.sales * 100) },
+    { label: 'Costo productos', value: moneyCOP(totals.costs * 100) },
+    { label: 'Gastos', value: moneyCOP(totals.expenses * 100) },
+    { label: 'Utilidad neta', value: moneyCOP(totals.net * 100) },
+  ]);
+  d.space(6);
+  d.h2('Detalle mensual');
+  d.row(['Mes', 'Ventas', 'Costo productos', 'Gastos', 'Utilidad neta'], { header: true, right: { 1: true, 2: true, 3: true, 4: true } });
+  for (const r of rows) d.row(r, { right: { 1: true, 2: true, 3: true, 4: true } });
+  d.row(['Total', moneyCOP(totals.sales * 100), moneyCOP(totals.costs * 100), moneyCOP(totals.expenses * 100), moneyCOP(totals.net * 100)], { header: true, right: { 1: true, 2: true, 3: true, 4: true } });
+  d.space(4);
+  d.valueRow('Margen sobre ventas:', totals.sales > 0 ? Math.round((totals.net / totals.sales) * 1000) / 10 + ' %' : '0 %', true);
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename="ganancias.pdf"');
+  res.send(d.render());
+});
+
+app.get('/api/admin/reports/inventory', requireAdmin, (req, res) => {
+  const products = loadProducts().slice().sort((a, b) => a.name.localeCompare(b.name));
+  const lowThreshold = (p) => (Number.isInteger(p.minStock) ? p.minStock : LOW_STOCK_THRESHOLD);
+
+  let totalUnits = 0;
+  let lowCount = 0;
+  let valueCOP = 0;
+  const rows = products.map((p) => {
+    const stock = Number.isInteger(p.stock) ? p.stock : 0;
+    const min = Number.isInteger(p.minStock) ? p.minStock : LOW_STOCK_THRESHOLD;
+    const cost = Number.isInteger(p.costPrice) ? p.costPrice : p.price;
+    totalUnits += stock;
+    if (stock <= lowThreshold(p)) lowCount += 1;
+    valueCOP += stock * cost;
+    return [p.id, p.name, stock, min, moneyCOP(cost * 100), moneyCOP(stock * cost * 100)];
+  });
+
+  if (req.query.format === 'csv') {
+    return csvResponse(res, 'inventario.csv', ['id', 'producto', 'stock', 'min', 'costo_unitario', 'valor'], rows);
+  }
+
+  const settings = loadSettings();
+  const d = newPdfDoc(settings);
+  d.title('Reporte de Inventario');
+  d.subtitle(new Date().toLocaleDateString('es-CO') + ' | Valorado a costo de compra');
+  d.metricRow([
+    { label: 'Productos', value: products.length },
+    { label: 'Unidades', value: totalUnits },
+    { label: 'Stock bajo', value: lowCount },
+    { label: 'Valor inventario', value: moneyCOP(valueCOP * 100) },
+  ]);
+  d.space(6);
+  d.h2('Detalle');
+  d.row(['ID', 'Producto', 'Stock', 'Min', 'Costo unid.', 'Valor'], { header: true, right: { 2: true, 3: true, 4: true, 5: true } });
+  for (const r of rows) d.row(r, { right: { 2: true, 3: true, 4: true, 5: true } });
+  d.row(['', 'Total', totalUnits, '', '', moneyCOP(valueCOP * 100)], { header: true, right: { 2: true, 5: true } });
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename="inventario.pdf"');
+  res.send(d.render());
+});
+
+app.get('/api/admin/reports/customers', requireAdmin, (req, res) => {
+  const customers = loadCustomers()
+    .slice()
+    .sort((a, b) => (Number.isInteger(b.totalSpentCOP) ? b.totalSpentCOP : 0) - (Number.isInteger(a.totalSpentCOP) ? a.totalSpentCOP : 0));
+
+  const rows = customers.map((c) => [
+    c.fullName || '-',
+    c.phone || '',
+    c.email || '',
+    c.city || '',
+    Number.isInteger(c.totalOrders) ? c.totalOrders : 0,
+    moneyCOP((Number.isInteger(c.totalSpentCOP) ? c.totalSpentCOP : 0) * 100),
+  ]);
+
+  if (req.query.format === 'csv') {
+    return csvResponse(res, 'clientes.csv', ['nombre', 'telefono', 'email', 'ciudad', 'pedidos', 'total_gastado'], rows);
+  }
+
+  const totalCustomers = customers.length;
+  const repeatCustomers = customers.filter((c) => (Number.isInteger(c.totalOrders) ? c.totalOrders : 0) > 1).length;
+
+  const settings = loadSettings();
+  const d = newPdfDoc(settings);
+  d.title('Reporte de Clientes');
+  d.subtitle(new Date().toLocaleDateString('es-CO'));
+  d.metricRow([
+    { label: 'Clientes', value: totalCustomers },
+    { label: 'Recurrentes', value: repeatCustomers },
+    { label: 'Prom. pedidos/cliente', value: totalCustomers ? Math.round(customers.reduce((s, c) => s + (Number.isInteger(c.totalOrders) ? c.totalOrders : 0), 0) / totalCustomers * 10) / 10 : 0 },
+  ]);
+  d.space(6);
+  d.h2('Detalle');
+  d.row(['Cliente', 'Telefono', 'Email', 'Ciudad', 'Pedidos', 'Total'], { header: true, right: { 4: true, 5: true } });
+  for (const r of rows) d.row(r, { right: { 4: true, 5: true } });
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename="clientes.pdf"');
+  res.send(d.render());
 });
 
 app.get('/api/health', (req, res) => {
